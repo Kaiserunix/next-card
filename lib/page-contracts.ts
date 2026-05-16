@@ -1,0 +1,240 @@
+import type {
+  AnalysisResult,
+  DeckState,
+  InputsState,
+  Mode,
+  PlanOption,
+  PlansState,
+  ProofsState,
+  TaskDeck,
+  TaskFlowState
+} from "@/lib/types";
+
+export type ContractStatus = "implemented" | "partial" | "todo";
+
+export type IntegrationArea =
+  | "mock-ai"
+  | "ocr"
+  | "openai"
+  | "backend"
+  | "reminders"
+  | "calendar"
+  | "audio"
+  | "motion"
+  | "testing";
+
+export type PageActionContract = {
+  name: string;
+  status: ContractStatus;
+  ownerFile: string;
+  purpose: string;
+  inputShape: string;
+  outputShape: string;
+  nextWork: string;
+};
+
+export type PageContract = {
+  mode: Mode;
+  status: ContractStatus;
+  ownerFiles: string[];
+  reads: string[];
+  writes: string[];
+  actions: PageActionContract[];
+  extensionAreas: IntegrationArea[];
+};
+
+export type InputPagePort = {
+  mode: "input";
+  state: InputsState;
+  analysis: AnalysisResult | null;
+  plans: PlansState;
+  taskFlow: TaskFlowState | null;
+  submitInput: () => void;
+  regeneratePlans: () => void;
+  selectPlan: (planId: PlanOption["id"]) => void;
+};
+
+export type DeckPagePort = {
+  mode: "deck";
+  state: DeckState;
+  activeDeck: TaskDeck | null;
+  openDeck: (deckId: string) => void;
+  completeCurrentCard: (direction: "left" | "right") => void;
+  revealStatusBar: () => void;
+  requestFreezeCurrentCard: () => void;
+  startFocusTiming: () => void;
+  startQuickBurning: () => void;
+};
+
+export type ProofPagePort = {
+  mode: "proof";
+  state: ProofsState;
+  refreshSummary: () => void;
+  exportSummaryDocument: () => void;
+};
+
+export const PAGE_CONTRACTS: Record<Mode, PageContract> = {
+  input: {
+    mode: "input",
+    status: "implemented",
+    ownerFiles: [
+      "app/page.tsx",
+      "components/input/InputComposer.tsx",
+      "components/input/PlanModePanel.tsx",
+      "components/input/PlanOptionCard.tsx",
+      "components/flow/TaskFlowOverview.tsx",
+      "lib/mock-ai.ts",
+      "store/useNextCardStore.ts"
+    ],
+    reads: ["inputs", "analysis", "analysisStatus", "plans", "taskFlow"],
+    writes: ["inputs", "analysis", "plans", "taskFlow", "deck.decks", "proofs.records"],
+    actions: [
+      {
+        name: "submitInput",
+        status: "implemented",
+        ownerFile: "components/input/InputComposer.tsx",
+        purpose: "Collect text, mock attachment, or mock image timetable and start the Plan Mode analysis state.",
+        inputShape: "InputsState",
+        outputShape: "AnalysisResult + three PlanOption items",
+        nextWork: "Replace mock analysis with real OpenAI planning only after product flow is stable."
+      },
+      {
+        name: "regeneratePlans",
+        status: "implemented",
+        ownerFile: "store/useNextCardStore.ts",
+        purpose: "Keep original input and refresh the three plan options.",
+        inputShape: "InputsState + previous PlanOption[]",
+        outputShape: "PlanOption[]",
+        nextWork: "Add regeneration reason chips if users need control over speed/detail/pressure."
+      },
+      {
+        name: "selectPlan",
+        status: "implemented",
+        ownerFile: "store/useNextCardStore.ts",
+        purpose: "Generate task flow, create deck entry, and write the first proof record.",
+        inputShape: "PlanOption['id']",
+        outputShape: "TaskFlowState + TaskDeck + ProofRecord",
+        nextWork: "When deck interactions are complete, update proof progress instead of only writing the initial record."
+      }
+    ],
+    extensionAreas: ["mock-ai", "ocr", "openai", "testing"]
+  },
+  deck: {
+    mode: "deck",
+    status: "partial",
+    ownerFiles: [
+      "components/deck/DeckLibrary.tsx",
+      "components/deck/CardTimeUI.tsx",
+      "store/useNextCardStore.ts",
+      "lib/mock-ai.ts"
+    ],
+    reads: ["deck.decks", "deck.activeDeckId", "deck.currentCardId"],
+    writes: ["deck.completedCardIds", "deck.frozenCardIds", "deck.rescheduleQueue", "deck.rewardCards", "proofs.records"],
+    actions: [
+      {
+        name: "openDeck",
+        status: "implemented",
+        ownerFile: "store/useNextCardStore.ts",
+        purpose: "Open a generated deck and show its current active card.",
+        inputShape: "deckId: string",
+        outputShape: "activeDeckId + currentCardId",
+        nextWork: "Move from static active card preview to full Reigns-like swipe surface."
+      },
+      {
+        name: "completeCurrentCard",
+        status: "todo",
+        ownerFile: "store/useNextCardStore.ts",
+        purpose: "Left or right swipe marks the card completed, advances the deck, updates time, and records proof.",
+        inputShape: "direction: 'left' | 'right'",
+        outputShape: "updated TaskDeck + ProofRecord",
+        nextWork: "Implement with Framer Motion drag gestures in SwipeTaskCard."
+      },
+      {
+        name: "revealStatusBar",
+        status: "todo",
+        ownerFile: "components/deck/DeckStatusBar.tsx",
+        purpose: "Down swipe reveals deck progress, elapsed time, remaining time, and current urgency stage.",
+        inputShape: "current TaskDeck + current TaskCard",
+        outputShape: "visible status bar UI",
+        nextWork: "Create DeckStatusBar and wire drag offset thresholds."
+      },
+      {
+        name: "requestFreezeCurrentCard",
+        status: "todo",
+        ownerFile: "components/deck/FreezePrompt.tsx",
+        purpose: "Deeper down swipe shows freeze prompt and lets user continue or freeze.",
+        inputShape: "current TaskCard",
+        outputShape: "frozen card + rescheduleQueue entry + ProofRecord",
+        nextWork: "Use mockRescheduleFrozenCard and add ice visual state."
+      },
+      {
+        name: "startFocusTiming",
+        status: "todo",
+        ownerFile: "components/deck/SwipeTaskCard.tsx",
+        purpose: "Double click starts timing, shows sparks, and attempts the lightweight flint sound.",
+        inputShape: "current TaskCard",
+        outputShape: "startedAt + activeTimeMode: 'timing'",
+        nextWork: "Use WebAudio with visual fallback."
+      },
+      {
+        name: "startQuickBurning",
+        status: "todo",
+        ownerFile: "components/deck/BurnTimer.tsx",
+        purpose: "Triple click enters quick burning mode without failing the card.",
+        inputShape: "current TaskCard",
+        outputShape: "activeTimeMode: 'burning' + burn proof event",
+        nextWork: "Add burn rail countdown and continue/freeze end state."
+      }
+    ],
+    extensionAreas: ["motion", "audio", "reminders", "testing"]
+  },
+  proof: {
+    mode: "proof",
+    status: "partial",
+    ownerFiles: [
+      "components/proof/ProofDashboard.tsx",
+      "store/useNextCardStore.ts",
+      "lib/mock-ai.ts"
+    ],
+    reads: ["proofs.records", "proofs.summaryDocument", "deck.rewardCards"],
+    writes: ["proofs.summaryDocument"],
+    actions: [
+      {
+        name: "renderProofDashboard",
+        status: "partial",
+        ownerFile: "components/proof/ProofDashboard.tsx",
+        purpose: "Show proof stats, colored table, and summary document.",
+        inputShape: "ProofsState",
+        outputShape: "dashboard UI",
+        nextWork: "Split into ProofCharts, ProofTable, FlowJournal, SummaryDocument components."
+      },
+      {
+        name: "refreshSummary",
+        status: "implemented",
+        ownerFile: "lib/mock-ai.ts",
+        purpose: "Generate readable summary text from proof records.",
+        inputShape: "ProofRecord[]",
+        outputShape: "summaryDocument: string",
+        nextWork: "Later replace with real summary service or local deterministic richer formatter."
+      },
+      {
+        name: "exportSummaryDocument",
+        status: "todo",
+        ownerFile: "components/proof/SummaryDocument.tsx",
+        purpose: "Export or copy a readable proof summary document.",
+        inputShape: "ProofsState",
+        outputShape: "downloadable markdown or copyable document text",
+        nextWork: "Decide whether MVP needs markdown export, print view, or copy button."
+      }
+    ],
+    extensionAreas: ["backend", "openai", "testing"]
+  }
+};
+
+export const NEXT_IMPLEMENTATION_BACKLOG = [
+  "Build SwipeTaskCard and replace static active card preview.",
+  "Add card completion, freeze, burn, and reward actions to useNextCardStore.",
+  "Split proof dashboard into table, charts, flow journal, and summary document components.",
+  "Add deterministic Playwright smoke tests for input, deck, and proof flows.",
+  "Keep OCR, OpenAI, backend, reminders, and calendar sync mocked until the MVP interaction loop is stable."
+] as const;
