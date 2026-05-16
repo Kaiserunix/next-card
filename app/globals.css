@@ -1,0 +1,137 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #fbf1ea;
+  --foreground: #073d28;
+  --muted: #6f7e70;
+  --phone: #fff6ef;
+  --line: rgba(28, 69, 49, 0.14);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--background);
+}
+
+body {
+  min-height: 100dvh;
+  margin: 0;
+  color: var(--foreground);
+  background:
+    radial-gradient(circle at 10% 0%, rgba(255, 255, 255, 0.72), transparent 28rem),
+    linear-gradient(135deg, #f8ede5 0%, #fff8f1 48%, #edf5ef 100%);
+  font-family:
+    ui-sans-serif,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+button,
+textarea,
+input {
+  font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+textarea {
+  resize: none;
+}
+
+.font-editorial {
+  font-family:
+    Georgia,
+    "Times New Roman",
+    Times,
+    serif;
+}
+
+.phone-shell {
+  position: relative;
+  border: 1px solid rgba(9, 63, 39, 0.11);
+  border-radius: 2.35rem;
+  background: var(--phone);
+  box-shadow: 0 28px 80px rgba(57, 38, 24, 0.16);
+  overflow: hidden;
+}
+
+.phone-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.65), transparent 14%, transparent 86%, rgba(64, 44, 30, 0.04)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.75), transparent 18rem);
+}
+
+.grain {
+  position: relative;
+}
+
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.09;
+  background-image:
+    linear-gradient(rgba(19, 65, 43, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(19, 65, 43, 0.08) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: linear-gradient(to bottom, transparent, black 24%, black 78%, transparent);
+}
+
+.stacked-cover {
+  position: relative;
+}
+
+.stacked-cover::before,
+.stacked-cover::after {
+  content: "";
+  position: absolute;
+  inset: 0.55rem;
+  border-radius: 1.4rem;
+  border: 1px solid rgba(6, 63, 39, 0.12);
+  background: rgba(255, 249, 243, 0.72);
+  transform: rotate(-4deg) translateY(0.6rem);
+  z-index: 0;
+}
+
+.stacked-cover::after {
+  transform: rotate(4deg) translateY(0.2rem);
+  background: rgba(242, 232, 220, 0.78);
+}
+
+.burn-rail {
+  background:
+    linear-gradient(90deg, rgba(231, 120, 75, 0.88), rgba(201, 157, 62, 0.86)),
+    #efd8c9;
+}
+
+@keyframes spark-rise {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0) scale(0.7);
+  }
+  22% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--spark-x), -34px, 0) scale(0.25);
+  }
+}
+
+.spark {
+  animation: spark-rise 780ms ease-out forwards;
+}

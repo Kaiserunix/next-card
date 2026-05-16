@@ -26,3 +26,6 @@ pnpm-debug.log*
 Thumbs.db
 .vscode/
 .idea/
+
+# local Codex verification artifacts
+.codex-*
