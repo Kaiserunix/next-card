@@ -1,8 +1,10 @@
 import type {
   AnalysisResult,
+  ActiveOverlay,
   DeckState,
   InputsState,
   Mode,
+  OverlayType,
   PlanOption,
   PlansState,
   ProofsState,
@@ -50,16 +52,28 @@ export type InputPagePort = {
   plans: PlansState;
   taskFlow: TaskFlowState | null;
   submitInput: () => void;
+  submitGoalAndCreateDeck: () => void;
   regeneratePlans: () => void;
   selectPlan: (planId: PlanOption["id"]) => void;
+  openPlanCatalog: () => void;
+  openOverlay: (type: OverlayType, id?: string) => void;
 };
 
 export type DeckPagePort = {
   mode: "deck";
   state: DeckState;
   activeDeck: TaskDeck | null;
+  deckPanelOpen: boolean;
+  focusCardMode: boolean;
+  activePlanCatalogId?: string;
   openDeck: (deckId: string) => void;
-  completeCurrentCard: (direction: "left" | "right") => void;
+  openDeckPanel: () => void;
+  closeDeckPanel: () => void;
+  toggleFocusCardMode: () => void;
+  openPlanCatalog: () => void;
+  openDeckCardDetail: (cardId: string) => void;
+  openDeckCard: (deckId: string, cardId: string) => void;
+  completeCurrentCard: (direction: "left" | "right" | "button") => void;
   revealStatusBar: () => void;
   requestFreezeCurrentCard: () => void;
   startFocusTiming: () => void;
@@ -69,8 +83,10 @@ export type DeckPagePort = {
 export type ProofPagePort = {
   mode: "proof";
   state: ProofsState;
+  activeOverlay: ActiveOverlay;
   refreshSummary: () => void;
   exportSummaryDocument: () => void;
+  openOverlay: (type: OverlayType, id?: string) => void;
 };
 
 export const PAGE_CONTRACTS: Record<Mode, PageContract> = {
@@ -93,10 +109,10 @@ export const PAGE_CONTRACTS: Record<Mode, PageContract> = {
         name: "submitInput",
         status: "implemented",
         ownerFile: "components/input/InputComposer.tsx",
-        purpose: "Collect text, mock attachment, or mock image timetable and start the Plan Mode analysis state.",
+        purpose: "Collect text, mock attachment, or mock image timetable, then directly create a compact task decomposition and deck.",
         inputShape: "InputsState",
-        outputShape: "AnalysisResult + three PlanOption items",
-        nextWork: "Replace mock analysis with real OpenAI planning only after product flow is stable."
+        outputShape: "AnalysisResult + TaskFlowState + TaskDeck + ProofRecord",
+        nextWork: "Keep compact plan switching for plan-1 / plan-2 / plan-3 while replacing mock analysis later."
       },
       {
         name: "regeneratePlans",
@@ -114,7 +130,7 @@ export const PAGE_CONTRACTS: Record<Mode, PageContract> = {
         purpose: "Generate task flow, create deck entry, and write the first proof record.",
         inputShape: "PlanOption['id']",
         outputShape: "TaskFlowState + TaskDeck + ProofRecord",
-        nextWork: "When deck interactions are complete, update proof progress instead of only writing the initial record."
+        nextWork: "Keep this wired to the compact segmented control in InputComposer."
       }
     ],
     extensionAreas: ["mock-ai", "ocr", "openai", "testing"]
@@ -128,17 +144,26 @@ export const PAGE_CONTRACTS: Record<Mode, PageContract> = {
       "store/useNextCardStore.ts",
       "lib/mock-ai.ts"
     ],
-    reads: ["deck.decks", "deck.activeDeckId", "deck.currentCardId"],
+    reads: ["deck.decks", "deck.activeDeckId", "deck.currentCardId", "focusCardMode", "activePlanCatalogId"],
     writes: ["deck.completedCardIds", "deck.frozenCardIds", "deck.rescheduleQueue", "deck.rewardCards", "proofs.records"],
     actions: [
       {
         name: "openDeck",
         status: "implemented",
         ownerFile: "store/useNextCardStore.ts",
-        purpose: "Open a generated deck and show its current active card.",
+        purpose: "Open a generated deck, close the side stack, and show its current active card.",
         inputShape: "deckId: string",
-        outputShape: "activeDeckId + currentCardId",
-        nextWork: "Move from static active card preview to full Reigns-like swipe surface."
+        outputShape: "activeDeckId + currentCardId + focusCardMode",
+        nextWork: "Add resume ordering for frozen cards if users need manual queue control."
+      },
+      {
+        name: "renderFocusedDeck",
+        status: "implemented",
+        ownerFile: "components/deck/DeckLibrary.tsx",
+        purpose: "Render one full-height active card, keep the unfinished stack on the side in focus mode, and move it below the card in non-focus mode.",
+        inputShape: "DeckState + focusCardMode",
+        outputShape: "single-card focus UI + fullscreen unfinished stack overlay",
+        nextWork: "Tune the non-focus stack tray height after testing with real device safe areas."
       },
       {
         name: "completeCurrentCard",
@@ -203,10 +228,10 @@ export const PAGE_CONTRACTS: Record<Mode, PageContract> = {
         name: "renderProofDashboard",
         status: "implemented",
         ownerFile: "components/proof/ProofDashboard.tsx",
-        purpose: "Show proof stats, summary, progress charts, colored proof rows, and flow journal.",
+        purpose: "Show a no-page-scroll mobile proof summary with key stats, latest evidence, detailed burn/freeze reviews, and a full-row color completion table.",
         inputShape: "ProofsState",
-        outputShape: "dashboard UI",
-        nextWork: "Split into ProofCharts, ProofTable, FlowJournal, SummaryDocument components when the file grows."
+        outputShape: "compact mobile dashboard UI + fullscreen review overlays + color-covered completion rows",
+        nextWork: "Add real export only if the product needs .xlsx download after the mobile table is validated."
       },
       {
         name: "refreshSummary",
@@ -236,6 +261,5 @@ export const NEXT_IMPLEMENTATION_BACKLOG = [
   "Tune swipe, burn, and freeze thresholds on real Android devices.",
   "Split proof dashboard into table, charts, flow journal, and summary document components when needed.",
   "Add deterministic Playwright smoke tests for input, deck, and proof flows.",
-  "Keep OCR, OpenAI, backend, reminders, and calendar sync mocked until the MVP interaction loop is stable.",
-  "Use docs/backend-extension-boundaries.md before wiring real OCR, OpenAI, backend persistence, reminders, or calendar sync."
+  "Keep OCR, OpenAI, backend, reminders, and calendar sync mocked until the MVP interaction loop is stable."
 ] as const;

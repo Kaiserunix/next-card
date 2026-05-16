@@ -23,25 +23,19 @@ test("exposes exactly the three primary modes and switches between them", async 
   await expect(page.getByPlaceholder("What's your next card?")).toBeVisible();
 });
 
-test("generates, regenerates, and opens a 去高数课 burning card deck", async ({ page }) => {
+test("directly decomposes and opens a 去高数课 burning card deck", async ({ page }) => {
   await submitCourseGoal(page);
 
-  await expect(page.getByText("正在理解目标")).toBeVisible();
-  await expect(page.getByRole("button", { name: "执行方案一" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "执行方案二" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "执行方案三" })).toBeVisible();
-
-  await page.getByRole("button", { name: "否，重新生成" }).click();
-  await expect(page.getByText(/重新生成会偏向/).first()).toBeVisible();
-
-  await page.getByRole("button", { name: "执行方案一" }).click();
-  await expect(page.getByText("task flow overview")).toBeVisible();
-  await expect(page.getByText("还有 18 分钟", { exact: true })).toBeVisible();
+  await expect(page.getByText("初步分解任务", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "方案一", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "方案二", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "方案三", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "打开计划目录", exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "进入 deck" }).click();
-  await expect(page.getByText("Deck library")).toBeVisible();
+  await expect(page.getByText("focus deck")).toBeVisible();
   await expect(page.getByRole("heading", { name: "去高数课" }).first()).toBeVisible();
-  await expect(page.getByText("Active card")).toBeVisible();
+  await expect(page.getByRole("button", { name: "计划栏" })).toBeVisible();
   await expect(page.getByText("确认高数课时间和教室")).toBeVisible();
   await expect(page.getByText("4 min")).toBeVisible();
   await expect(page.getByText("burning").first()).toBeVisible();
@@ -60,20 +54,19 @@ test("records quick burning completion and freeze evidence in proof", async ({ p
   await freezeActions.getByRole("button", { name: "先冻结" }).click();
 
   await page.getByRole("button", { name: "proof" }).click();
-  await expect(page.getByText("燃烧完成")).toBeVisible();
-  await expect(page.getByText("冻结重排")).toBeVisible();
+  await expect(page.getByText("燃烧复盘")).toBeVisible();
+  await expect(page.getByText("冻结代办")).toBeVisible();
   await expect(page.getByText("frozen-rescheduled").first()).toBeVisible();
-  await expect(page.getByText(/快速燃烧/).first()).toBeVisible();
+  await expect(page.getByText("burning-completed").first()).toBeVisible();
 });
 
 async function submitCourseGoal(page: Page) {
   await page.getByPlaceholder("What's your next card?").fill("去高数课");
-  await page.getByRole("button", { name: /生成执行方案/ }).click();
+  await page.getByRole("button", { name: "直接拆解" }).click();
 }
 
 async function openCourseDeck(page: Page) {
   await submitCourseGoal(page);
-  await page.getByRole("button", { name: "执行方案一" }).click();
   await page.getByRole("button", { name: "进入 deck" }).click();
   await expect(page.getByText("确认高数课时间和教室")).toBeVisible();
 }

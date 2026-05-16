@@ -51,12 +51,11 @@ export function DeckLibrary() {
         <div className="min-w-0">
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-fern">
             <Target size={14} />
-            Deck library
+            focus deck
           </div>
           <h1 className="mt-1 truncate font-editorial text-[1.78rem] leading-tight text-ink">
             {activeDeck?.coverTitle ?? "单卡专注"}
           </h1>
-          <div className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-ink/42">Active card</div>
         </div>
         <div className="flex shrink-0 gap-2">
           <button

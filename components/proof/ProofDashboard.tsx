@@ -21,15 +21,15 @@ export function ProofDashboard() {
   const actualMinutes = records.reduce((sum, record) => sum + record.actualMinutes, 0);
   const burning = records.filter((record) => record.timeStatus === "burning-completed" || record.lastDamageEffect === "burn").length;
   const rescheduled = records.filter((record) => record.timeStatus === "frozen-rescheduled" || record.status === "frozen").length;
-  const latestRows = records.slice(0, 4);
+  const latestRows = records.slice(0, 2);
 
   return (
     <section className="flex h-full min-h-0 flex-col overflow-hidden">
       <div className="grid grid-cols-4 gap-2">
         <StatCard icon={Archive} label="今日证据" value={records.length.toString()} onClick={() => openOverlay("evidence-review")} />
         <StatCard icon={Gift} label="奖励卡" value={rewarded.toString()} onClick={() => openOverlay("reward-review")} />
-        <StatCard icon={Snowflake} label="冻结重排" value={rescheduled.toString()} onClick={() => openOverlay("frozen-todo-review")} />
-        <StatCard icon={Flame} label="燃烧完成" value={burning.toString()} onClick={() => openOverlay("burn-failed-review")} />
+        <StatCard icon={Snowflake} label="冻结代办" value={rescheduled.toString()} onClick={() => openOverlay("frozen-todo-review")} />
+        <StatCard icon={Flame} label="燃烧复盘" value={burning.toString()} onClick={() => openOverlay("burn-failed-review")} />
       </div>
 
       <div className="mt-3 rounded-[1.55rem] border border-ink/10 bg-white/62 p-4 shadow-soft">

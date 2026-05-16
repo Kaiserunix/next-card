@@ -107,6 +107,29 @@ describe("planning store flow", () => {
     });
   });
 
+  it("can directly create the PR4 compact decomposition deck from the input composer", () => {
+    const state = storeState() as ReturnType<typeof storeState> & {
+      submitGoalAndCreateDeck: () => void;
+    };
+
+    state.setInputText("去高数课");
+    state.submitGoalAndCreateDeck();
+
+    expect(storeState().analysisStatus).toBe("ready");
+    expect(storeState().plans.selectedPlanId).toBe("plan-1");
+    expect(storeState().plans.options).toHaveLength(3);
+    expect(storeState().taskFlow?.nodes).toHaveLength(4);
+    expect(storeState().deck.decks[0]).toMatchObject({
+      coverTitle: "去高数课",
+      coverIcon: "course"
+    });
+    expect(storeState().deck.currentCardId).toBe(storeState().deck.decks[0].cards[0].id);
+    expect(storeState().proofs.records[0]).toMatchObject({
+      goalTitle: "去高数课",
+      status: "in-progress"
+    });
+  });
+
   it("opens and closes the generated plan catalog overlay without changing the selected plan", () => {
     const deck = generateCourseDeckInStore();
     const state = storeState() as ReturnType<typeof storeState> & {

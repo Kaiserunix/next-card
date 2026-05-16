@@ -20,6 +20,7 @@ html {
 }
 
 body {
+  height: 100dvh;
   min-height: 100dvh;
   margin: 0;
   color: var(--foreground);
@@ -32,7 +33,7 @@ body {
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
-  overflow-x: hidden;
+  overflow: hidden;
   overscroll-behavior-y: contain;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -70,21 +71,24 @@ textarea {
 }
 
 .webview-root {
-  min-height: 100svh;
-  min-height: 100dvh;
+  height: 100svh;
+  height: 100dvh;
   padding: max(env(safe-area-inset-top), 0.75rem) 0 max(env(safe-area-inset-bottom), 0.75rem);
   display: grid;
   justify-items: center;
+  overflow: hidden;
 }
 
 .webview-frame {
   width: min(100vw, 430px);
-  min-height: calc(100svh - max(env(safe-area-inset-top), 0.75rem) - max(env(safe-area-inset-bottom), 0.75rem));
-  min-height: calc(100dvh - max(env(safe-area-inset-top), 0.75rem) - max(env(safe-area-inset-bottom), 0.75rem));
+  height: calc(100svh - max(env(safe-area-inset-top), 0.75rem) - max(env(safe-area-inset-bottom), 0.75rem));
+  height: calc(100dvh - max(env(safe-area-inset-top), 0.75rem) - max(env(safe-area-inset-bottom), 0.75rem));
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 1rem;
   padding: 0.75rem;
+  overflow: hidden;
 }
 
 @media (min-width: 520px) {
@@ -100,8 +104,10 @@ textarea {
 .webview-stack {
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
   gap: 1rem;
   min-width: 0;
+  min-height: 0;
 }
 
 .phone-shell {

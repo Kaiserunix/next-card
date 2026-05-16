@@ -48,6 +48,7 @@ export function resetNextCardStore() {
       summaryDocument: initialSummary
     },
     activeOverlay: null,
+    deckPanelOpen: false,
     focusCardMode: true,
     activePlanCatalogId: undefined
   });
