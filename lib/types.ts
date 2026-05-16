@@ -143,4 +143,25 @@ export type ProofsState = {
   summaryDocument: string;
 };
 
+export type OverlayType =
+  | "guide"
+  | "task-node-detail"
+  | "plan-catalog-detail"
+  | "deck-stack-detail"
+  | "deck-card-detail"
+  | "evidence-review"
+  | "reward-review"
+  | "freeze-review"
+  | "burn-review"
+  | "burn-failed-review"
+  | "frozen-todo-review"
+  | "proof-excel-review"
+  | "summary-review"
+  | "proof-record-review";
+
+export type ActiveOverlay = {
+  type: OverlayType;
+  id?: string;
+} | null;
+
 export type Mode = "input" | "deck" | "proof";
