@@ -29,3 +29,10 @@ Thumbs.db
 
 # local Codex verification artifacts
 .codex-*
+
+# Playwright
+test-results/
+playwright-report/
+
+# Local planning notes
+任务/

@@ -26,7 +26,16 @@ Before handing off a change, run:
 
 ```bash
 pnpm lint
+pnpm test
 pnpm build
+```
+
+Vitest covers the local backend state machine and mock AI contract. Playwright
+is reserved for a small mobile WebView smoke flow and is not part of the
+default verification path:
+
+```bash
+pnpm test:e2e
 ```
 
 `pnpm build` uses `output: "export"` and produces a static bundle in:
@@ -349,6 +358,17 @@ Recommended Android-side steps:
 The repository may already show deleted static proof preview files and an
 `archive/` folder from earlier prototype cleanup. Those are unrelated to the
 current app implementation. Do not restore or delete them unless the owner asks.
+
+## Backend Extension Boundaries
+
+Real OCR, OpenAI, backend persistence, reminders, and calendar sync may only
+plug in at the seams described in:
+
+```text
+docs/backend-extension-boundaries.md
+```
+
+Read that file before starting any backend integration work.
 
 ## License
 
