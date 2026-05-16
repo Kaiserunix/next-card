@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowRight, CheckCircle2, Circle, Snowflake, TimerReset } from "lucide-react";
+import { PlanCatalogPreview } from "@/components/PlanCatalogPreview";
 import { useNextCardStore } from "@/store/useNextCardStore";
 
 const statusClass = {
@@ -22,13 +23,14 @@ const statusIcon = {
 };
 
 export function TaskFlowOverview() {
-  const { taskFlow, deck, openDeck } = useNextCardStore();
+  const { taskFlow, deck, plans, openDeck, openPlanCatalog, openOverlay } = useNextCardStore();
 
   if (!taskFlow) {
     return null;
   }
 
   const activeDeck = deck.decks.find((item) => item.id === deck.activeDeckId);
+  const selectedPlan = plans.options.find((option) => option.id === plans.selectedPlanId) ?? plans.options[0];
 
   return (
     <section className="rounded-[2rem] border border-ink/10 bg-white/56 p-4 shadow-soft backdrop-blur">
@@ -59,6 +61,18 @@ export function TaskFlowOverview() {
       <div className="mt-5 h-2 overflow-hidden rounded-full bg-ink/8">
         <div className="h-full rounded-full bg-moss" style={{ width: `${taskFlow.overallProgress}%` }} />
       </div>
+
+      {activeDeck && (
+        <div className="mt-5">
+          <PlanCatalogPreview
+            taskFlow={taskFlow}
+            deck={activeDeck}
+            selectedPlan={selectedPlan}
+            onOpen={openPlanCatalog}
+            onNodeOpen={(nodeId) => openOverlay("task-node-detail", nodeId)}
+          />
+        </div>
+      )}
 
       <div className="mt-5 grid gap-3">
         {taskFlow.nodes.map((node, index) => {

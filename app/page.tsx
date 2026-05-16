@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { AppOverlayHost } from "@/components/AppOverlayHost";
 import { TopModeTabs } from "@/components/TopModeTabs";
 import { DeckLibrary } from "@/components/deck/DeckLibrary";
 import { TaskFlowOverview } from "@/components/flow/TaskFlowOverview";
@@ -39,17 +40,18 @@ export default function Home() {
         )}
 
         {mode === "deck" && (
-          <motion.div key="deck" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+          <motion.div key="deck" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="min-h-0 flex-1 overflow-hidden">
             <DeckLibrary />
           </motion.div>
         )}
 
         {mode === "proof" && (
-          <motion.div key="proof" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+          <motion.div key="proof" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="min-h-0 flex-1">
             <ProofDashboard />
           </motion.div>
         )}
       </div>
+      <AppOverlayHost />
     </main>
   );
 }

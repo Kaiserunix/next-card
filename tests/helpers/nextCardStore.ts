@@ -46,7 +46,10 @@ export function resetNextCardStore() {
     proofs: {
       records: [],
       summaryDocument: initialSummary
-    }
+    },
+    activeOverlay: null,
+    focusCardMode: true,
+    activePlanCatalogId: undefined
   });
 }
 

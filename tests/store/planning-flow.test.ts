@@ -107,6 +107,29 @@ describe("planning store flow", () => {
     });
   });
 
+  it("opens and closes the generated plan catalog overlay without changing the selected plan", () => {
+    const deck = generateCourseDeckInStore();
+    const state = storeState() as ReturnType<typeof storeState> & {
+      activeOverlay: { type: string; id?: string } | null;
+      openPlanCatalog: () => void;
+      closeOverlay: () => void;
+    };
+
+    expect(state.activeOverlay).toBeNull();
+
+    state.openPlanCatalog();
+
+    expect(storeState().plans.selectedPlanId).toBe("plan-1");
+    expect((storeState() as typeof state).activeOverlay).toEqual({
+      type: "plan-catalog-detail",
+      id: deck.id
+    });
+
+    (storeState() as typeof state).closeOverlay();
+
+    expect((storeState() as typeof state).activeOverlay).toBeNull();
+  });
+
   it("ignores an invalid plan id without creating deck or proof records", () => {
     storeState().setInputText("去高数课");
     storeState().analyzeInput();

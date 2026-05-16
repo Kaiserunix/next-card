@@ -13,10 +13,12 @@ import {
 } from "@/lib/mock-ai";
 import { refreshDeckTimeState } from "@/lib/card-time-engine";
 import type {
+  ActiveOverlay,
   AnalysisResult,
   DeckState,
   InputsState,
   Mode,
+  OverlayType,
   PlanOption,
   PlansState,
   ProofRecord,
@@ -40,7 +42,16 @@ type NextCardStore = {
   taskFlow: TaskFlowState | null;
   deck: DeckState;
   proofs: ProofsState;
+  activeOverlay: ActiveOverlay;
+  focusCardMode: boolean;
+  activePlanCatalogId?: string;
   setMode: (mode: Mode) => void;
+  openOverlay: (type: OverlayType, id?: string) => void;
+  closeOverlay: () => void;
+  openPlanCatalog: () => void;
+  openDeckCardDetail: (cardId: string) => void;
+  openDeckCard: (deckId: string, cardId: string) => void;
+  toggleFocusCardMode: () => void;
   setInputText: (text: string) => void;
   addMockAttachment: () => void;
   addMockImageSchedule: () => void;
@@ -173,7 +184,34 @@ export const useNextCardStore = create<NextCardStore>()(
         records: [],
         summaryDocument: mockGenerateProofSummary([])
       },
+      activeOverlay: null,
+      focusCardMode: true,
+      activePlanCatalogId: undefined,
       setMode: (mode) => set({ mode }),
+      openOverlay: (type, id) => set({ activeOverlay: { type, id } }),
+      closeOverlay: () => set({ activeOverlay: null }),
+      openPlanCatalog: () =>
+        set((state) => {
+          const deckId = state.deck.activeDeckId ?? state.deck.decks[0]?.id;
+
+          return {
+            activePlanCatalogId: deckId,
+            activeOverlay: { type: "plan-catalog-detail", id: deckId }
+          };
+        }),
+      openDeckCardDetail: (cardId) => set({ activeOverlay: { type: "deck-card-detail", id: cardId } }),
+      openDeckCard: (deckId, cardId) =>
+        set((state) => ({
+          mode: "deck",
+          activeOverlay: null,
+          focusCardMode: true,
+          deck: {
+            ...state.deck,
+            activeDeckId: deckId,
+            currentCardId: cardId
+          }
+        })),
+      toggleFocusCardMode: () => set((state) => ({ focusCardMode: !state.focusCardMode })),
       setInputText: (text) =>
         set((state) => ({
           inputs: {
@@ -317,6 +355,8 @@ export const useNextCardStore = create<NextCardStore>()(
           const deck = state.deck.decks.find((item) => item.id === deckId);
           return {
             mode: "deck",
+            activeOverlay: null,
+            focusCardMode: true,
             deck: {
               ...state.deck,
               activeDeckId: deckId,

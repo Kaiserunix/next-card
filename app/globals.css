@@ -161,6 +161,30 @@ textarea {
   background: rgba(242, 232, 220, 0.78);
 }
 
+.deck-stack-tool::before,
+.deck-stack-tool::after {
+  position: absolute;
+  left: 0.45rem;
+  z-index: -1;
+  width: 2rem;
+  height: 3.4rem;
+  content: "";
+  border: 1px solid rgba(6, 63, 39, 0.11);
+  border-radius: 0.85rem;
+  background: rgba(255, 248, 241, 0.82);
+  box-shadow: 0 12px 24px rgba(47, 36, 27, 0.12);
+}
+
+.deck-stack-tool::before {
+  top: 1.35rem;
+  transform: rotate(-7deg) translateX(-0.25rem);
+}
+
+.deck-stack-tool::after {
+  top: 1.75rem;
+  transform: rotate(7deg) translateX(0.2rem);
+}
+
 .burn-rail {
   background:
     linear-gradient(90deg, rgba(231, 120, 75, 0.88), rgba(201, 157, 62, 0.86)),
