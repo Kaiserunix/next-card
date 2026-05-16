@@ -104,7 +104,8 @@
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 4px;
-        width: 100%;
+        width: calc(100vw - 32px);
+        max-width: calc(100vw - 32px);
         min-width: 0;
         margin: 12px 0 18px;
         padding: 4px;
@@ -299,12 +300,15 @@
 
       .journal-card {
         min-width: 0;
-        max-width: 100%;
+        width: 100%;
+        max-width: calc(100vw - 122px);
+        overflow: hidden;
         padding: 22px 0 28px;
         border-bottom: 1px solid var(--line-soft);
       }
 
       .journal-card h2 {
+        max-width: 100%;
         margin-bottom: 10px;
         font-size: 24px;
         font-weight: 500;
@@ -314,6 +318,7 @@
       }
 
       .journal-card p {
+        max-width: 100%;
         color: #4b5049;
         font-size: 13px;
         line-height: 1.72;
@@ -325,6 +330,7 @@
         display: flex;
         flex-direction: column;
         align-items: flex-start;
+        max-width: 100%;
         gap: 7px;
         margin-top: 14px;
       }
@@ -384,6 +390,10 @@
         .journal-card h2 {
           font-size: 22px;
         }
+
+        .journal-card {
+          max-width: calc(100vw - 112px);
+        }
       }
     </style>
   </head>
@@ -425,7 +435,7 @@
                 <time>08:12</time>
                 <div class="journal-line"></div>
                 <div class="journal-card">
-                  <h2>完成“整理高数课本和上次作业页”。</h2>
+                  <h2>完成“整理高数课本<br />和上次作业页”。</h2>
                   <p>
                     来源为课程表文字识别。卡片处于 hot 阶段，实际用时 4 分钟，推进了“出门准备”节点。下一步建议：确认教室并把水杯放进包里。
                   </p>
@@ -441,7 +451,7 @@
                 <time>08:19</time>
                 <div class="journal-line"></div>
                 <div class="journal-card">
-                  <h2>快速燃烧模式完成一张最低可行动作卡。</h2>
+                  <h2>快速燃烧模式完成<br />一张最低可行动作卡。</h2>
                   <p>
                     双击先启动计时，三击进入 burning。6 分钟后完成“确认教室并出门”，proof 记录燃烧边缘、火花反馈和准时完成。
                   </p>
@@ -457,7 +467,7 @@
                 <time>13:42</time>
                 <div class="journal-line"></div>
                 <div class="journal-card">
-                  <h2>“整理实验报告数据表”选择先冻结。</h2>
+                  <h2>“整理实验报告数据表”<br />选择先冻结。</h2>
                   <p>
                     下滑触发状态栏，继续下滑进入冻结提示。用户选择“先冻结”，上下文保存到重新安排队列，下一步建议为今晚 20:00 前恢复。
                   </p>
@@ -473,7 +483,7 @@
                 <time>21:06</time>
                 <div class="journal-line"></div>
                 <div class="journal-card">
-                  <h2>奖励卡生成：把作业通知变成可提交草稿。</h2>
+                  <h2>奖励卡生成：<br />把作业通知变成可提交草稿。</h2>
                   <p>
                     完成 5 张分解卡，比预计快 4 分钟。summary document 已更新，建议明早复查引用格式而不是继续扩写。
                   </p>
@@ -489,7 +499,7 @@
                 <time>22:18</time>
                 <div class="journal-line"></div>
                 <div class="journal-card">
-                  <h2>恢复冻结卡，完成表头检查。</h2>
+                  <h2>恢复冻结卡，<br />完成表头检查。</h2>
                   <p>
                     从 reschedule queue 回到实验报告 deck。保留冻结前上下文，没有重新规划，只完成一张 7 分钟内可结束的小卡。
                   </p>
