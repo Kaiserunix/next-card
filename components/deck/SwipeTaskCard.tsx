@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Flame } from "lucide-react";
+import { CheckCircle2, Flame, Snowflake } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { TaskCard, TaskDeck } from "@/lib/types";
 import { useNextCardStore } from "@/store/useNextCardStore";
@@ -162,10 +162,10 @@ export function SwipeTaskCard({ deck, card, focus = false }: SwipeTaskCardProps)
 
         <SparkLayer seed={sparks} active={activeTimeMode === "burning" || sparks > 0} />
         <CardTimeUI card={{ ...card, elapsedSeconds }} />
-        <div className={`${focus ? "mt-4" : "mt-5"} flex items-start justify-between gap-3`}>
+        <div className={`${focus ? "mt-5" : "mt-5"} flex items-start justify-between gap-3`}>
           <h3
             className={`min-w-0 overflow-hidden font-editorial leading-tight text-ink ${
-              focus ? "max-h-[4.45rem] text-[1.65rem]" : "text-[1.85rem]"
+              focus ? "max-h-[5rem] text-[2rem]" : "text-[1.85rem]"
             }`}
           >
             {card.title}
@@ -174,43 +174,35 @@ export function SwipeTaskCard({ deck, card, focus = false }: SwipeTaskCardProps)
             {deck.completedCards + 1} / {deck.totalCards}
           </span>
         </div>
-        <p className={`${focus ? "max-h-[4.5rem] overflow-hidden" : ""} mt-3 text-sm leading-6 text-ink/70`}>
+        <p className={`${focus ? "line-clamp-2" : ""} mt-4 text-[0.98rem] leading-7 text-ink/70`}>
           {card.action}
         </p>
-        <p className={`${focus ? "mt-auto max-h-[4.5rem] overflow-hidden" : "mt-5"} rounded-[1.05rem] bg-ink/[0.055] px-4 py-3 text-sm leading-6 text-ink/64`}>
-          {card.cardBackNote}
-        </p>
+        <div className="mt-auto" />
 
-        <div className={`${focus ? "mt-4" : "mt-5"} grid grid-cols-2 gap-2`}>
+        <div className={`${focus ? "mt-4" : "mt-5"} grid grid-cols-[1fr_3rem_3rem] gap-2`}>
           <button
             type="button"
             onClick={() => completeCurrentCard("left")}
-            className={`${focus ? "h-9" : "h-10"} flex items-center justify-center gap-1.5 rounded-full border border-ink/10 bg-white/72 text-xs font-semibold text-ink`}
+            className={`${focus ? "h-11" : "h-11"} flex items-center justify-center gap-1.5 rounded-full bg-ink text-sm font-semibold text-white`}
           >
-            <Check size={14} />
-            左滑完成
+            <CheckCircle2 size={16} />
+            完成
           </button>
           <button
             type="button"
             onClick={() => startQuickBurning()}
-            className={`${focus ? "h-9" : "h-10"} flex items-center justify-center gap-1.5 rounded-full bg-ink text-xs font-semibold text-white`}
+            className={`${focus ? "h-11" : "h-11"} grid place-items-center rounded-full border border-ember/20 bg-[#fff0e8] text-ember`}
+            aria-label="快速燃烧"
           >
-            <Flame size={14} />
-            快速燃烧
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowStatus((value) => !value)}
-            className={`${focus ? "h-9" : "h-10"} rounded-full border border-ink/10 bg-white/72 text-xs font-semibold text-ink`}
-          >
-            下滑状态
+            <Flame size={17} />
           </button>
           <button
             type="button"
             onClick={() => setShowFreeze(true)}
-            className={`${focus ? "h-9" : "h-10"} rounded-full border border-sky-200 bg-[#eefbff] text-xs font-semibold text-sky-900`}
+            className={`${focus ? "h-11" : "h-11"} grid place-items-center rounded-full border border-sky-200 bg-[#eefbff] text-sky-900`}
+            aria-label="先冻结"
           >
-            先冻结
+            <Snowflake size={17} />
           </button>
         </div>
       </motion.article>
