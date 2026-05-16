@@ -9,19 +9,19 @@ export function CardTimeUI({ card }: { card: TaskCard }) {
   const progress = Math.min(100, Math.max(10, card.damageProgress || 24));
 
   return (
-    <div className="rounded-[1.15rem] border border-ink/8 bg-white/68 p-3">
-      <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-semibold text-ink/64">
+    <div className="rounded-full border border-ink/8 bg-white/68 px-3 py-2">
+      <div className="flex items-center justify-between gap-2 text-[0.72rem] font-semibold text-ink/62">
         <span className="flex items-center gap-1.5">
-          <Clock3 size={14} />
-          {card.estimatedMinutes} min
+          <Clock3 size={13} />
+          {card.estimatedMinutes}m
         </span>
-        <span className="flex items-center gap-1.5">
+        <span className="flex min-w-0 items-center gap-1.5">
           <Timer size={14} />
-          {timePlan.windowLabel}
+          <span className="truncate">{timePlan.windowLabel}</span>
         </span>
-        <span className="rounded-full bg-ink/8 px-2.5 py-1">{card.urgencyStage}</span>
+        <span className="shrink-0 rounded-full bg-ink/8 px-2 py-0.5">{progress}%</span>
       </div>
-      <div className="mt-3 h-2 overflow-hidden rounded-full bg-ink/8">
+      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ink/8">
         <div
           className={`h-full rounded-full ${card.damageEffect === "burn" ? "burn-rail" : "bg-moss"}`}
           style={{ width: `${progress}%` }}
