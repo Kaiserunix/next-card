@@ -236,5 +236,6 @@ export const NEXT_IMPLEMENTATION_BACKLOG = [
   "Tune swipe, burn, and freeze thresholds on real Android devices.",
   "Split proof dashboard into table, charts, flow journal, and summary document components when needed.",
   "Add deterministic Playwright smoke tests for input, deck, and proof flows.",
-  "Keep OCR, OpenAI, backend, reminders, and calendar sync mocked until the MVP interaction loop is stable."
+  "Keep OCR, OpenAI, backend, reminders, and calendar sync mocked until the MVP interaction loop is stable.",
+  "Use docs/backend-extension-boundaries.md before wiring real OCR, OpenAI, backend persistence, reminders, or calendar sync."
 ] as const;

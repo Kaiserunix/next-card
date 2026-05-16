@@ -285,6 +285,15 @@ Current functions:
 Keep these deterministic. The MVP should feel smart, but it should not call real
 AI services yet.
 
+Backend extension boundaries are documented in:
+
+```text
+docs/backend-extension-boundaries.md
+```
+
+Use that boundary map before wiring real OCR, OpenAI planning, backend
+persistence, reminders, calendar sync, or proof export.
+
 ## State Contract
 
 Shared types live in:
