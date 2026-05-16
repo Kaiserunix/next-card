@@ -2,12 +2,18 @@
 
 import { BookOpen, Flame, Layers3 } from "lucide-react";
 import { useNextCardStore } from "@/store/useNextCardStore";
-import { CardTimeUI } from "@/components/deck/CardTimeUI";
+import { RewardCard } from "@/components/deck/RewardCard";
+import { SwipeTaskCard } from "@/components/deck/SwipeTaskCard";
 
 export function DeckLibrary() {
   const { deck, openDeck } = useNextCardStore();
   const activeDeck = deck.decks.find((item) => item.id === deck.activeDeckId);
-  const activeCard = activeDeck?.cards.find((card) => card.id === deck.currentCardId) ?? activeDeck?.cards[0];
+  const activeCard =
+    activeDeck?.cards.find((card) => card.id === deck.currentCardId) ??
+    activeDeck?.cards.find((card) => card.status === "active");
+  const latestReward = activeDeck
+    ? deck.rewardCards.find((reward) => reward.deckId === activeDeck.id)
+    : null;
 
   if (deck.decks.length === 0) {
     return (
@@ -63,20 +69,14 @@ export function DeckLibrary() {
                 <div className="text-xs font-semibold uppercase tracking-[0.14em] text-fern">{activeDeck.coverTitle}</div>
                 <h2 className="font-editorial text-[1.85rem] text-ink">Active card</h2>
               </div>
-              <span className="rounded-full bg-ink px-3 py-1 text-xs font-semibold text-white">1 / {activeDeck.totalCards}</span>
+              <span className="rounded-full bg-ink px-3 py-1 text-xs font-semibold text-white">
+                {Math.min(activeDeck.completedCards + 1, activeDeck.totalCards)} / {activeDeck.totalCards}
+              </span>
             </div>
-            <article className="relative overflow-hidden rounded-[1.8rem] border border-ink/10 bg-[#fff8f1] p-5 shadow-card">
-              {activeCard.damageEffect === "burn" && (
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-2 burn-rail" />
-              )}
-              <CardTimeUI card={activeCard} />
-              <h3 className="mt-5 font-editorial text-[1.85rem] leading-tight text-ink">{activeCard.title}</h3>
-              <p className="mt-3 text-sm leading-6 text-ink/70">{activeCard.action}</p>
-              <p className="mt-5 rounded-[1.05rem] bg-ink/[0.055] px-4 py-3 text-sm leading-6 text-ink/64">
-                {activeCard.cardBackNote}
-              </p>
-            </article>
+            <SwipeTaskCard deck={activeDeck} card={activeCard} />
           </div>
+        ) : activeDeck?.deckStatus === "completed" && latestReward ? (
+          <RewardCard reward={latestReward} />
         ) : (
           <div className="grid min-h-96 place-items-center text-center text-ink/58">选择一个 deck 查看单卡执行面。</div>
         )}
