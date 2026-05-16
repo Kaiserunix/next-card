@@ -55,6 +55,7 @@ export type InputPagePort = {
   submitGoalAndCreateDeck: () => void;
   regeneratePlans: () => void;
   selectPlan: (planId: PlanOption["id"]) => void;
+  openPlanCatalog: () => void;
   openOverlay: (type: OverlayType, id?: string) => void;
 };
 
@@ -64,10 +65,14 @@ export type DeckPagePort = {
   activeDeck: TaskDeck | null;
   deckPanelOpen: boolean;
   focusCardMode: boolean;
+  activePlanCatalogId?: string;
   openDeck: (deckId: string) => void;
   openDeckPanel: () => void;
   closeDeckPanel: () => void;
   toggleFocusCardMode: () => void;
+  openPlanCatalog: () => void;
+  openDeckCardDetail: (cardId: string) => void;
+  openDeckCard: (deckId: string, cardId: string) => void;
   completeCurrentCard: (direction: "left" | "right" | "button") => void;
   revealStatusBar: () => void;
   requestFreezeCurrentCard: () => void;
@@ -139,7 +144,7 @@ export const PAGE_CONTRACTS: Record<Mode, PageContract> = {
       "store/useNextCardStore.ts",
       "lib/mock-ai.ts"
     ],
-    reads: ["deck.decks", "deck.activeDeckId", "deck.currentCardId", "deckPanelOpen", "focusCardMode"],
+    reads: ["deck.decks", "deck.activeDeckId", "deck.currentCardId", "focusCardMode", "activePlanCatalogId"],
     writes: ["deck.completedCardIds", "deck.frozenCardIds", "deck.rescheduleQueue", "deck.rewardCards", "proofs.records"],
     actions: [
       {
@@ -155,10 +160,10 @@ export const PAGE_CONTRACTS: Record<Mode, PageContract> = {
         name: "renderFocusedDeck",
         status: "implemented",
         ownerFile: "components/deck/DeckLibrary.tsx",
-        purpose: "Render one full-height active card and collect unfinished cards into a side stack toolbar.",
-        inputShape: "DeckState + deckPanelOpen + focusCardMode",
-        outputShape: "single-card focus UI + expandable unfinished stack panel",
-        nextWork: "Tune side stack placement after testing with real device safe areas."
+        purpose: "Render one full-height active card, keep the unfinished stack on the side in focus mode, and move it below the card in non-focus mode.",
+        inputShape: "DeckState + focusCardMode",
+        outputShape: "single-card focus UI + fullscreen unfinished stack overlay",
+        nextWork: "Tune the non-focus stack tray height after testing with real device safe areas."
       },
       {
         name: "completeCurrentCard",
@@ -223,9 +228,9 @@ export const PAGE_CONTRACTS: Record<Mode, PageContract> = {
         name: "renderProofDashboard",
         status: "implemented",
         ownerFile: "components/proof/ProofDashboard.tsx",
-        purpose: "Show a no-page-scroll mobile proof summary with key stats, latest evidence, burn/freeze reviews, and a color-coded completion table.",
+        purpose: "Show a no-page-scroll mobile proof summary with key stats, latest evidence, detailed burn/freeze reviews, and a full-row color completion table.",
         inputShape: "ProofsState",
-        outputShape: "compact mobile dashboard UI + fullscreen review overlays + Excel-like completion table",
+        outputShape: "compact mobile dashboard UI + fullscreen review overlays + color-covered completion rows",
         nextWork: "Add real export only if the product needs .xlsx download after the mobile table is validated."
       },
       {

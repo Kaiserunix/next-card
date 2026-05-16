@@ -146,7 +146,9 @@ export type ProofsState = {
 export type OverlayType =
   | "guide"
   | "task-node-detail"
+  | "plan-catalog-detail"
   | "deck-stack-detail"
+  | "deck-card-detail"
   | "evidence-review"
   | "reward-review"
   | "freeze-review"

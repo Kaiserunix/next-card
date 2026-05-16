@@ -44,9 +44,13 @@ type NextCardStore = {
   activeOverlay: ActiveOverlay;
   deckPanelOpen: boolean;
   focusCardMode: boolean;
+  activePlanCatalogId?: string;
   setMode: (mode: Mode) => void;
   openOverlay: (type: OverlayType, id?: string) => void;
   closeOverlay: () => void;
+  openPlanCatalog: () => void;
+  openDeckCardDetail: (cardId: string) => void;
+  openDeckCard: (deckId: string, cardId: string) => void;
   openDeckPanel: () => void;
   closeDeckPanel: () => void;
   toggleFocusCardMode: () => void;
@@ -211,9 +215,32 @@ export const useNextCardStore = create<NextCardStore>()(
       activeOverlay: null,
       deckPanelOpen: false,
       focusCardMode: true,
+      activePlanCatalogId: undefined,
       setMode: (mode) => set((state) => ({ mode, deckPanelOpen: mode === "deck" ? state.deckPanelOpen : false })),
       openOverlay: (type, id) => set({ activeOverlay: { type, id } }),
       closeOverlay: () => set({ activeOverlay: null }),
+      openPlanCatalog: () =>
+        set((state) => {
+          const deckId = state.deck.activeDeckId ?? state.deck.decks[0]?.id;
+
+          return {
+            activePlanCatalogId: deckId,
+            activeOverlay: { type: "plan-catalog-detail", id: deckId }
+          };
+        }),
+      openDeckCardDetail: (cardId) => set({ activeOverlay: { type: "deck-card-detail", id: cardId } }),
+      openDeckCard: (deckId, cardId) =>
+        set((state) => ({
+          mode: "deck",
+          activeOverlay: null,
+          deckPanelOpen: false,
+          focusCardMode: true,
+          deck: {
+            ...state.deck,
+            activeDeckId: deckId,
+            currentCardId: cardId
+          }
+        })),
       openDeckPanel: () => set({ deckPanelOpen: true }),
       closeDeckPanel: () => set({ deckPanelOpen: false }),
       toggleFocusCardMode: () => set((state) => ({ focusCardMode: !state.focusCardMode })),

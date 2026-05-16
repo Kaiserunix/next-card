@@ -1,8 +1,9 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, Clock3, FilePlus2, ImagePlus, Layers3, Menu, RotateCcw, Send, Volume2 } from "lucide-react";
+import { ArrowRight, FilePlus2, ImagePlus, Layers3, Menu, RotateCcw, Send, Volume2 } from "lucide-react";
 import { useMemo } from "react";
+import { PlanCatalogPreview } from "@/components/PlanCatalogPreview";
 import { useNextCardStore } from "@/store/useNextCardStore";
 
 const examples = ["去高数课", "今晚 20:00 前交一页课程分析", "把明天早八课表变成提醒卡"];
@@ -21,6 +22,7 @@ export function InputComposer() {
     resetInputDraft,
     openDeck,
     selectPlan,
+    openPlanCatalog,
     openOverlay
   } = useNextCardStore();
 
@@ -30,6 +32,7 @@ export function InputComposer() {
   );
   const activeDeck = deck.decks.find((item) => item.id === deck.activeDeckId);
   const hasResult = Boolean(taskFlow && analysis && activeDeck);
+  const selectedPlan = plans.options.find((option) => option.id === plans.selectedPlanId) ?? plans.options[0];
 
   const handleSubmit = () => {
     if (!canSubmit) {
@@ -146,39 +149,15 @@ export function InputComposer() {
                 })}
               </div>
 
-              <div className="mt-3 rounded-[1.25rem] border border-ink/8 bg-white/58 p-3">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-fern">
-                  <Clock3 size={13} />
-                  time
-                </div>
-                <div className="mt-2 grid grid-cols-3 gap-2 text-xs">
-                  <CompactChip label="deadline" value={analysis?.deadlineLabel ?? "-"} />
-                  <CompactChip label="window" value={analysis?.availableWindow ?? "-"} />
-                  <CompactChip label="start" value={analysis?.suggestedStart ?? "-"} />
-                </div>
-              </div>
-
-              <div className="mt-3 h-2 overflow-hidden rounded-full bg-ink/8">
-                <div className="h-full rounded-full bg-moss" style={{ width: `${taskFlow?.overallProgress ?? 0}%` }} />
-              </div>
-
-              <div className="mt-3 grid min-h-0 flex-1 gap-2 overflow-hidden">
-                {taskFlow?.nodes.slice(0, 3).map((node, index) => (
-                  <button
-                    key={node.id}
-                    type="button"
-                    onClick={() => openOverlay("task-node-detail", node.id)}
-                    className="min-h-0 rounded-[1.1rem] border border-ink/8 bg-white/62 px-3 py-2.5 text-left transition hover:bg-white/78"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-semibold text-ink/42">0{index + 1}</span>
-                      <span className="rounded-full bg-ink/[0.055] px-2 py-0.5 text-[0.68rem] font-semibold text-ink/58">
-                        {node.timeLabel}
-                      </span>
-                    </div>
-                    <h2 className="mt-1 overflow-hidden text-sm font-semibold leading-5 text-ink">{node.title}</h2>
-                  </button>
-                ))}
+              <div className="mt-3 min-h-0 flex-1 overflow-hidden">
+                <PlanCatalogPreview
+                  taskFlow={taskFlow}
+                  deck={activeDeck}
+                  selectedPlan={selectedPlan}
+                  compact
+                  onOpen={openPlanCatalog}
+                  onNodeOpen={(nodeId) => openOverlay("task-node-detail", nodeId)}
+                />
               </div>
 
               {activeDeck && (
@@ -249,14 +228,5 @@ export function InputComposer() {
         </div>
       )}
     </section>
-  );
-}
-
-function CompactChip({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="min-w-0 rounded-[0.8rem] bg-ink/[0.045] px-2 py-2">
-      <div className="truncate text-[0.6rem] font-semibold uppercase tracking-[0.08em] text-ink/36">{label}</div>
-      <div className="mt-1 truncate text-[0.72rem] font-semibold text-ink/72">{value}</div>
-    </div>
   );
 }
