@@ -5,6 +5,7 @@ import {
   resetNextCardStore,
   storeState
 } from "@/tests/helpers/nextCardStore";
+import { useNextCardStore } from "@/store/useNextCardStore";
 
 const baseNow = new Date("2026-05-16T08:00:00.000Z");
 
@@ -34,6 +35,47 @@ describe("active deck time refresh and reschedule queue", () => {
       remainingSeconds: 60
     });
     expect(storeState().proofs.records).toHaveLength(proofCount);
+  });
+
+  it("preserves quick-burning visual state during active deck time refresh", () => {
+    const deck = generateCourseDeckInStore();
+    const activeCardId = deck.cards[0].id;
+
+    storeState().startQuickBurning();
+    useNextCardStore.setState((state) => ({
+      deck: {
+        ...state.deck,
+        decks: state.deck.decks.map((item) =>
+          item.id === deck.id
+            ? {
+                ...item,
+                cards: item.cards.map((card) =>
+                  card.id === activeCardId
+                    ? {
+                        ...card,
+                        deadlineAt: addMinutes(30),
+                        urgencyStage: "burning",
+                        damageEffect: "burn",
+                        damageProgress: 84,
+                        burnLevel: 3
+                      }
+                    : card
+                )
+              }
+            : item
+        )
+      }
+    }));
+
+    storeState().refreshActiveDeckTime(baseNow.toISOString());
+
+    expect(getActiveDeck().cards.find((card) => card.id === activeCardId)).toMatchObject({
+      urgencyStage: "calm",
+      damageEffect: "burn",
+      damageProgress: 84,
+      burnLevel: 3,
+      remainingSeconds: 1800
+    });
   });
 
   it("ignores active deck time refresh when no active deck exists", () => {

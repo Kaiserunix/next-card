@@ -2,7 +2,15 @@ import type { TaskCard, TaskDeck } from "@/lib/types";
 
 const protectedStatuses = new Set<TaskCard["status"]>(["completed", "frozen", "rewarded", "needs-review"]);
 
-export function refreshCardTimeState(card: TaskCard, now: Date): TaskCard {
+export type CardTimeRefreshOptions = {
+  preserveBurnFromUserAction?: boolean;
+};
+
+export function refreshCardTimeState(
+  card: TaskCard,
+  now: Date = new Date(),
+  options: CardTimeRefreshOptions = {}
+): TaskCard {
   if (protectedStatuses.has(card.status) || !card.deadlineAt) {
     return card;
   }
@@ -32,6 +40,14 @@ export function refreshCardTimeState(card: TaskCard, now: Date): TaskCard {
   }
 
   if (remainingSeconds <= 1200) {
+    if (options.preserveBurnFromUserAction && card.damageEffect === "burn") {
+      return {
+        ...card,
+        urgencyStage: "hot",
+        remainingSeconds
+      };
+    }
+
     return {
       ...card,
       urgencyStage: "hot",
@@ -39,6 +55,14 @@ export function refreshCardTimeState(card: TaskCard, now: Date): TaskCard {
       burnLevel: 2,
       remainingSeconds,
       damageProgress: 52
+    };
+  }
+
+  if (options.preserveBurnFromUserAction && card.damageEffect === "burn") {
+    return {
+      ...card,
+      urgencyStage: "calm",
+      remainingSeconds
     };
   }
 
@@ -52,9 +76,13 @@ export function refreshCardTimeState(card: TaskCard, now: Date): TaskCard {
   };
 }
 
-export function refreshDeckTimeState(deck: TaskDeck, now: Date): TaskDeck {
+export function refreshDeckTimeState(
+  deck: TaskDeck,
+  now: Date = new Date(),
+  options: CardTimeRefreshOptions = {}
+): TaskDeck {
   return {
     ...deck,
-    cards: deck.cards.map((card) => refreshCardTimeState(card, now))
+    cards: deck.cards.map((card) => refreshCardTimeState(card, now, options))
   };
 }

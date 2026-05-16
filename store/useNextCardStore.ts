@@ -436,7 +436,9 @@ export const useNextCardStore = create<NextCardStore>()(
             return state;
           }
 
-          const refreshedDeck = refreshDeckTimeState(activeDeck, nowIso ? new Date(nowIso) : new Date());
+          const refreshedDeck = refreshDeckTimeState(activeDeck, nowIso ? new Date(nowIso) : new Date(), {
+            preserveBurnFromUserAction: state.deck.activeTimeMode === "burning"
+          });
 
           return {
             taskFlow: updateFlowFromCards(state.taskFlow, refreshedDeck.cards),

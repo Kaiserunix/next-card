@@ -37,11 +37,14 @@ TaskDeck
 
 Rules:
 
+- UI components must not import a real network client directly.
+- Real services must return the existing domain types rather than introducing a parallel API-only model.
 - UI components must not depend on raw provider responses.
 - Service adapters should normalize provider output before it reaches the Zustand store.
 - The planning flow must still understand first, decompose second, and offer exactly three plan choices third.
 - Generated cards must remain decomposed action tasks, not broad goals.
 - The MVP must keep `lib/mock-ai.ts` as the local fallback until real service behavior is stable.
+- Any planner response should be validated before reaching the store: three plans, four steps per plan, non-empty time anchors, and enum-safe urgency/damage values.
 
 ## OCR API
 
@@ -157,3 +160,10 @@ cloud proof archive
 ```
 
 The correct next step for each area is to build an adapter around the existing domain types, then add tests that prove the UI and store still consume the same local contract.
+
+## Recommended Backend Order
+
+1. Wrap `lib/mock-ai.ts` behind an adapter that can swap mock planning for a real OpenAI planner without changing UI imports.
+2. Add backend persistence as an additive sync of `inputs`, `taskFlow`, `deck`, and `proofs`; keep localStorage as the offline fallback.
+3. Replace mock image parsing by filling `InputsState.imageSchedule.parsedTimetable` and `inputs.parsedText`.
+4. Add reminders and calendar sync last, after card timing, freezing, reschedule, and proof evidence are stable on real devices.

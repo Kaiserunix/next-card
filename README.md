@@ -51,6 +51,15 @@ load local assets instead of a hosted URL.
 
 Vitest covers the local backend state machine and mock AI contract; Playwright is reserved for small mobile WebView smoke flows.
 
+The AI output contract is documented in:
+
+```text
+docs/AI-BEHAVIOR.md
+```
+
+Use it together with `docs/backend-extension-boundaries.md` before replacing
+mock planning, OCR, persistence, reminders, or calendar behavior.
+
 No real OCR, OpenAI API, backend, auth, reminders, calendar sync, or notification
 service is connected yet.
 

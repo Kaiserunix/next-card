@@ -56,6 +56,28 @@ describe("refreshCardTimeState", () => {
     });
   });
 
+  it("preserves user-triggered burn damage when a refresh moves the card back to calm", () => {
+    const updated = refreshCardTimeState(
+      makeCard({
+        deadlineAt: addMinutes(30),
+        urgencyStage: "burning",
+        damageEffect: "burn",
+        burnLevel: 3,
+        damageProgress: 84
+      }),
+      baseNow,
+      { preserveBurnFromUserAction: true }
+    );
+
+    expect(updated).toMatchObject({
+      urgencyStage: "calm",
+      damageEffect: "burn",
+      burnLevel: 3,
+      damageProgress: 84,
+      remainingSeconds: 1800
+    });
+  });
+
   it("marks a card hot when its deadline is fifteen minutes away", () => {
     const updated = refreshCardTimeState(makeCard({ deadlineAt: addMinutes(15) }), baseNow);
 
