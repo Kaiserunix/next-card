@@ -43,7 +43,12 @@ export function TaskFlowOverview() {
         {activeDeck && (
           <button
             type="button"
-            onClick={() => openDeck(activeDeck.id)}
+            onClick={() => {
+              openDeck(activeDeck.id);
+              window.requestAnimationFrame(() => {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              });
+            }}
             className="h-11 w-full rounded-full bg-ink px-5 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(6,63,39,0.18)] transition hover:scale-[0.99]"
           >
             进入 deck

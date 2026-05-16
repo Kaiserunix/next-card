@@ -142,48 +142,48 @@ export const PAGE_CONTRACTS: Record<Mode, PageContract> = {
       },
       {
         name: "completeCurrentCard",
-        status: "todo",
+        status: "implemented",
         ownerFile: "store/useNextCardStore.ts",
         purpose: "Left or right swipe marks the card completed, advances the deck, updates time, and records proof.",
         inputShape: "direction: 'left' | 'right'",
         outputShape: "updated TaskDeck + ProofRecord",
-        nextWork: "Implement with Framer Motion drag gestures in SwipeTaskCard."
+        nextWork: "Tune drag thresholds after touch testing on a real Android WebView."
       },
       {
         name: "revealStatusBar",
-        status: "todo",
+        status: "implemented",
         ownerFile: "components/deck/DeckStatusBar.tsx",
         purpose: "Down swipe reveals deck progress, elapsed time, remaining time, and current urgency stage.",
         inputShape: "current TaskDeck + current TaskCard",
         outputShape: "visible status bar UI",
-        nextWork: "Create DeckStatusBar and wire drag offset thresholds."
+        nextWork: "Add node display names instead of raw flow node ids."
       },
       {
         name: "requestFreezeCurrentCard",
-        status: "todo",
+        status: "implemented",
         ownerFile: "components/deck/FreezePrompt.tsx",
         purpose: "Deeper down swipe shows freeze prompt and lets user continue or freeze.",
         inputShape: "current TaskCard",
         outputShape: "frozen card + rescheduleQueue entry + ProofRecord",
-        nextWork: "Use mockRescheduleFrozenCard and add ice visual state."
+        nextWork: "Add resume-from-reschedule queue screen."
       },
       {
         name: "startFocusTiming",
-        status: "todo",
+        status: "implemented",
         ownerFile: "components/deck/SwipeTaskCard.tsx",
         purpose: "Double click starts timing, shows sparks, and attempts the lightweight flint sound.",
         inputShape: "current TaskCard",
         outputShape: "startedAt + activeTimeMode: 'timing'",
-        nextWork: "Use WebAudio with visual fallback."
+        nextWork: "Tune the WebAudio sound in native Android WebView."
       },
       {
         name: "startQuickBurning",
-        status: "todo",
-        ownerFile: "components/deck/BurnTimer.tsx",
+        status: "implemented",
+        ownerFile: "components/deck/SwipeTaskCard.tsx",
         purpose: "Triple click enters quick burning mode without failing the card.",
         inputShape: "current TaskCard",
         outputShape: "activeTimeMode: 'burning' + burn proof event",
-        nextWork: "Add burn rail countdown and continue/freeze end state."
+        nextWork: "Extract BurnTimer from SwipeTaskCard if the countdown becomes richer."
       }
     ],
     extensionAreas: ["motion", "audio", "reminders", "testing"]
@@ -201,12 +201,12 @@ export const PAGE_CONTRACTS: Record<Mode, PageContract> = {
     actions: [
       {
         name: "renderProofDashboard",
-        status: "partial",
+        status: "implemented",
         ownerFile: "components/proof/ProofDashboard.tsx",
-        purpose: "Show proof stats, colored table, and summary document.",
+        purpose: "Show proof stats, summary, progress charts, colored proof rows, and flow journal.",
         inputShape: "ProofsState",
         outputShape: "dashboard UI",
-        nextWork: "Split into ProofCharts, ProofTable, FlowJournal, SummaryDocument components."
+        nextWork: "Split into ProofCharts, ProofTable, FlowJournal, SummaryDocument components when the file grows."
       },
       {
         name: "refreshSummary",
@@ -233,8 +233,8 @@ export const PAGE_CONTRACTS: Record<Mode, PageContract> = {
 
 export const NEXT_IMPLEMENTATION_BACKLOG = [
   "Build SwipeTaskCard and replace static active card preview.",
-  "Add card completion, freeze, burn, and reward actions to useNextCardStore.",
-  "Split proof dashboard into table, charts, flow journal, and summary document components.",
+  "Tune swipe, burn, and freeze thresholds on real Android devices.",
+  "Split proof dashboard into table, charts, flow journal, and summary document components when needed.",
   "Add deterministic Playwright smoke tests for input, deck, and proof flows.",
   "Keep OCR, OpenAI, backend, reminders, and calendar sync mocked until the MVP interaction loop is stable."
 ] as const;

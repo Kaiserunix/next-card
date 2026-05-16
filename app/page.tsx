@@ -11,11 +11,17 @@ import { useNextCardStore } from "@/store/useNextCardStore";
 
 export default function Home() {
   const { mode, setMode } = useNextCardStore();
+  const changeMode = (nextMode: typeof mode) => {
+    setMode(nextMode);
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  };
 
   return (
     <main className="webview-root">
       <div className="webview-frame">
-        <TopModeTabs activeMode={mode} onChange={setMode} />
+        <TopModeTabs activeMode={mode} onChange={changeMode} />
 
         {mode === "input" && (
           <motion.div
