@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640" role="img" aria-label="Monday math timetable">
+  <rect width="960" height="640" fill="#f8fbff"/>
+  <rect x="40" y="36" width="880" height="568" rx="28" fill="#ffffff" stroke="#9db7d8" stroke-width="3"/>
+  <text x="72" y="92" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#17324d">课程表 - 周一</text>
+  <text x="730" y="92" font-family="Arial, sans-serif" font-size="22" fill="#47657f">第 12 周</text>
+  <g font-family="Arial, sans-serif" font-size="22" fill="#1d3557">
+    <rect x="72" y="130" width="816" height="72" rx="14" fill="#e9f4ff"/>
+    <text x="96" y="174">08:00 - 09:40</text>
+    <text x="300" y="174" font-weight="700">高等数学 A</text>
+    <text x="620" y="174">二教 304</text>
+    <rect x="72" y="222" width="816" height="72" rx="14" fill="#f7fbf1"/>
+    <text x="96" y="266">10:10 - 11:50</text>
+    <text x="300" y="266" font-weight="700">大学英语</text>
+    <text x="620" y="266">三教 201</text>
+    <rect x="72" y="314" width="816" height="72" rx="14" fill="#fff7e8"/>
+    <text x="96" y="358">14:00 - 15:40</text>
+    <text x="300" y="358" font-weight="700">程序设计实验</text>
+    <text x="620" y="358">实验楼 B405</text>
+    <rect x="72" y="430" width="816" height="112" rx="16" fill="#eef9f8"/>
+    <text x="96" y="478" font-weight="700">提醒</text>
+    <text x="180" y="478">高数课建议提前 20 分钟出门，带教材和上次作业页。</text>
+  </g>
+</svg>

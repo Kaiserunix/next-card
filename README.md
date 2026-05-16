@@ -26,6 +26,7 @@ Before handing off a change, run:
 
 ```bash
 pnpm lint
+pnpm test
 pnpm build
 ```
 
@@ -47,6 +48,8 @@ load local assets instead of a hosted URL.
 - Framer Motion
 - lucide-react
 - Playwright as a dev-only smoke-test helper
+
+Vitest covers the local backend state machine and mock AI contract; Playwright is reserved for small mobile WebView smoke flows.
 
 No real OCR, OpenAI API, backend, auth, reminders, calendar sync, or notification
 service is connected yet.
@@ -331,7 +334,7 @@ Minimum scope:
 2. Test drag thresholds, double click, triple click, and WebAudio on device.
 3. Add native back-button handling for `input / deck / proof` mode history.
 4. Add a resume screen for frozen cards in `rescheduleQueue`.
-5. Run `pnpm lint` and `pnpm build`.
+5. Run `pnpm lint`, `pnpm test`, and `pnpm build`.
 
 Do not start real OCR, OpenAI API, backend, reminders, or calendar sync until the
 mock deck loop is complete and demo-stable.

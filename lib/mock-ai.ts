@@ -9,8 +9,55 @@ import type {
   TaskFlowState
 } from "@/lib/types";
 
-const courseSignals = ["高数", "课程", "上课", "课表", "早八", "教室"];
-const assignmentSignals = ["作业", "提交", "截止", "论文", "报告", "ddl", "deadline"];
+const courseSignals = [
+  "高数",
+  "课程",
+  "上课",
+  "课表",
+  "早八",
+  "教室",
+  "calculus",
+  "lecture",
+  "classroom",
+  "course schedule",
+  "lab schedule",
+  "seminar"
+];
+const assignmentSignals = [
+  "提交",
+  "截止",
+  "前交",
+  "论文",
+  "报告",
+  "ddl",
+  "deadline",
+  "作业通知",
+  "作业说明",
+  "课程作业",
+  "submit",
+  "essay",
+  "due",
+  "report",
+  "homework",
+  "reflection",
+  "paper"
+];
+const explicitAssignmentSignals = [
+  "论文",
+  "报告",
+  "ddl",
+  "deadline",
+  "作业通知",
+  "作业说明",
+  "课程作业",
+  "submit",
+  "essay",
+  "due",
+  "report",
+  "homework",
+  "reflection",
+  "paper"
+];
 
 const nowIso = () => new Date().toISOString();
 
@@ -25,8 +72,10 @@ const addMinutes = (minutes: number) => {
 function detectSource(input: InputsState): SourceType {
   const hasAttachment = input.attachments.length > 0;
   const hasImage = Boolean(input.imageSchedule);
+  const hasText = Boolean(input.text.trim());
+  const sourceCount = [hasText, hasAttachment, hasImage].filter(Boolean).length;
 
-  if ((hasAttachment || hasImage) && input.text.trim()) {
+  if (sourceCount > 1) {
     return "mixed";
   }
 
@@ -55,6 +104,28 @@ function hasAny(text: string, signals: string[]) {
   return signals.some((signal) => lower.includes(signal.toLowerCase()));
 }
 
+function isAssignmentLike(text: string) {
+  const normalized = text.replace(/\s+/g, "");
+  const lower = normalized.toLowerCase();
+  const negatedHomework =
+    /(不是|并不是|不要|别|不用|不需要).{0,12}(提交|交|写|做|完成)?作业/.test(normalized) ||
+    /(不要|别|不用|不需要).{0,12}(提交|交).{0,12}作业/.test(normalized);
+  const negatedDeadline =
+    /(没有|无|不是|不需要|不用).{0,8}(硬)?(截止|deadline|ddl|due)/i.test(lower) ||
+    /(有没有|是否有).{0,8}(硬)?(截止|deadline|ddl|due).{0,12}(没有|无|不是|不需要|不用)/i.test(lower);
+  const hasExplicitAssignment = hasAny(text, explicitAssignmentSignals);
+
+  if ((negatedHomework || negatedDeadline) && !hasExplicitAssignment) {
+    return false;
+  }
+
+  if (hasAny(text, assignmentSignals)) {
+    return true;
+  }
+
+  return /(^|[，。；,.!?！？、])(作业)($|[，。；,.!?！？、])/.test(text) || /(写|做|补|交|提交|完成).{0,12}作业/.test(normalized);
+}
+
 export function mockAnalyzeInput(input: InputsState): AnalysisResult {
   const sourceType = detectSource(input);
   const parsedText = [input.text, input.parsedText, input.imageSchedule?.parsedTimetable]
@@ -62,28 +133,7 @@ export function mockAnalyzeInput(input: InputsState): AnalysisResult {
     .join(" ");
   const goal = normalizeGoal(input.text || input.parsedText || input.imageSchedule?.parsedTimetable || "");
   const isCourse = hasAny(parsedText, courseSignals);
-  const isAssignment = hasAny(parsedText, assignmentSignals);
-
-  if (isCourse) {
-    return {
-      sourceType,
-      goalUnderstanding: `你想把「${goal}」从一句提醒变成可以马上执行的出门/到课卡组。重点不是“记得上课”，而是把准备、离开、到达和课前缓冲拆开。`,
-      constraints: [
-        "课程开始前需要留出整理物品和路上缓冲",
-        "第一张卡适合做成近截止燃烧演示，帮助快速启动",
-        "如果错过最佳出门窗口，需要进入温柔重排而不是失败提示"
-      ],
-      stages: ["确认课程信息", "整理材料", "出门移动", "到达后课前准备"],
-      timeStrategy: [
-        "现在先完成 3 分钟内的物品确认",
-        "路上任务只保留必须动作，避免长文本任务",
-        "如果窗口错过，把当前卡冻结并生成下一次课前提醒"
-      ],
-      deadlineLabel: "还有 18 分钟到最佳出门窗口",
-      availableWindow: "现在到课前 20 分钟",
-      suggestedStart: "现在开始第一张卡"
-    };
-  }
+  const isAssignment = isAssignmentLike(parsedText);
 
   if (isAssignment) {
     return {
@@ -103,6 +153,27 @@ export function mockAnalyzeInput(input: InputsState): AnalysisResult {
       deadlineLabel: "今晚 20:00 前",
       availableWindow: "今天晚饭前到 20:00",
       suggestedStart: "建议 25 分钟内启动"
+    };
+  }
+
+  if (isCourse) {
+    return {
+      sourceType,
+      goalUnderstanding: `你想把「${goal}」从一句提醒变成可以马上执行的出门/到课卡组。重点不是“记得上课”，而是把准备、离开、到达和课前缓冲拆开。`,
+      constraints: [
+        "课程开始前需要留出整理物品和路上缓冲",
+        "第一张卡适合做成近截止燃烧演示，帮助快速启动",
+        "如果错过最佳出门窗口，需要进入温柔重排而不是失败提示"
+      ],
+      stages: ["确认课程信息", "整理材料", "出门移动", "到达后课前准备"],
+      timeStrategy: [
+        "现在先完成 3 分钟内的物品确认",
+        "路上任务只保留必须动作，避免长文本任务",
+        "如果窗口错过，把当前卡冻结并生成下一次课前提醒"
+      ],
+      deadlineLabel: "还有 18 分钟到最佳出门窗口",
+      availableWindow: "现在到课前 20 分钟",
+      suggestedStart: "现在开始第一张卡"
     };
   }
 
@@ -211,9 +282,12 @@ export function mockGenerateTaskFlow(selectedPlan: PlanOption): TaskFlowState {
 export function mockGenerateDeckFromPlan(
   selectedPlan: PlanOption,
   taskFlow: TaskFlowState,
-  goalTitle: string
+  goalTitle?: string
 ): TaskDeck {
-  const isCourse = goalTitle.includes("高数") || selectedPlan.steps.some((step) => step.includes("课程") || step.includes("教室"));
+  const isCourse =
+    Boolean(goalTitle?.includes("高数")) ||
+    selectedPlan.steps.some((step) => step.includes("上课") || step.includes("教材") || step.includes("课程") || step.includes("教室"));
+  const coverTitle = goalTitle || (isCourse ? "去高数课" : "今日推进");
   const deckId = makeId("deck");
   const titles = selectedPlan.steps.flatMap((step, index) => {
     if (isCourse) {
@@ -251,7 +325,7 @@ export function mockGenerateDeckFromPlan(
 
   return {
     id: deckId,
-    coverTitle: goalTitle || (isCourse ? "去高数课" : "今日推进"),
+    coverTitle,
     coverIcon: isCourse ? "course" : "spark",
     deckStatus: "new",
     cards,
@@ -311,7 +385,7 @@ export function mockRescheduleFrozenCard(card: TaskCard, taskFlow: TaskFlowState
     urgencyStage: "calm",
     burnLevel: 0,
     suggestedStartAt: addMinutes(180),
-    cardBackNote: `已保留在「${taskFlow.title}」里，适合 3 小时后重新打开。`
+    cardBackNote: `已保留在「${taskFlow.title}」里，适合 3 小时后重新打开并稍后恢复上下文。`
   };
 }
 

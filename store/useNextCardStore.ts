@@ -11,6 +11,7 @@ import {
   mockRescheduleFrozenCard,
   mockRegeneratePlanOptions
 } from "@/lib/mock-ai";
+import { refreshDeckTimeState } from "@/lib/card-time-engine";
 import type {
   AnalysisResult,
   DeckState,
@@ -53,6 +54,8 @@ type NextCardStore = {
   continueCurrentCard: () => void;
   startFocusTiming: () => void;
   startQuickBurning: () => void;
+  refreshActiveDeckTime: (nowIso?: string) => void;
+  resumeFrozenCard: (cardId: string) => void;
 };
 
 const defaultInputs: InputsState = {
@@ -279,7 +282,7 @@ export const useNextCardStore = create<NextCardStore>()(
           completedCards: 0,
           frozenCards: 0,
           actualMinutes: 0,
-          timeStatus: generatedDeck.cards[0]?.urgencyStage === "burning" ? "burning-completed" : "on-time",
+          timeStatus: "on-time",
           timeDamageEvents:
             generatedDeck.cards[0]?.damageEffect === "burn"
               ? ["生成第一张近截止燃烧演示卡"]
@@ -425,6 +428,94 @@ export const useNextCardStore = create<NextCardStore>()(
             activeTimeMode: state.deck.activeTimeMode === "paused" ? "idle" : state.deck.activeTimeMode
           }
         })),
+      refreshActiveDeckTime: (nowIso) =>
+        set((state) => {
+          const activeDeck = state.deck.decks.find((deck) => deck.id === state.deck.activeDeckId);
+
+          if (!activeDeck) {
+            return state;
+          }
+
+          const refreshedDeck = refreshDeckTimeState(activeDeck, nowIso ? new Date(nowIso) : new Date());
+
+          return {
+            taskFlow: updateFlowFromCards(state.taskFlow, refreshedDeck.cards),
+            deck: {
+              ...state.deck,
+              decks: replaceDeck(state.deck.decks, refreshedDeck)
+            }
+          };
+        }),
+      resumeFrozenCard: (cardId) =>
+        set((state) => {
+          const targetDeck = state.deck.decks.find((deck) => deck.cards.some((card) => card.id === cardId));
+          const targetCard = targetDeck?.cards.find((card) => card.id === cardId);
+
+          if (!targetDeck || !targetCard || targetCard.status !== "frozen") {
+            return state;
+          }
+
+          const resumedAt = new Date().toISOString();
+          const cards = targetDeck.cards.map((card) => {
+            if (card.id === cardId) {
+              return {
+                ...card,
+                status: "active" as const,
+                damageEffect: "none" as const,
+                damageProgress: 0,
+                burnLevel: 0 as const,
+                urgencyStage: "warm" as const,
+                suggestedStartAt: resumedAt,
+                startedAt: null
+              };
+            }
+
+            if (card.status === "active") {
+              return { ...card, status: "queued" as const };
+            }
+
+            return card;
+          });
+          const frozenCardIds = state.deck.frozenCardIds.filter((id) => id !== cardId);
+          const rescheduleQueue = state.deck.rescheduleQueue.filter((id) => id !== cardId);
+          const updatedDeck: TaskDeck = {
+            ...targetDeck,
+            deckStatus: "active",
+            cards,
+            completedCards: cards.filter((card) => card.status === "completed" || card.status === "rewarded").length
+          };
+          const proofRecord: ProofRecord = {
+            id: makeProofId(),
+            goalTitle: targetDeck.coverTitle,
+            source: state.inputs.sourceType,
+            status: "in-progress",
+            ...getDeckProofProgress(updatedDeck, frozenCardIds.length),
+            actualMinutes: 0,
+            timeStatus: "frozen-rescheduled",
+            timeDamageEvents: ["从 reschedule queue 恢复冻结卡"],
+            lastAction: `恢复冻结卡：${targetCard.title}`,
+            nextSuggestion: "继续完成这张卡；如果压力仍然太高，可以再次冻结并保留上下文。",
+            createdAt: resumedAt
+          };
+          const records = [proofRecord, ...state.proofs.records];
+
+          return {
+            taskFlow: updateFlowFromCards(state.taskFlow, cards),
+            deck: {
+              ...state.deck,
+              decks: replaceDeck(state.deck.decks, updatedDeck),
+              activeDeckId: targetDeck.id,
+              currentCardId: cardId,
+              frozenCardIds,
+              rescheduleQueue,
+              activeTimeMode: "idle"
+            },
+            proofs: {
+              records,
+              summaryDocument: mockGenerateProofSummary(records)
+            }
+          };
+        }),
       freezeCurrentCard: () =>
         set((state) => {
           const activeDeck = state.deck.decks.find((deck) => deck.id === state.deck.activeDeckId);
