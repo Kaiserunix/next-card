@@ -26,7 +26,16 @@ Before handing off a change, run:
 
 ```bash
 pnpm lint
+pnpm test
 pnpm build
+```
+
+Vitest covers the local backend state machine and mock AI contract. Playwright
+is reserved for a small mobile WebView smoke flow and is not part of the
+default verification path:
+
+```bash
+pnpm test:e2e
 ```
 
 `pnpm build` uses `output: "export"` and produces a static bundle in:
@@ -191,11 +200,16 @@ Current behavior:
 
 - Shows generated deck covers.
 - Opens a deck.
-- Shows one active card preview.
+- Shows one active card execution surface.
 - Shows estimated time, remaining window, urgency stage, and a time rail.
 - `去高数课` creates a course-style deck with a near-deadline burning demo card.
+- Double click starts timing with sparks and WebAudio fallback.
+- Triple click or the burn button starts quick burning mode.
+- Left/right drag or completion button completes the current card and writes proof.
+- Down drag reveals the status bar.
+- Deeper down drag or freeze button opens the freeze prompt and writes proof.
 
-Interfaces left for the next teammate:
+Implemented interfaces:
 
 - `openDeck`
 - `completeCurrentCard`
@@ -206,25 +220,15 @@ Interfaces left for the next teammate:
 
 Next work:
 
-1. Create `components/deck/SwipeTaskCard.tsx`.
-2. Move the active-card preview from `DeckLibrary` into `SwipeTaskCard`.
-3. Use Framer Motion drag gestures:
-   - right swipe: complete current card
-   - left swipe: complete current card
-   - down swipe: show `DeckStatusBar`
-   - deeper down swipe: show `FreezePrompt`
-4. Add store actions for card completion, freeze, reschedule, timing, and burning.
-5. Write proof records for completion, burning, freeze, reschedule, and reward.
-6. When all cards complete, show a reward card and add it to `deck.rewardCards`.
+1. Tune drag thresholds on a physical Android WebView.
+2. Add a real resume screen for `rescheduleQueue`.
+3. Extract `BurnTimer` if the burn countdown becomes more detailed.
+4. Improve reward-card transition after a full deck completes.
 
 Recommended component files to add next:
 
 ```text
-components/deck/SwipeTaskCard.tsx
 components/deck/BurnTimer.tsx
-components/deck/DeckStatusBar.tsx
-components/deck/FreezePrompt.tsx
-components/deck/RewardCard.tsx
 ```
 
 ## Proof Page Contract
@@ -242,9 +246,11 @@ lib/mock-ai.ts
 Current behavior:
 
 - Shows proof stat cards.
-- Shows a colored action table.
+- Shows a colored action table as mobile proof cards.
+- Shows progress charts and a completion ring.
 - Shows a readable summary document.
-- Receives the first proof record when a plan is selected.
+- Shows a proof03-style manually scrollable flow journal with fade edges.
+- Receives records from plan selection, timing, burning, completion, freezing, and reward generation.
 
 Interfaces left for the next teammate:
 
@@ -254,7 +260,7 @@ Interfaces left for the next teammate:
 
 Next work:
 
-1. Split `ProofDashboard` into smaller components:
+1. Split `ProofDashboard` into smaller components when the next proof iteration grows:
    ```text
    components/proof/ProofTable.tsx
    components/proof/ProofCharts.tsx
@@ -262,10 +268,8 @@ Next work:
    components/proof/JournalEntry.tsx
    components/proof/SummaryDocument.tsx
    ```
-2. Add the required blog-style chronological flow journal.
-3. Add progress ring, bar progress, heat blocks, or compact stat charts.
-4. Update proof records from deck events, not only plan selection.
-5. Add copy/export behavior for the summary document if needed for demos.
+2. Add richer heat blocks once multiple days exist.
+3. Add copy/export behavior for the summary document if needed for demos.
 
 ## Mock AI Contract
 
@@ -319,18 +323,15 @@ nested state directly inside UI components.
 
 ## Suggested Next PR
 
-Build the deck execution surface.
+Tune the deck execution surface on real mobile WebView.
 
 Minimum scope:
 
-1. Add `SwipeTaskCard`.
-2. Add left/right swipe completion.
-3. Add double-click timing sparks.
-4. Add triple-click quick burning mode.
-5. Add down-swipe status bar.
-6. Add deeper down-swipe freeze prompt.
-7. Update proof records from those actions.
-8. Run `pnpm lint` and `pnpm build`.
+1. Install the static `out/` bundle in an Android WebView wrapper.
+2. Test drag thresholds, double click, triple click, and WebAudio on device.
+3. Add native back-button handling for `input / deck / proof` mode history.
+4. Add a resume screen for frozen cards in `rescheduleQueue`.
+5. Run `pnpm lint` and `pnpm build`.
 
 Do not start real OCR, OpenAI API, backend, reminders, or calendar sync until the
 mock deck loop is complete and demo-stable.
@@ -357,6 +358,17 @@ Recommended Android-side steps:
 The repository may already show deleted static proof preview files and an
 `archive/` folder from earlier prototype cleanup. Those are unrelated to the
 current app implementation. Do not restore or delete them unless the owner asks.
+
+## Backend Extension Boundaries
+
+Real OCR, OpenAI, backend persistence, reminders, and calendar sync may only
+plug in at the seams described in:
+
+```text
+docs/backend-extension-boundaries.md
+```
+
+Read that file before starting any backend integration work.
 
 ## License
 
