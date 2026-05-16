@@ -13,8 +13,8 @@ export default function Home() {
   const { mode, setMode } = useNextCardStore();
 
   return (
-    <main className="min-h-[100dvh] px-4 py-5 sm:px-6 lg:px-8">
-      <div className="mx-auto flex max-w-[78rem] flex-col gap-5">
+    <main className="webview-root">
+      <div className="webview-frame">
         <TopModeTabs activeMode={mode} onChange={setMode} />
 
         {mode === "input" && (
@@ -22,10 +22,10 @@ export default function Home() {
             key="input"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="grid gap-5 lg:grid-cols-[25rem_minmax(0,1fr)]"
+            className="webview-stack"
           >
             <InputComposer />
-            <div className="space-y-5">
+            <div className="webview-stack">
               <PlanModePanel />
               <TaskFlowOverview />
             </div>

@@ -3,10 +3,11 @@
 Next Card is a demo-ready Web MVP for turning a one-sentence goal, written plan,
 attachment, notification, or timetable into an AI-planned task card deck.
 
-The first implementation pass is now a runnable Next.js app. The current focus is
-the `input` experience: a calm Pi-inspired composer, mock Plan Mode analysis,
-three execution plans, task-flow generation, a generated deck cover, and an
-initial proof record.
+The first implementation pass is now a runnable Next.js app. The app is forced
+into a mobile-only WebView shape so it can later be wrapped as an Android APK.
+The current focus is the `input` experience: a calm Pi-inspired composer, mock
+Plan Mode analysis, three execution plans, task-flow generation, a generated deck
+cover, and an initial proof record.
 
 ## Run
 
@@ -28,6 +29,15 @@ pnpm lint
 pnpm build
 ```
 
+`pnpm build` uses `output: "export"` and produces a static bundle in:
+
+```text
+out/
+```
+
+That folder is the APK WebView handoff artifact if the Android wrapper wants to
+load local assets instead of a hosted URL.
+
 ## Current Stack
 
 - Next.js App Router
@@ -40,6 +50,42 @@ pnpm build
 
 No real OCR, OpenAI API, backend, auth, reminders, calendar sync, or notification
 service is connected yet.
+
+## Mobile WebView Target
+
+This project is now mobile-only by design.
+
+Web target contract:
+
+```text
+lib/webview-contract.ts
+```
+
+Current decisions:
+
+- The app renders as a single mobile WebView surface.
+- Desktop browsers only preview a centered `430px` maximum-width app frame.
+- There are no desktop two-column layouts.
+- The root viewport uses `viewport-fit=cover` and CSS safe-area env values.
+- The UI supports practical Android widths from `360px` upward.
+- State persists through `localStorage`, so Android WebView must enable DOM storage.
+- The Next build exports static files for WebView packaging.
+
+Android wrapper requirements:
+
+```kotlin
+webView.settings.javaScriptEnabled = true
+webView.settings.domStorageEnabled = true
+webView.settings.loadWithOverviewMode = true
+webView.settings.useWideViewPort = true
+```
+
+If loading the exported app locally, point the WebView at the generated static
+entry after copying `out/` into Android assets. If loading remotely, use an HTTPS
+deployment of the same static export.
+
+Do not add desktop breakpoints or dashboard-style layouts. Any new page or
+component should be designed inside the same mobile WebView frame first.
 
 ## Product Modes
 
@@ -58,6 +104,17 @@ components/TopModeTabs.tsx
 
 Do not add a fourth primary mode without revisiting the product contract in
 `AGENTS.md`.
+
+The visible app shell is implemented in:
+
+```text
+app/page.tsx
+app/globals.css
+app/layout.tsx
+```
+
+Keep this shell mobile-only. If a teammate needs a desktop demo, use the centered
+preview frame rather than adding separate desktop UI.
 
 ## Page Interface Contracts
 
@@ -277,6 +334,23 @@ Minimum scope:
 
 Do not start real OCR, OpenAI API, backend, reminders, or calendar sync until the
 mock deck loop is complete and demo-stable.
+
+## Suggested APK Wrapper Work
+
+This repo only ships the WebView page. Android packaging should happen in a
+separate native wrapper project or a later `android/` folder.
+
+Recommended Android-side steps:
+
+1. Run `pnpm build`.
+2. Copy `out/` into Android assets or deploy it to HTTPS.
+3. Create a single-Activity WebView wrapper.
+4. Enable JavaScript and DOM storage.
+5. Load the local `index.html` or hosted URL.
+6. Set the status/navigation bar colors to match `#fbf1ea`.
+7. Preserve safe-area/inset behavior and avoid injecting desktop viewport rules.
+8. Later add a bridge only for reminders, calendar, notifications, sound, and
+   native back-button behavior.
 
 ## Known Dirty Worktree Note
 

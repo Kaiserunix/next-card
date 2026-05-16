@@ -9,7 +9,7 @@ export function PlanModePanel() {
   const { analysis, analysisStatus, plans, regeneratePlans, selectPlan } = useNextCardStore();
 
   return (
-    <section className="min-h-[42rem] rounded-[2rem] border border-ink/10 bg-white/48 p-4 shadow-soft backdrop-blur sm:p-5 lg:min-h-[45rem]">
+    <section className="rounded-[2rem] border border-ink/10 bg-white/56 p-4 shadow-soft backdrop-blur">
       <AnimatePresence mode="popLayout">
         {analysisStatus === "idle" && (
           <motion.div
@@ -17,10 +17,10 @@ export function PlanModePanel() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
-            className="flex h-full min-h-[36rem] flex-col justify-between rounded-[1.55rem] border border-dashed border-ink/16 bg-[#fff8f1]/64 p-5"
+            className="flex min-h-[28rem] flex-col justify-between rounded-[1.55rem] border border-dashed border-ink/16 bg-[#fff8f1]/64 p-5"
           >
             <div>
-              <div className="font-editorial text-[2rem] leading-tight text-ink">
+              <div className="font-editorial text-[1.85rem] leading-tight text-ink">
                 Plan Mode
                 <br />
                 waits for one clear signal.
@@ -29,7 +29,7 @@ export function PlanModePanel() {
                 输入侧会先收集目标或课表。提交后，这里才会开始显示理解、约束、阶段拆解和三套方案。
               </p>
             </div>
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid gap-3">
               {["understand", "decompose", "choose"].map((item) => (
                 <div key={item} className="rounded-[1.2rem] border border-ink/8 bg-white/58 p-4 text-sm font-medium text-ink/58">
                   {item}
@@ -45,13 +45,13 @@ export function PlanModePanel() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
-            className="grid min-h-[36rem] place-items-center rounded-[1.55rem] bg-[#fff8f1]/70 p-8 text-center"
+            className="grid min-h-[28rem] place-items-center rounded-[1.55rem] bg-[#fff8f1]/70 p-6 text-center"
           >
             <div>
               <div className="mx-auto mb-6 grid size-16 place-items-center rounded-full bg-ink text-white shadow-[0_18px_36px_rgba(6,63,39,0.2)]">
                 <GitBranch className="animate-pulse" size={26} />
               </div>
-              <h2 className="font-editorial text-[2.15rem] leading-tight text-ink">正在理解目标</h2>
+              <h2 className="font-editorial text-[1.95rem] leading-tight text-ink">正在理解目标</h2>
               <p className="mx-auto mt-3 max-w-[27rem] text-sm leading-6 text-ink/62">
                 先找时间、难度、依赖和能量压力。不会立刻甩出一堆 Todo。
               </p>
@@ -80,15 +80,15 @@ export function PlanModePanel() {
                 <Clock3 size={14} />
                 extracted time
               </div>
-              <h2 className="font-editorial text-[2rem] leading-tight text-ink">{analysis.goalUnderstanding}</h2>
-              <div className="mt-5 grid gap-3 md:grid-cols-3">
+              <h2 className="font-editorial text-[1.58rem] leading-tight text-ink">{analysis.goalUnderstanding}</h2>
+              <div className="mt-5 grid gap-3">
                 <TimeChip label="deadline" value={analysis.deadlineLabel} />
                 <TimeChip label="window" value={analysis.availableWindow} />
                 <TimeChip label="start" value={analysis.suggestedStart} />
               </div>
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-[0.85fr_1.15fr]">
+            <div className="grid gap-4">
               <div className="space-y-4">
                 <InfoBlock title="关键约束" items={plans.constraints} />
                 <InfoBlock title="时间策略" items={plans.timeStrategy} />

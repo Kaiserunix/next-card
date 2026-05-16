@@ -46,7 +46,7 @@ export function InputComposer() {
   };
 
   return (
-    <section className="phone-shell grain flex min-h-[42rem] w-full max-w-[24.5rem] flex-col px-4 pb-4 pt-4 sm:min-h-[45rem]">
+    <section className="phone-shell grain flex min-h-[calc(100svh-6.75rem)] w-full flex-col px-4 pb-4 pt-4">
       <div className="relative z-10 flex items-center justify-between px-1">
         <button
           type="button"
@@ -119,7 +119,7 @@ export function InputComposer() {
                 <p className="text-[0.95rem] leading-6 text-ink/78">
                   {analysisStatus === "analyzing"
                     ? "我正在先读目标、找时间线、判断是否需要燃烧或冻结路径。"
-                    : "理解完成。右侧会出现目标理解、约束、阶段拆解和三套执行方案。"}
+                    : "理解完成。下方会出现目标理解、约束、阶段拆解和三套执行方案。"}
                 </p>
               </div>
             </motion.div>
@@ -170,7 +170,7 @@ export function InputComposer() {
             type="button"
             onClick={handleSubmit}
             disabled={!canSubmit || analysisStatus === "analyzing"}
-            className="mb-0.5 flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-ink px-3 text-xs font-semibold text-white transition hover:scale-[0.98] disabled:cursor-not-allowed disabled:bg-ink/26 sm:gap-2 sm:px-4 sm:text-sm"
+            className="mb-0.5 flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-ink px-3 text-xs font-semibold text-white transition hover:scale-[0.98] disabled:cursor-not-allowed disabled:bg-ink/26"
           >
             <span>生成执行方案</span>
             <Send size={15} />

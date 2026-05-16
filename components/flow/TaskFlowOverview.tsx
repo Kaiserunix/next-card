@@ -31,11 +31,11 @@ export function TaskFlowOverview() {
   const activeDeck = deck.decks.find((item) => item.id === deck.activeDeckId);
 
   return (
-    <section className="rounded-[2rem] border border-ink/10 bg-white/50 p-5 shadow-soft backdrop-blur">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <section className="rounded-[2rem] border border-ink/10 bg-white/56 p-4 shadow-soft backdrop-blur">
+      <div className="flex flex-col gap-4">
         <div>
           <div className="text-xs font-semibold uppercase tracking-[0.14em] text-fern">task flow overview</div>
-          <h2 className="mt-2 font-editorial text-[2rem] leading-tight text-ink">{taskFlow.title}</h2>
+          <h2 className="mt-2 font-editorial text-[1.75rem] leading-tight text-ink">{taskFlow.title}</h2>
           <p className="mt-2 max-w-[34rem] text-sm leading-6 text-ink/62">
             这是进入 deck 前的轻量路线图。每个节点代表一组行动卡，不是项目管理甘特图。
           </p>
@@ -44,7 +44,7 @@ export function TaskFlowOverview() {
           <button
             type="button"
             onClick={() => openDeck(activeDeck.id)}
-            className="h-11 rounded-full bg-ink px-5 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(6,63,39,0.18)] transition hover:scale-[0.99]"
+            className="h-11 w-full rounded-full bg-ink px-5 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(6,63,39,0.18)] transition hover:scale-[0.99]"
           >
             进入 deck
           </button>
@@ -55,7 +55,7 @@ export function TaskFlowOverview() {
         <div className="h-full rounded-full bg-moss" style={{ width: `${taskFlow.overallProgress}%` }} />
       </div>
 
-      <div className="mt-5 grid gap-3 md:grid-cols-4">
+      <div className="mt-5 grid gap-3">
         {taskFlow.nodes.map((node, index) => {
           const Icon = statusIcon[node.status];
 

@@ -16,7 +16,7 @@ type TopModeTabsProps = {
 
 export function TopModeTabs({ activeMode, onChange }: TopModeTabsProps) {
   return (
-    <nav className="mx-auto grid w-full max-w-[25rem] grid-cols-3 gap-2 rounded-full border border-ink/10 bg-white/54 p-1 shadow-sm backdrop-blur">
+    <nav className="sticky top-[max(env(safe-area-inset-top),0.5rem)] z-40 grid w-full grid-cols-3 gap-1.5 rounded-full border border-ink/10 bg-white/78 p-1 shadow-sm backdrop-blur">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const active = activeMode === tab.id;
@@ -26,7 +26,7 @@ export function TopModeTabs({ activeMode, onChange }: TopModeTabsProps) {
             key={tab.id}
             type="button"
             onClick={() => onChange(tab.id)}
-            className={`flex h-10 items-center justify-center gap-2 rounded-full text-sm font-medium transition ${
+            className={`flex h-10 items-center justify-center gap-1.5 rounded-full text-sm font-medium transition ${
               active
                 ? "bg-ink text-white shadow-[0_10px_24px_rgba(6,63,39,0.22)]"
                 : "text-ink/62 hover:bg-white/70 hover:text-ink"
