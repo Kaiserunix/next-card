@@ -12,9 +12,10 @@ import { FreezePrompt } from "@/components/deck/FreezePrompt";
 type SwipeTaskCardProps = {
   deck: TaskDeck;
   card: TaskCard;
+  focus?: boolean;
 };
 
-export function SwipeTaskCard({ deck, card }: SwipeTaskCardProps) {
+export function SwipeTaskCard({ deck, card, focus = false }: SwipeTaskCardProps) {
   const activeTimeMode = useNextCardStore((state) => state.deck.activeTimeMode);
   const completeCurrentCard = useNextCardStore((state) => state.completeCurrentCard);
   const continueCurrentCard = useNextCardStore((state) => state.continueCurrentCard);
@@ -81,20 +82,36 @@ export function SwipeTaskCard({ deck, card }: SwipeTaskCardProps) {
   };
 
   return (
-    <div className="space-y-3">
+    <div className={focus ? "relative flex h-full min-h-0 flex-col overflow-hidden" : "space-y-3"}>
       <AnimatePresence>
-        {showStatus && <DeckStatusBar deck={deck} card={card} elapsedSeconds={elapsedSeconds} />}
+        {showStatus && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className={focus ? "absolute inset-x-1 top-1 z-20" : undefined}
+          >
+            <DeckStatusBar deck={deck} card={card} elapsedSeconds={elapsedSeconds} />
+          </motion.div>
+        )}
         {showFreeze && (
-          <FreezePrompt
-            onContinue={() => {
-              setShowFreeze(false);
-              continueCurrentCard();
-            }}
-            onFreeze={() => {
-              setShowFreeze(false);
-              freezeCurrentCard();
-            }}
-          />
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className={focus ? "absolute inset-x-1 top-1 z-20" : undefined}
+          >
+            <FreezePrompt
+              onContinue={() => {
+                setShowFreeze(false);
+                continueCurrentCard();
+              }}
+              onFreeze={() => {
+                setShowFreeze(false);
+                freezeCurrentCard();
+              }}
+            />
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -126,7 +143,9 @@ export function SwipeTaskCard({ deck, card }: SwipeTaskCardProps) {
         onDoubleClick={handleDoubleClick}
         onClick={(event) => handleClick(event.detail)}
         whileTap={{ scale: 0.985 }}
-        className={`relative overflow-hidden rounded-[1.8rem] border p-5 shadow-card ${
+        className={`relative overflow-hidden rounded-[1.8rem] border shadow-card ${
+          focus ? "flex min-h-0 flex-1 flex-col p-4" : "p-5"
+        } ${
           card.damageEffect === "freeze"
             ? "border-sky-200 bg-[#eefbff]"
             : card.damageEffect === "burn" || activeTimeMode === "burning"
@@ -143,22 +162,30 @@ export function SwipeTaskCard({ deck, card }: SwipeTaskCardProps) {
 
         <SparkLayer seed={sparks} active={activeTimeMode === "burning" || sparks > 0} />
         <CardTimeUI card={{ ...card, elapsedSeconds }} />
-        <div className="mt-5 flex items-start justify-between gap-3">
-          <h3 className="min-w-0 font-editorial text-[1.85rem] leading-tight text-ink">{card.title}</h3>
+        <div className={`${focus ? "mt-4" : "mt-5"} flex items-start justify-between gap-3`}>
+          <h3
+            className={`min-w-0 overflow-hidden font-editorial leading-tight text-ink ${
+              focus ? "max-h-[4.45rem] text-[1.65rem]" : "text-[1.85rem]"
+            }`}
+          >
+            {card.title}
+          </h3>
           <span className="shrink-0 rounded-full bg-white/70 px-3 py-1 text-xs font-semibold text-ink/64">
             {deck.completedCards + 1} / {deck.totalCards}
           </span>
         </div>
-        <p className="mt-3 text-sm leading-6 text-ink/70">{card.action}</p>
-        <p className="mt-5 rounded-[1.05rem] bg-ink/[0.055] px-4 py-3 text-sm leading-6 text-ink/64">
+        <p className={`${focus ? "max-h-[4.5rem] overflow-hidden" : ""} mt-3 text-sm leading-6 text-ink/70`}>
+          {card.action}
+        </p>
+        <p className={`${focus ? "mt-auto max-h-[4.5rem] overflow-hidden" : "mt-5"} rounded-[1.05rem] bg-ink/[0.055] px-4 py-3 text-sm leading-6 text-ink/64`}>
           {card.cardBackNote}
         </p>
 
-        <div className="mt-5 grid grid-cols-2 gap-2">
+        <div className={`${focus ? "mt-4" : "mt-5"} grid grid-cols-2 gap-2`}>
           <button
             type="button"
             onClick={() => completeCurrentCard("left")}
-            className="flex h-10 items-center justify-center gap-1.5 rounded-full border border-ink/10 bg-white/72 text-xs font-semibold text-ink"
+            className={`${focus ? "h-9" : "h-10"} flex items-center justify-center gap-1.5 rounded-full border border-ink/10 bg-white/72 text-xs font-semibold text-ink`}
           >
             <Check size={14} />
             左滑完成
@@ -166,7 +193,7 @@ export function SwipeTaskCard({ deck, card }: SwipeTaskCardProps) {
           <button
             type="button"
             onClick={() => startQuickBurning()}
-            className="flex h-10 items-center justify-center gap-1.5 rounded-full bg-ink text-xs font-semibold text-white"
+            className={`${focus ? "h-9" : "h-10"} flex items-center justify-center gap-1.5 rounded-full bg-ink text-xs font-semibold text-white`}
           >
             <Flame size={14} />
             快速燃烧
@@ -174,14 +201,14 @@ export function SwipeTaskCard({ deck, card }: SwipeTaskCardProps) {
           <button
             type="button"
             onClick={() => setShowStatus((value) => !value)}
-            className="h-10 rounded-full border border-ink/10 bg-white/72 text-xs font-semibold text-ink"
+            className={`${focus ? "h-9" : "h-10"} rounded-full border border-ink/10 bg-white/72 text-xs font-semibold text-ink`}
           >
             下滑状态
           </button>
           <button
             type="button"
             onClick={() => setShowFreeze(true)}
-            className="h-10 rounded-full border border-sky-200 bg-[#eefbff] text-xs font-semibold text-sky-900"
+            className={`${focus ? "h-9" : "h-10"} rounded-full border border-sky-200 bg-[#eefbff] text-xs font-semibold text-sky-900`}
           >
             先冻结
           </button>

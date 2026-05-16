@@ -12,6 +12,7 @@ import {
   mockRegeneratePlanOptions
 } from "@/lib/mock-ai";
 import type {
+  ActiveOverlay,
   AnalysisResult,
   DeckState,
   InputsState,
@@ -24,6 +25,7 @@ import type {
   TaskCard,
   TaskDeck,
   TaskFlowState,
+  OverlayType,
   UploadedAttachment,
   UploadedImage
 } from "@/lib/types";
@@ -39,12 +41,22 @@ type NextCardStore = {
   taskFlow: TaskFlowState | null;
   deck: DeckState;
   proofs: ProofsState;
+  activeOverlay: ActiveOverlay;
+  deckPanelOpen: boolean;
+  focusCardMode: boolean;
   setMode: (mode: Mode) => void;
+  openOverlay: (type: OverlayType, id?: string) => void;
+  closeOverlay: () => void;
+  openDeckPanel: () => void;
+  closeDeckPanel: () => void;
+  toggleFocusCardMode: () => void;
   setInputText: (text: string) => void;
   addMockAttachment: () => void;
   addMockImageSchedule: () => void;
   analyzeInput: () => void;
   finishAnalysis: () => void;
+  submitGoalAndCreateDeck: () => void;
+  resetInputDraft: () => void;
   regeneratePlans: () => void;
   selectPlan: (planId: PlanOption["id"]) => void;
   openDeck: (deckId: string) => void;
@@ -156,6 +168,32 @@ function getDeckProofProgress(deck: TaskDeck, frozenCards = 0) {
   };
 }
 
+function makeInitialProofRecord(
+  generatedDeck: TaskDeck,
+  selected: PlanOption,
+  source: InputsState["sourceType"]
+): ProofRecord {
+  return {
+    id: makeProofId(),
+    goalTitle: generatedDeck.coverTitle,
+    source,
+    status: "in-progress",
+    progress: 0,
+    completedCards: 0,
+    frozenCards: 0,
+    actualMinutes: 0,
+    timeStatus: generatedDeck.cards[0]?.urgencyStage === "burning" ? "burning-completed" : "on-time",
+    timeDamageEvents:
+      generatedDeck.cards[0]?.damageEffect === "burn"
+        ? ["生成第一张近截止燃烧演示卡"]
+        : ["生成执行卡组"],
+    lastDamageEffect: generatedDeck.cards[0]?.damageEffect === "burn" ? "burn" : undefined,
+    lastAction: `选择${selected.name}并生成任务流`,
+    nextSuggestion: "进入 deck，先完成第一张最小行动卡",
+    createdAt: new Date().toISOString()
+  };
+}
+
 export const useNextCardStore = create<NextCardStore>()(
   persist(
     (set, get) => ({
@@ -170,7 +208,15 @@ export const useNextCardStore = create<NextCardStore>()(
         records: [],
         summaryDocument: mockGenerateProofSummary([])
       },
-      setMode: (mode) => set({ mode }),
+      activeOverlay: null,
+      deckPanelOpen: false,
+      focusCardMode: true,
+      setMode: (mode) => set((state) => ({ mode, deckPanelOpen: mode === "deck" ? state.deckPanelOpen : false })),
+      openOverlay: (type, id) => set({ activeOverlay: { type, id } }),
+      closeOverlay: () => set({ activeOverlay: null }),
+      openDeckPanel: () => set({ deckPanelOpen: true }),
+      closeDeckPanel: () => set({ deckPanelOpen: false }),
+      toggleFocusCardMode: () => set((state) => ({ focusCardMode: !state.focusCardMode })),
       setInputText: (text) =>
         set((state) => ({
           inputs: {
@@ -240,6 +286,54 @@ export const useNextCardStore = create<NextCardStore>()(
           }
         });
       },
+      submitGoalAndCreateDeck: () => {
+        const state = get();
+
+        if (!state.inputs.text.trim() && state.inputs.attachments.length === 0 && !state.inputs.imageSchedule) {
+          return;
+        }
+
+        const analysis = mockAnalyzeInput(state.inputs);
+        const options = mockGeneratePlanOptions(analysis);
+        const selected = options[0];
+        const taskFlow = mockGenerateTaskFlow(selected);
+        const goalTitle = state.inputs.text.trim() || (state.inputs.imageSchedule ? "去高数课" : "今日推进");
+        const generatedDeck = mockGenerateDeckFromPlan(selected, taskFlow, goalTitle);
+        const proofRecord = makeInitialProofRecord(generatedDeck, selected, state.inputs.sourceType);
+        const records = [proofRecord, ...state.proofs.records];
+
+        set({
+          analysis,
+          analysisStatus: "ready",
+          plans: {
+            goalUnderstanding: analysis.goalUnderstanding,
+            constraints: analysis.constraints,
+            timeStrategy: analysis.timeStrategy,
+            options,
+            selectedPlanId: selected.id,
+            regenerateCount: state.plans.regenerateCount
+          },
+          taskFlow,
+          deck: {
+            ...state.deck,
+            decks: [generatedDeck, ...state.deck.decks.filter((deck) => deck.coverTitle !== generatedDeck.coverTitle)],
+            activeDeckId: generatedDeck.id,
+            currentCardId: generatedDeck.cards[0]?.id ?? null
+          },
+          proofs: {
+            records,
+            summaryDocument: mockGenerateProofSummary(records)
+          }
+        });
+      },
+      resetInputDraft: () =>
+        set({
+          inputs: defaultInputs,
+          analysis: null,
+          analysisStatus: "idle",
+          plans: defaultPlans,
+          taskFlow: null
+        }),
       regeneratePlans: () => {
         const state = get();
         const analysis = mockAnalyzeInput(state.inputs);
@@ -270,25 +364,7 @@ export const useNextCardStore = create<NextCardStore>()(
         const taskFlow = mockGenerateTaskFlow(selected);
         const goalTitle = state.inputs.text.trim() || (state.inputs.imageSchedule ? "去高数课" : "今日推进");
         const generatedDeck = mockGenerateDeckFromPlan(selected, taskFlow, goalTitle);
-        const proofRecord: ProofRecord = {
-          id: makeProofId(),
-          goalTitle: generatedDeck.coverTitle,
-          source: state.inputs.sourceType,
-          status: "in-progress",
-          progress: 0,
-          completedCards: 0,
-          frozenCards: 0,
-          actualMinutes: 0,
-          timeStatus: generatedDeck.cards[0]?.urgencyStage === "burning" ? "burning-completed" : "on-time",
-          timeDamageEvents:
-            generatedDeck.cards[0]?.damageEffect === "burn"
-              ? ["生成第一张近截止燃烧演示卡"]
-              : ["生成执行卡组"],
-          lastDamageEffect: generatedDeck.cards[0]?.damageEffect === "burn" ? "burn" : undefined,
-          lastAction: `选择${selected.name}并生成任务流`,
-          nextSuggestion: "进入 deck，先完成第一张最小行动卡",
-          createdAt: new Date().toISOString()
-        };
+        const proofRecord = makeInitialProofRecord(generatedDeck, selected, state.inputs.sourceType);
         const records = [proofRecord, ...state.proofs.records];
 
         set({
@@ -314,6 +390,8 @@ export const useNextCardStore = create<NextCardStore>()(
           const deck = state.deck.decks.find((item) => item.id === deckId);
           return {
             mode: "deck",
+            deckPanelOpen: false,
+            focusCardMode: true,
             deck: {
               ...state.deck,
               activeDeckId: deckId,
