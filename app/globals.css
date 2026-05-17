@@ -197,6 +197,32 @@ textarea {
     #efd8c9;
 }
 
+@keyframes frost-drift {
+  0% {
+    background-position: 0 0, 0 0;
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    background-position: 34px 18px, -28px 24px;
+    transform: translate3d(-4px, 2px, 0);
+  }
+}
+
+@keyframes heat-flow {
+  0% {
+    filter: blur(0);
+    transform: translate3d(0, 7px, 0) scale(0.98);
+  }
+  50% {
+    filter: blur(0.6px);
+    transform: translate3d(0, 0, 0) scale(1.03);
+  }
+  100% {
+    filter: blur(0);
+    transform: translate3d(0, 7px, 0) scale(0.98);
+  }
+}
+
 @keyframes spark-rise {
   0% {
     opacity: 0;
@@ -213,6 +239,57 @@ textarea {
 
 .spark {
   animation: spark-rise 780ms ease-out forwards;
+}
+
+@keyframes ember-rise {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0) scale(0.42);
+  }
+  25% {
+    opacity: var(--burn-spark-opacity);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--ember-x), -52px, 0) scale(0.18);
+  }
+}
+
+.frost-effect-layer {
+  opacity: var(--freeze-intensity);
+  transition: opacity 160ms ease-out;
+}
+
+.frost-crystal-field {
+  opacity: var(--freeze-crystal-opacity);
+  background-image:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.58) 1px, transparent 1px),
+    linear-gradient(48deg, rgba(125, 211, 252, 0.2) 1px, transparent 1px);
+  background-size: 28px 28px, 34px 34px;
+  mask-image: linear-gradient(270deg, black, rgba(0, 0, 0, 0.62), transparent 74%);
+  animation: frost-drift 7s linear infinite alternate;
+}
+
+.heat-effect-layer {
+  opacity: var(--burn-intensity);
+  transition: opacity 160ms ease-out;
+}
+
+.heat-glow {
+  opacity: var(--burn-glow-opacity);
+  animation: heat-flow 2.4s ease-in-out infinite;
+}
+
+.heat-spark-field {
+  opacity: var(--burn-spark-opacity);
+  mask-image: linear-gradient(to top, black, black 58%, transparent);
+}
+
+.ember-particle {
+  width: 0.32rem;
+  height: 0.32rem;
+  box-shadow: 0 0 14px rgba(255, 189, 72, 0.68);
+  animation: ember-rise 1.35s ease-out infinite;
 }
 
 .journal-window {

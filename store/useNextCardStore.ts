@@ -2,13 +2,13 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { mergeBackendPlanModeResult } from "@/lib/client/plan-mode-client-adapter";
 import {
   mockAnalyzeInput,
   mockGenerateDeckFromPlan,
   mockGeneratePlanOptions,
   mockGenerateProofSummary,
   mockGenerateTaskFlow,
-  mockRescheduleFrozenCard,
   mockRegeneratePlanOptions
 } from "@/lib/mock-ai";
 import type {
@@ -16,7 +16,9 @@ import type {
   AnalysisResult,
   DeckState,
   InputsState,
+  LastCompletion,
   Mode,
+  PlanModeTurnResult,
   PlanOption,
   PlansState,
   ProofRecord,
@@ -42,6 +44,7 @@ type NextCardStore = {
   deck: DeckState;
   proofs: ProofsState;
   activeOverlay: ActiveOverlay;
+  lastCompletion?: LastCompletion;
   deckPanelOpen: boolean;
   focusCardMode: boolean;
   activePlanCatalogId?: string;
@@ -57,6 +60,10 @@ type NextCardStore = {
   setInputText: (text: string) => void;
   addMockAttachment: () => void;
   addMockImageSchedule: () => void;
+  addImageUpload: (file: File) => void;
+  addDocumentUpload: (file: File) => void;
+  removeInputAttachment: (id: string) => void;
+  removeImageUpload: (id?: string) => void;
   analyzeInput: () => void;
   finishAnalysis: () => void;
   submitGoalAndCreateDeck: () => void;
@@ -64,12 +71,22 @@ type NextCardStore = {
   regeneratePlans: () => void;
   selectPlan: (planId: PlanOption["id"]) => void;
   openDeck: (deckId: string) => void;
+  resumeFrozenDeck: (deckId: string) => void;
   completeCurrentCard: (direction: "left" | "right" | "button") => void;
+  freezeCurrentDeck: () => void;
+  failCurrentDeckByBurn: () => void;
   freezeCurrentCard: () => void;
   continueCurrentCard: () => void;
   startFocusTiming: () => void;
   startQuickBurning: () => void;
 };
+
+type PersistedNextCardState = Partial<
+  Pick<
+    NextCardStore,
+    "inputs" | "analysis" | "analysisStatus" | "plans" | "taskFlow" | "deck" | "proofs"
+  >
+>;
 
 const defaultInputs: InputsState = {
   text: "",
@@ -112,6 +129,92 @@ const mockImage = (): UploadedImage => ({
   parsedTimetable: "图像课表识别：明天 08:00 高数课，地点二教 304，建议提前 20 分钟出门。"
 });
 
+function makeDocumentAttachment(file: File): UploadedAttachment {
+  return {
+    id: `document-${Date.now()}-${Math.random().toString(16).slice(2, 7)}`,
+    name: file.name || "未命名文档",
+    kind: "document",
+    mockedText: `已添加文档：${file.name || "未命名文档"}。稍后可接入真实解析，现在先按文档目标生成行动卡。`,
+    size: file.size,
+    mimeType: file.type || undefined
+  };
+}
+
+function makeImageUpload(file: File): UploadedImage {
+  return {
+    id: `image-${Date.now()}-${Math.random().toString(16).slice(2, 7)}`,
+    name: file.name || "已添加图片",
+    parsedTimetable: `已添加图片：${file.name || "图片"}。稍后可接入图库 OCR，现在先按图片内容生成行动卡。`,
+    size: file.size,
+    mimeType: file.type || undefined
+  };
+}
+
+function getParsedText(inputs: Pick<InputsState, "attachments" | "imageSchedule">) {
+  return [
+    ...inputs.attachments.map((attachment) => attachment.mockedText),
+    inputs.imageSchedule?.parsedTimetable
+  ].filter(Boolean).join("\n");
+}
+
+function getSourceType(inputs: Pick<InputsState, "text" | "attachments" | "imageSchedule">): InputsState["sourceType"] {
+  const hasText = Boolean(inputs.text.trim());
+  const hasAttachment = inputs.attachments.length > 0;
+  const hasImage = Boolean(inputs.imageSchedule);
+  const sourceCount = [hasText, hasAttachment, hasImage].filter(Boolean).length;
+
+  if (sourceCount > 1) {
+    return "mixed";
+  }
+
+  if (hasImage) {
+    return "image";
+  }
+
+  if (hasAttachment) {
+    return "attachment";
+  }
+
+  return "text";
+}
+
+async function requestBackendPlanMode(inputs: InputsState): Promise<PlanModeTurnResult | null> {
+  const inputText = inputs.text.trim() || inputs.parsedText.trim() || inputs.imageSchedule?.name || "导入任务";
+
+  try {
+    const response = await fetch("/api/backend/plan-mode/", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        inputText,
+        sourceType: inputs.sourceType,
+        parsedText: inputs.parsedText
+      })
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return (await response.json()) as PlanModeTurnResult;
+  } catch {
+    return null;
+  }
+}
+
+function makePlansFromAnalysis(analysis: AnalysisResult, options: PlanOption[], selectedPlanId: PlanOption["id"] | null, regenerateCount: number): PlansState {
+  return {
+    goalUnderstanding: analysis.goalUnderstanding,
+    constraints: analysis.constraints,
+    timeStrategy: analysis.timeStrategy,
+    options,
+    selectedPlanId,
+    regenerateCount
+  };
+}
+
 const makeProofId = () => `proof-${Date.now()}-${Math.random().toString(16).slice(2, 7)}`;
 
 const makeRewardId = () => `reward-${Date.now()}-${Math.random().toString(16).slice(2, 7)}`;
@@ -123,6 +226,19 @@ function getActualMinutes(card: TaskCard) {
   const seconds = Math.max(card.elapsedSeconds, startedSeconds, Math.round(card.estimatedMinutes * 42));
 
   return Math.max(1, Math.ceil(seconds / 60));
+}
+
+function getDeckActualMinutes(cards: TaskCard[]) {
+  return Math.max(
+    1,
+    cards.reduce((sum, card) => {
+      if (card.status === "completed" || card.status === "rewarded" || card.startedAt) {
+        return sum + getActualMinutes(card);
+      }
+
+      return sum;
+    }, 0)
+  );
 }
 
 function getNextCardId(cards: TaskCard[], currentIndex: number) {
@@ -144,6 +260,7 @@ function updateFlowFromCards(taskFlow: TaskFlowState | null, cards: TaskCard[]):
       const nodeCards = cards.filter((card) => card.flowNodeId === node.id);
       const nodeDone = nodeCards.filter((card) => card.status === "completed" || card.status === "rewarded").length;
       const nodeFrozen = nodeCards.some((card) => card.status === "frozen");
+      const nodeFailed = nodeCards.some((card) => card.status === "needs-review" && card.damageEffect === "burn");
       const nodeActive = nodeCards.some((card) => card.status === "active");
 
       if (nodeCards.length === 0) {
@@ -152,9 +269,44 @@ function updateFlowFromCards(taskFlow: TaskFlowState | null, cards: TaskCard[]):
 
       return {
         ...node,
-        status: nodeFrozen ? "frozen" : nodeDone === nodeCards.length ? "completed" : nodeActive ? "active" : "not-started",
+        status: nodeFailed ? "failed" : nodeFrozen ? "frozen" : nodeDone === nodeCards.length ? "completed" : nodeActive ? "active" : "not-started",
         progress: Math.round((nodeDone / nodeCards.length) * 100),
-        urgencyStage: nodeActive ? nodeCards.find((card) => card.status === "active")?.urgencyStage ?? node.urgencyStage : node.urgencyStage
+        urgencyStage: nodeFailed ? "expired" : nodeActive ? nodeCards.find((card) => card.status === "active")?.urgencyStage ?? node.urgencyStage : node.urgencyStage
+      };
+    })
+  };
+}
+
+function lockFlowFromCards(
+  taskFlow: TaskFlowState | null,
+  cards: TaskCard[],
+  lockStatus: "frozen" | "failed"
+): TaskFlowState | null {
+  if (!taskFlow) {
+    return null;
+  }
+
+  const completed = cards.filter((card) => card.status === "completed" || card.status === "rewarded").length;
+  const overallProgress = cards.length === 0 ? 0 : Math.round((completed / cards.length) * 100);
+
+  return {
+    ...taskFlow,
+    overallProgress,
+    nodes: taskFlow.nodes.map((node) => {
+      const nodeCards = cards.filter((card) => card.flowNodeId === node.id);
+
+      if (nodeCards.length === 0) {
+        return node;
+      }
+
+      const nodeDone = nodeCards.filter((card) => card.status === "completed" || card.status === "rewarded").length;
+      const locked = nodeDone === nodeCards.length ? "completed" : lockStatus;
+
+      return {
+        ...node,
+        status: locked,
+        progress: Math.round((nodeDone / nodeCards.length) * 100),
+        urgencyStage: lockStatus === "failed" && locked !== "completed" ? "expired" : "calm"
       };
     })
   };
@@ -179,6 +331,8 @@ function makeInitialProofRecord(
 ): ProofRecord {
   return {
     id: makeProofId(),
+    deckId: generatedDeck.id,
+    cardId: generatedDeck.cards[0]?.id,
     goalTitle: generatedDeck.coverTitle,
     source,
     status: "in-progress",
@@ -213,6 +367,7 @@ export const useNextCardStore = create<NextCardStore>()(
         summaryDocument: mockGenerateProofSummary([])
       },
       activeOverlay: null,
+      lastCompletion: undefined,
       deckPanelOpen: false,
       focusCardMode: true,
       activePlanCatalogId: undefined,
@@ -230,17 +385,22 @@ export const useNextCardStore = create<NextCardStore>()(
         }),
       openDeckCardDetail: (cardId) => set({ activeOverlay: { type: "deck-card-detail", id: cardId } }),
       openDeckCard: (deckId, cardId) =>
-        set((state) => ({
-          mode: "deck",
-          activeOverlay: null,
-          deckPanelOpen: false,
-          focusCardMode: true,
-          deck: {
-            ...state.deck,
-            activeDeckId: deckId,
-            currentCardId: cardId
-          }
-        })),
+        set((state) => {
+          const targetDeck = state.deck.decks.find((deck) => deck.id === deckId);
+          const locked = targetDeck?.deckStatus === "frozen" || targetDeck?.deckStatus === "failed" || targetDeck?.deckStatus === "completed";
+
+          return {
+            mode: "deck",
+            activeOverlay: null,
+            deckPanelOpen: false,
+            focusCardMode: true,
+            deck: {
+              ...state.deck,
+              activeDeckId: deckId,
+              currentCardId: locked ? null : cardId
+            }
+          };
+        }),
       openDeckPanel: () => set({ deckPanelOpen: true }),
       closeDeckPanel: () => set({ deckPanelOpen: false }),
       toggleFocusCardMode: () => set((state) => ({ focusCardMode: !state.focusCardMode })),
@@ -249,10 +409,7 @@ export const useNextCardStore = create<NextCardStore>()(
           inputs: {
             ...state.inputs,
             text,
-            sourceType:
-              state.inputs.attachments.length > 0 || state.inputs.imageSchedule
-                ? "mixed"
-                : "text"
+            sourceType: getSourceType({ ...state.inputs, text })
           }
         })),
       addMockAttachment: () =>
@@ -262,8 +419,14 @@ export const useNextCardStore = create<NextCardStore>()(
             inputs: {
               ...state.inputs,
               attachments: [...state.inputs.attachments, attachment],
-              parsedText: [state.inputs.parsedText, attachment.mockedText].filter(Boolean).join("\n"),
-              sourceType: state.inputs.text.trim() ? "mixed" : "attachment"
+              parsedText: getParsedText({
+                attachments: [...state.inputs.attachments, attachment],
+                imageSchedule: state.inputs.imageSchedule
+              }),
+              sourceType: getSourceType({
+                ...state.inputs,
+                attachments: [...state.inputs.attachments, attachment]
+              })
             }
           };
         }),
@@ -274,8 +437,63 @@ export const useNextCardStore = create<NextCardStore>()(
             inputs: {
               ...state.inputs,
               imageSchedule,
-              parsedText: [state.inputs.parsedText, imageSchedule.parsedTimetable].filter(Boolean).join("\n"),
-              sourceType: state.inputs.text.trim() || state.inputs.attachments.length > 0 ? "mixed" : "image"
+              parsedText: getParsedText({ attachments: state.inputs.attachments, imageSchedule }),
+              sourceType: getSourceType({ ...state.inputs, imageSchedule })
+            }
+          };
+        }),
+      addImageUpload: (file) =>
+        set((state) => {
+          const imageSchedule = makeImageUpload(file);
+
+          return {
+            inputs: {
+              ...state.inputs,
+              imageSchedule,
+              parsedText: getParsedText({ attachments: state.inputs.attachments, imageSchedule }),
+              sourceType: getSourceType({ ...state.inputs, imageSchedule })
+            }
+          };
+        }),
+      addDocumentUpload: (file) =>
+        set((state) => {
+          const attachment = makeDocumentAttachment(file);
+          const attachments = [...state.inputs.attachments, attachment];
+
+          return {
+            inputs: {
+              ...state.inputs,
+              attachments,
+              parsedText: getParsedText({ attachments, imageSchedule: state.inputs.imageSchedule }),
+              sourceType: getSourceType({ ...state.inputs, attachments })
+            }
+          };
+        }),
+      removeInputAttachment: (id) =>
+        set((state) => {
+          const attachments = state.inputs.attachments.filter((attachment) => attachment.id !== id);
+
+          return {
+            inputs: {
+              ...state.inputs,
+              attachments,
+              parsedText: getParsedText({ attachments, imageSchedule: state.inputs.imageSchedule }),
+              sourceType: getSourceType({ ...state.inputs, attachments })
+            }
+          };
+        }),
+      removeImageUpload: (id) =>
+        set((state) => {
+          if (id && state.inputs.imageSchedule?.id !== id) {
+            return state;
+          }
+
+          return {
+            inputs: {
+              ...state.inputs,
+              imageSchedule: null,
+              parsedText: getParsedText({ attachments: state.inputs.attachments, imageSchedule: null }),
+              sourceType: getSourceType({ ...state.inputs, imageSchedule: null })
             }
           };
         }),
@@ -295,34 +513,70 @@ export const useNextCardStore = create<NextCardStore>()(
           taskFlow: null
         });
       },
-      finishAnalysis: () => {
+      finishAnalysis: async () => {
         const state = get();
         const analysis = state.analysis ?? mockAnalyzeInput(state.inputs);
         const options = mockGeneratePlanOptions(analysis);
+        let plans = makePlansFromAnalysis(analysis, options, null, state.plans.regenerateCount);
+        let finalAnalysis = analysis;
+
+        const backendResult = await requestBackendPlanMode(state.inputs);
+
+        if (backendResult) {
+          const merged = mergeBackendPlanModeResult({
+            analysis,
+            plans,
+            backendResult
+          });
+          finalAnalysis = merged.analysis;
+          plans = merged.plans;
+        }
 
         set({
-          analysis,
+          analysis: finalAnalysis,
           analysisStatus: "ready",
-          plans: {
-            goalUnderstanding: analysis.goalUnderstanding,
-            constraints: analysis.constraints,
-            timeStrategy: analysis.timeStrategy,
-            options,
-            selectedPlanId: null,
-            regenerateCount: state.plans.regenerateCount
-          }
+          plans
         });
       },
-      submitGoalAndCreateDeck: () => {
+      submitGoalAndCreateDeck: async () => {
         const state = get();
 
         if (!state.inputs.text.trim() && state.inputs.attachments.length === 0 && !state.inputs.imageSchedule) {
           return;
         }
 
-        const analysis = mockAnalyzeInput(state.inputs);
-        const options = mockGeneratePlanOptions(analysis);
-        const selected = options[0];
+        const localAnalysis = mockAnalyzeInput(state.inputs);
+        const localOptions = mockGeneratePlanOptions(localAnalysis);
+        let finalAnalysis = localAnalysis;
+        let plans = makePlansFromAnalysis(localAnalysis, localOptions, null, state.plans.regenerateCount);
+
+        set({
+          analysis: localAnalysis,
+          analysisStatus: "analyzing",
+          plans: {
+            ...plans,
+            options: []
+          },
+          taskFlow: null
+        });
+
+        const backendResult = await requestBackendPlanMode(state.inputs);
+
+        if (backendResult) {
+          const merged = mergeBackendPlanModeResult({
+            analysis: localAnalysis,
+            plans,
+            backendResult
+          });
+          finalAnalysis = merged.analysis;
+          plans = merged.plans;
+        }
+
+        const selected = plans.options[0] ?? localOptions[0];
+        plans = {
+          ...plans,
+          selectedPlanId: selected.id
+        };
         const taskFlow = mockGenerateTaskFlow(selected);
         const goalTitle = state.inputs.text.trim() || (state.inputs.imageSchedule ? "去高数课" : "今日推进");
         const generatedDeck = mockGenerateDeckFromPlan(selected, taskFlow, goalTitle);
@@ -330,16 +584,9 @@ export const useNextCardStore = create<NextCardStore>()(
         const records = [proofRecord, ...state.proofs.records];
 
         set({
-          analysis,
+          analysis: finalAnalysis,
           analysisStatus: "ready",
-          plans: {
-            goalUnderstanding: analysis.goalUnderstanding,
-            constraints: analysis.constraints,
-            timeStrategy: analysis.timeStrategy,
-            options,
-            selectedPlanId: selected.id,
-            regenerateCount: state.plans.regenerateCount
-          },
+          plans,
           taskFlow,
           deck: {
             ...state.deck,
@@ -361,22 +608,42 @@ export const useNextCardStore = create<NextCardStore>()(
           plans: defaultPlans,
           taskFlow: null
         }),
-      regeneratePlans: () => {
+      regeneratePlans: async () => {
         const state = get();
-        const analysis = mockAnalyzeInput(state.inputs);
-        const options = mockRegeneratePlanOptions(state.inputs, state.plans.options);
+        const localAnalysis = mockAnalyzeInput(state.inputs);
+        const localOptions = mockRegeneratePlanOptions(state.inputs, state.plans.options);
+        let finalAnalysis = localAnalysis;
+        let plans = makePlansFromAnalysis(localAnalysis, localOptions, null, state.plans.regenerateCount + 1);
 
         set({
-          analysis,
-          analysisStatus: "ready",
+          analysis: localAnalysis,
+          analysisStatus: "analyzing",
           plans: {
-            goalUnderstanding: analysis.goalUnderstanding,
-            constraints: analysis.constraints,
-            timeStrategy: analysis.timeStrategy,
-            options,
-            selectedPlanId: null,
-            regenerateCount: state.plans.regenerateCount + 1
+            ...plans,
+            options: []
           },
+          taskFlow: null
+        });
+
+        const backendResult = await requestBackendPlanMode(state.inputs);
+
+        if (backendResult) {
+          const merged = mergeBackendPlanModeResult({
+            analysis: localAnalysis,
+            plans,
+            backendResult
+          });
+          finalAnalysis = merged.analysis;
+          plans = {
+            ...merged.plans,
+            regenerateCount: state.plans.regenerateCount + 1
+          };
+        }
+
+        set({
+          analysis: finalAnalysis,
+          analysisStatus: "ready",
+          plans,
           taskFlow: null
         });
       },
@@ -415,6 +682,8 @@ export const useNextCardStore = create<NextCardStore>()(
       openDeck: (deckId) =>
         set((state) => {
           const deck = state.deck.decks.find((item) => item.id === deckId);
+          const locked = deck?.deckStatus === "frozen" || deck?.deckStatus === "failed" || deck?.deckStatus === "completed";
+
           return {
             mode: "deck",
             deckPanelOpen: false,
@@ -422,7 +691,91 @@ export const useNextCardStore = create<NextCardStore>()(
             deck: {
               ...state.deck,
               activeDeckId: deckId,
-              currentCardId: deck?.cards.find((card) => card.status === "active")?.id ?? deck?.cards[0]?.id ?? null
+              currentCardId: locked
+                ? null
+                : deck?.cards.find((card) => card.status === "active")?.id ?? deck?.cards.find((card) => card.status === "queued")?.id ?? null
+            }
+          };
+        }),
+      resumeFrozenDeck: (deckId) =>
+        set((state) => {
+          const targetDeck = state.deck.decks.find((deck) => deck.id === deckId);
+
+          if (!targetDeck || targetDeck.deckStatus !== "frozen") {
+            return state;
+          }
+
+          const firstFrozenCard = targetDeck.cards.find((card) => card.status === "frozen");
+
+          if (!firstFrozenCard) {
+            return state;
+          }
+
+          const cards = targetDeck.cards.map((card) => {
+            if (card.id === firstFrozenCard.id) {
+              return {
+                ...card,
+                status: "active" as const,
+                damageEffect: "none" as const,
+                damageProgress: Math.min(card.damageProgress, 12),
+                cardBackNote: "冰冻任务已恢复，从这张卡继续推进。"
+              };
+            }
+
+            if (card.status === "frozen") {
+              return {
+                ...card,
+                status: "queued" as const,
+                damageEffect: "none" as const,
+                damageProgress: Math.min(card.damageProgress, 8),
+                cardBackNote: "从冰冻缓存恢复，等待前一张卡完成后继续。"
+              };
+            }
+
+            return card;
+          });
+          const updatedDeck: TaskDeck = {
+            ...targetDeck,
+            deckStatus: "active",
+            cards,
+            completedCards: cards.filter((card) => card.status === "completed" || card.status === "rewarded").length
+          };
+          const resumedIds = new Set(targetDeck.cards.filter((card) => card.status === "frozen").map((card) => card.id));
+          const proofRecord: ProofRecord = {
+            id: makeProofId(),
+            deckId: targetDeck.id,
+            cardId: firstFrozenCard.id,
+            goalTitle: targetDeck.coverTitle,
+            source: state.inputs.sourceType,
+            status: "in-progress",
+            ...getDeckProofProgress(updatedDeck, 0),
+            actualMinutes: 0,
+            timeStatus: "on-time",
+            timeDamageEvents: ["从 Proof 恢复冰冻任务，继续被冻结的当前卡"],
+            lastAction: `恢复冰冻任务：${firstFrozenCard.title}`,
+            nextSuggestion: "从这张卡继续，后续缓存卡会按顺序回到 deck。",
+            createdAt: new Date().toISOString()
+          };
+          const records = [proofRecord, ...state.proofs.records];
+
+          return {
+            mode: "deck",
+            activeOverlay: null,
+            deckPanelOpen: false,
+            focusCardMode: true,
+            taskFlow: updateFlowFromCards(state.taskFlow, cards),
+            deck: {
+              ...state.deck,
+              decks: replaceDeck(state.deck.decks, updatedDeck),
+              activeDeckId: targetDeck.id,
+              currentCardId: firstFrozenCard.id,
+              frozenCardIds: state.deck.frozenCardIds.filter((id) => !resumedIds.has(id)),
+              rescheduleQueue: state.deck.rescheduleQueue.filter((id) => id !== targetDeck.id),
+              activeTimeMode: "idle"
+            },
+            proofs: {
+              records,
+              summaryDocument: mockGenerateProofSummary(records)
             }
           };
         }),
@@ -431,7 +784,7 @@ export const useNextCardStore = create<NextCardStore>()(
           const activeDeck = state.deck.decks.find((deck) => deck.id === state.deck.activeDeckId);
           const currentCard = activeDeck?.cards.find((card) => card.id === state.deck.currentCardId);
 
-          if (!activeDeck || !currentCard) {
+          if (!activeDeck || !currentCard || activeDeck.deckStatus === "frozen" || activeDeck.deckStatus === "failed" || activeDeck.deckStatus === "completed") {
             return state;
           }
 
@@ -447,6 +800,8 @@ export const useNextCardStore = create<NextCardStore>()(
           const updatedDeck = { ...activeDeck, deckStatus: "active" as const, cards };
           const proofRecord: ProofRecord = {
             id: makeProofId(),
+            deckId: activeDeck.id,
+            cardId: currentCard.id,
             goalTitle: activeDeck.coverTitle,
             source: state.inputs.sourceType,
             status: "in-progress",
@@ -472,50 +827,61 @@ export const useNextCardStore = create<NextCardStore>()(
             }
           };
         }),
-      startQuickBurning: () =>
+      failCurrentDeckByBurn: () =>
         set((state) => {
           const activeDeck = state.deck.decks.find((deck) => deck.id === state.deck.activeDeckId);
           const currentCard = activeDeck?.cards.find((card) => card.id === state.deck.currentCardId);
 
-          if (!activeDeck || !currentCard) {
+          if (!activeDeck || activeDeck.deckStatus === "frozen" || activeDeck.deckStatus === "failed" || activeDeck.deckStatus === "completed") {
             return state;
           }
 
           const cards = activeDeck.cards.map((card) =>
-            card.id === currentCard.id
-              ? {
+            card.status === "completed" || card.status === "rewarded"
+              ? card
+              : {
                   ...card,
-                  startedAt: card.startedAt ?? new Date().toISOString(),
-                  urgencyStage: "burning" as const,
+                  startedAt: card.id === currentCard?.id ? card.startedAt ?? new Date().toISOString() : card.startedAt,
+                  status: "needs-review" as const,
+                  urgencyStage: "expired" as const,
                   damageEffect: "burn" as const,
-                  damageProgress: Math.max(card.damageProgress, 84),
+                  damageProgress: 100,
                   burnLevel: 3 as const,
-                  status: "active" as const
+                  remainingSeconds: 0,
+                  cardBackNote: "这组任务已经因燃烧失败锁定，不能继续打卡。"
                 }
-              : card
           );
-          const updatedDeck = { ...activeDeck, deckStatus: "active" as const, cards };
+          const completedCount = cards.filter((card) => card.status === "completed" || card.status === "rewarded").length;
+          const updatedDeck: TaskDeck = {
+            ...activeDeck,
+            deckStatus: "failed",
+            cards,
+            completedCards: completedCount
+          };
           const proofRecord: ProofRecord = {
             id: makeProofId(),
+            deckId: activeDeck.id,
             goalTitle: activeDeck.coverTitle,
             source: state.inputs.sourceType,
-            status: "in-progress",
-            ...getDeckProofProgress(updatedDeck, state.deck.frozenCardIds.length),
-            actualMinutes: 0,
-            timeStatus: "on-time",
-            timeDamageEvents: ["三击进入快速燃烧模式"],
+            status: "failed",
+            ...getDeckProofProgress(updatedDeck, cards.filter((card) => card.status === "frozen").length),
+            actualMinutes: getDeckActualMinutes(activeDeck.cards),
+            timeStatus: "expired",
+            timeDamageEvents: ["上滑触发燃烧失败，整组任务停止后续打卡"],
             lastDamageEffect: "burn",
-            lastAction: `快速燃烧启动：${currentCard.title}`,
-            nextSuggestion: "把燃烧当作提醒，完成最小动作或先冻结",
+            lastAction: `任务失败：${activeDeck.coverTitle}`,
+            nextSuggestion: "该任务已锁定。需要重做时，请从 Input 新建一个新任务。",
             createdAt: new Date().toISOString()
           };
           const records = [proofRecord, ...state.proofs.records];
 
           return {
+            taskFlow: lockFlowFromCards(state.taskFlow, cards, "failed"),
             deck: {
               ...state.deck,
               decks: replaceDeck(state.deck.decks, updatedDeck),
-              activeTimeMode: "burning"
+              currentCardId: null,
+              activeTimeMode: "idle"
             },
             proofs: {
               records,
@@ -523,6 +889,7 @@ export const useNextCardStore = create<NextCardStore>()(
             }
           };
         }),
+      startQuickBurning: () => get().failCurrentDeckByBurn(),
       continueCurrentCard: () =>
         set((state) => ({
           deck: {
@@ -530,66 +897,62 @@ export const useNextCardStore = create<NextCardStore>()(
             activeTimeMode: state.deck.activeTimeMode === "paused" ? "idle" : state.deck.activeTimeMode
           }
         })),
-      freezeCurrentCard: () =>
+      freezeCurrentDeck: () =>
         set((state) => {
           const activeDeck = state.deck.decks.find((deck) => deck.id === state.deck.activeDeckId);
-          const currentIndex = activeDeck?.cards.findIndex((card) => card.id === state.deck.currentCardId) ?? -1;
-          const currentCard = activeDeck?.cards[currentIndex];
+          const currentCard = activeDeck?.cards.find((card) => card.id === state.deck.currentCardId);
 
-          if (!activeDeck || !currentCard) {
+          if (!activeDeck || activeDeck.deckStatus === "frozen" || activeDeck.deckStatus === "failed" || activeDeck.deckStatus === "completed") {
             return state;
           }
 
-          const frozenCard = mockRescheduleFrozenCard(currentCard, state.taskFlow ?? {
-            title: activeDeck.coverTitle,
-            nodes: [],
-            edges: [],
-            overallProgress: 0
-          });
-          const nextCardId = getNextCardId(activeDeck.cards, currentIndex);
-          const cards = activeDeck.cards.map((card) => {
-            if (card.id === currentCard.id) {
-              return frozenCard;
-            }
-
-            if (card.id === nextCardId) {
-              return { ...card, status: "active" as const };
-            }
-
-            return card;
-          });
-          const frozenCardIds = Array.from(new Set([...state.deck.frozenCardIds, currentCard.id]));
+          const cards = activeDeck.cards.map((card) =>
+            card.status === "completed" || card.status === "rewarded"
+              ? card
+              : {
+                  ...card,
+                  status: "frozen" as const,
+                  damageEffect: "freeze" as const,
+                  urgencyStage: "calm" as const,
+                  burnLevel: 0 as const,
+                  suggestedStartAt: card.suggestedStartAt ?? new Date().toISOString(),
+                  cardBackNote: "冰冻任务已缓存到后台，之后可从当前卡继续。"
+                }
+          );
+          const frozenIds = cards.filter((card) => card.status === "frozen").map((card) => card.id);
+          const frozenCardIds = Array.from(new Set([...state.deck.frozenCardIds, ...frozenIds]));
           const updatedDeck: TaskDeck = {
             ...activeDeck,
-            deckStatus: nextCardId ? "active" : "frozen",
+            deckStatus: "frozen",
             cards,
             completedCards: cards.filter((card) => card.status === "completed" || card.status === "rewarded").length
           };
           const proofRecord: ProofRecord = {
             id: makeProofId(),
+            deckId: activeDeck.id,
             goalTitle: activeDeck.coverTitle,
             source: state.inputs.sourceType,
             status: "frozen",
-            ...getDeckProofProgress(updatedDeck, frozenCardIds.length),
-            actualMinutes: getActualMinutes(currentCard),
+            ...getDeckProofProgress(updatedDeck, frozenIds.length),
+            actualMinutes: currentCard ? getActualMinutes(currentCard) : getDeckActualMinutes(activeDeck.cards),
             timeStatus: "frozen-rescheduled",
-            timeDamageEvents: ["下滑进入冻结提示", "选择先冻结，加入重新安排队列"],
+            timeDamageEvents: ["右滑冰冻任务，当前卡和后续卡片存入后台缓存"],
             lastDamageEffect: "freeze",
-            lastAction: `冻结：${currentCard.title}`,
-            nextSuggestion: "稍后从 reschedule queue 恢复，不需要重新理解目标",
+            lastAction: `冰冻任务：${activeDeck.coverTitle}`,
+            nextSuggestion: "任务已作为缓存待定任务保存，可从 Proof 恢复并继续当前卡。",
             createdAt: new Date().toISOString()
           };
           const records = [proofRecord, ...state.proofs.records];
 
           return {
-            taskFlow: updateFlowFromCards(state.taskFlow, cards),
+            taskFlow: lockFlowFromCards(state.taskFlow, cards, "frozen"),
             deck: {
               ...state.deck,
               decks: replaceDeck(state.deck.decks, updatedDeck),
-              currentCardId: nextCardId,
+              currentCardId: null,
               frozenCardIds,
-              rescheduleQueue: Array.from(new Set([...state.deck.rescheduleQueue, currentCard.id])),
-              activeTimeMode: "paused"
+              rescheduleQueue: Array.from(new Set([...state.deck.rescheduleQueue, activeDeck.id])),
+              activeTimeMode: "idle"
             },
             proofs: {
               records,
@@ -597,13 +960,14 @@ export const useNextCardStore = create<NextCardStore>()(
             }
           };
         }),
+      freezeCurrentCard: () => get().freezeCurrentDeck(),
       completeCurrentCard: (direction) =>
         set((state) => {
           const activeDeck = state.deck.decks.find((deck) => deck.id === state.deck.activeDeckId);
           const currentIndex = activeDeck?.cards.findIndex((card) => card.id === state.deck.currentCardId) ?? -1;
           const currentCard = activeDeck?.cards[currentIndex];
 
-          if (!activeDeck || !currentCard) {
+          if (!activeDeck || !currentCard || activeDeck.deckStatus === "frozen" || activeDeck.deckStatus === "failed" || activeDeck.deckStatus === "completed") {
             return state;
           }
 
@@ -649,6 +1013,8 @@ export const useNextCardStore = create<NextCardStore>()(
           };
           const proofRecord: ProofRecord = {
             id: makeProofId(),
+            deckId: activeDeck.id,
+            cardId: currentCard.id,
             goalTitle: activeDeck.coverTitle,
             source: state.inputs.sourceType,
             status: allDone ? "rewarded" : "completed",
@@ -667,6 +1033,8 @@ export const useNextCardStore = create<NextCardStore>()(
           const rewardProof: ProofRecord | null = rewardCard
             ? {
                 id: makeProofId(),
+                deckId: activeDeck.id,
+                cardId: currentCard.id,
                 goalTitle: activeDeck.coverTitle,
                 source: state.inputs.sourceType,
                 status: "rewarded",
@@ -685,10 +1053,16 @@ export const useNextCardStore = create<NextCardStore>()(
 
           return {
             taskFlow: updateFlowFromCards(state.taskFlow, cards),
+            lastCompletion: {
+              deckId: activeDeck.id,
+              cardId: currentCard.id,
+              proofId: proofRecord.id
+            },
+            activeOverlay: allDone ? { type: "completion-receipt" } : state.activeOverlay,
             deck: {
               ...state.deck,
               decks: replaceDeck(state.deck.decks, updatedDeck),
-              currentCardId: nextCardId,
+              currentCardId: allDone ? null : nextCardId,
               completedCardIds,
               rewardCards: rewardCard ? [rewardCard, ...state.deck.rewardCards] : state.deck.rewardCards,
               activeTimeMode: "idle"
@@ -702,6 +1076,28 @@ export const useNextCardStore = create<NextCardStore>()(
     }),
     {
       name: "next-card-mvp",
+      version: 2,
+      migrate: (persistedState) => persistedState as PersistedNextCardState,
+      merge: (persistedState, currentState) => {
+        const persisted = persistedState as PersistedNextCardState;
+
+        return {
+          ...currentState,
+          inputs: persisted.inputs ?? currentState.inputs,
+          analysis: persisted.analysis ?? currentState.analysis,
+          analysisStatus: persisted.analysisStatus ?? currentState.analysisStatus,
+          plans: persisted.plans ?? currentState.plans,
+          taskFlow: persisted.taskFlow ?? currentState.taskFlow,
+          deck: persisted.deck ?? currentState.deck,
+          proofs: persisted.proofs ?? currentState.proofs,
+          mode: "input",
+          activeOverlay: null,
+          deckPanelOpen: false,
+          focusCardMode: true,
+          activePlanCatalogId: undefined,
+          lastCompletion: undefined
+        };
+      },
       partialize: (state) => ({
         inputs: state.inputs,
         analysis: state.analysis,

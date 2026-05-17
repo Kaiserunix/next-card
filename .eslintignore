@@ -3,4 +3,7 @@ node_modules/
 out/
 dist/
 build/
+archive/
+release/
+test-results/
 next-env.d.ts

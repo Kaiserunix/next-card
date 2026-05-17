@@ -5,6 +5,9 @@ export const metadata: Metadata = {
   title: "Next Card",
   description: "Turn goals and timetables into calm action card decks.",
   applicationName: "Next Card",
+  icons: {
+    icon: "data:,"
+  },
   appleWebApp: {
     capable: true,
     title: "Next Card",

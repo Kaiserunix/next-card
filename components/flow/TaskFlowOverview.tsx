@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, CheckCircle2, Circle, Snowflake, TimerReset } from "lucide-react";
+import { ArrowRight, CheckCircle2, Circle, Flame, Snowflake, TimerReset } from "lucide-react";
 import { useNextCardStore } from "@/store/useNextCardStore";
 
 const statusClass = {
@@ -8,6 +8,7 @@ const statusClass = {
   active: "border-cyan-500/24 bg-cyan-50 text-cyan-900",
   completed: "border-emerald-500/24 bg-emerald-50 text-emerald-900",
   frozen: "border-sky-300 bg-sky-50 text-sky-900",
+  failed: "border-ember/26 bg-[#fff1e8] text-ember",
   rewarded: "border-gold/40 bg-[#fff6d9] text-[#6d4b04]",
   attention: "border-ember/30 bg-[#fff1e9] text-[#7b341a]"
 };
@@ -17,6 +18,7 @@ const statusIcon = {
   active: TimerReset,
   completed: CheckCircle2,
   frozen: Snowflake,
+  failed: Flame,
   rewarded: CheckCircle2,
   attention: TimerReset
 };

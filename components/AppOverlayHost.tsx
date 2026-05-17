@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   ArrowRight,
   BookOpen,
+  CheckCircle2,
   Clock3,
   Flame,
   Gift,
@@ -15,26 +16,28 @@ import {
 import type { PlanOption, OverlayType, ProofRecord, TaskCard, TaskDeck, TaskFlowState } from "@/lib/types";
 import { useState, type ReactNode } from "react";
 import { useNextCardStore } from "@/store/useNextCardStore";
+import { CompactPlanCatalog } from "@/components/deck/CompactPlanCatalog";
 
 const overlayTitle: Record<OverlayType, { eyebrow: string; title: string }> = {
   guide: { eyebrow: "guide", title: "从目标到证据怎么走" },
-  "task-node-detail": { eyebrow: "task node", title: "这一步为什么存在" },
+  "task-node-detail": { eyebrow: "task node", title: "任务组详情" },
   "plan-catalog-detail": { eyebrow: "目录", title: "计划任务目录" },
-  "deck-stack-detail": { eyebrow: "deck stack", title: "未完成卡堆" },
+  "deck-stack-detail": { eyebrow: "deck backend", title: "任务组后台" },
   "deck-card-detail": { eyebrow: "card review", title: "行动卡详情" },
   "evidence-review": { eyebrow: "review", title: "今日证据复盘" },
   "reward-review": { eyebrow: "review", title: "奖励卡复盘" },
-  "freeze-review": { eyebrow: "review", title: "冻结重排复盘" },
+  "freeze-review": { eyebrow: "review", title: "冰冻任务复盘" },
   "burn-review": { eyebrow: "review", title: "燃烧节奏复盘" },
   "burn-failed-review": { eyebrow: "review", title: "燃烧失败与风险" },
-  "frozen-todo-review": { eyebrow: "review", title: "冻结代办复盘" },
-  "proof-excel-review": { eyebrow: "table", title: "完成度彩色表" },
+  "frozen-todo-review": { eyebrow: "review", title: "冰冻任务复盘" },
+  "proof-excel-review": { eyebrow: "table", title: "大任务进度表" },
+  "completion-receipt": { eyebrow: "proof saved", title: "完成收据" },
   "summary-review": { eyebrow: "summary", title: "完整复盘文档" },
   "proof-record-review": { eyebrow: "proof record", title: "单条证据详情" }
 };
 
 export function AppOverlayHost() {
-  const { activeOverlay, closeOverlay, taskFlow, plans, proofs, deck, analysis, openOverlay, openDeckCardDetail, openDeckCard } = useNextCardStore();
+  const { activeOverlay, closeOverlay, taskFlow, plans, proofs, deck, analysis, lastCompletion, openOverlay, openDeckCardDetail, openDeckCard, resetInputDraft, setMode } = useNextCardStore();
 
   if (!activeOverlay) {
     return null;
@@ -43,6 +46,34 @@ export function AppOverlayHost() {
   const meta = overlayTitle[activeOverlay.type];
   const activeDeck = deck.decks.find((item) => item.id === deck.activeDeckId);
   const selectedPlan = plans.options.find((option) => option.id === plans.selectedPlanId) ?? plans.options[0];
+  const currentRecords = activeDeck ? proofs.records.filter((record) => record.deckId === activeDeck.id) : [];
+  const currentDecks = activeDeck ? [activeDeck] : [];
+  const currentRewardCount = activeDeck ? deck.rewardCards.filter((reward) => reward.deckId === activeDeck.id).length : 0;
+
+  if (activeOverlay.type === "completion-receipt") {
+    return (
+      <div className="fixed inset-0 z-[80] grid justify-items-center bg-[#fbf1ea]">
+        <section className="h-dvh w-full max-w-[430px] overflow-hidden bg-[#fff8f1] shadow-soft">
+          <CompletionReceipt
+            decks={deck.decks}
+            records={proofs.records}
+            taskFlow={taskFlow}
+            lastCompletion={lastCompletion}
+            onGoProof={() => {
+              closeOverlay();
+              setMode("proof");
+            }}
+            onNewGoal={() => {
+              closeOverlay();
+              resetInputDraft();
+              setMode("input");
+            }}
+            onOpenProgress={() => openOverlay("proof-excel-review")}
+          />
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-[80] grid justify-items-center bg-[#fbf1ea]/96 backdrop-blur">
@@ -68,31 +99,161 @@ export function AppOverlayHost() {
             <TaskNodeDetail nodeId={activeOverlay.id} taskFlow={taskFlow} activeDeck={activeDeck} selectedPlan={selectedPlan} />
           )}
           {activeOverlay.type === "plan-catalog-detail" && (
-            <PlanCatalogDetail taskFlow={taskFlow} activeDeck={activeDeck} selectedPlan={selectedPlan} onOpenCard={openDeckCardDetail} />
+            <PlanCatalogDetail
+              taskFlow={taskFlow}
+              activeDeck={activeDeck}
+              currentCardId={deck.currentCardId}
+              selectedPlan={selectedPlan}
+              onOpenCard={openDeckCardDetail}
+            />
           )}
           {activeOverlay.type === "deck-stack-detail" && <DeckStackReview decks={deck.decks} onOpenCard={openDeckCardDetail} />}
           {activeOverlay.type === "deck-card-detail" && (
             <DeckCardDetail
               decks={deck.decks}
-              records={proofs.records}
+              records={currentRecords}
               taskFlow={taskFlow}
               cardId={activeOverlay.id}
               onFocusCard={openDeckCard}
             />
           )}
-          {activeOverlay.type === "evidence-review" && <EvidenceReview records={proofs.records} />}
-          {activeOverlay.type === "reward-review" && <RewardReview records={proofs.records} rewardCount={deck.rewardCards.length} />}
-          {activeOverlay.type === "freeze-review" && <FrozenTodoReview records={proofs.records} decks={deck.decks} onOpenCard={openDeckCardDetail} />}
-          {activeOverlay.type === "burn-review" && <BurnFailedReview records={proofs.records} decks={deck.decks} onOpenCard={openDeckCardDetail} />}
-          {activeOverlay.type === "burn-failed-review" && <BurnFailedReview records={proofs.records} decks={deck.decks} onOpenCard={openDeckCardDetail} />}
-          {activeOverlay.type === "frozen-todo-review" && <FrozenTodoReview records={proofs.records} decks={deck.decks} onOpenCard={openDeckCardDetail} />}
+          {activeOverlay.type === "evidence-review" && <EvidenceReview records={currentRecords} />}
+          {activeOverlay.type === "reward-review" && <RewardReview records={currentRecords} rewardCount={currentRewardCount} />}
+          {activeOverlay.type === "freeze-review" && <FrozenTodoReview records={currentRecords} decks={currentDecks} onOpenCard={openDeckCardDetail} />}
+          {activeOverlay.type === "burn-review" && <BurnFailedReview records={currentRecords} decks={currentDecks} onOpenCard={openDeckCardDetail} />}
+          {activeOverlay.type === "burn-failed-review" && <BurnFailedReview records={currentRecords} decks={currentDecks} onOpenCard={openDeckCardDetail} />}
+          {activeOverlay.type === "frozen-todo-review" && <FrozenTodoReview records={currentRecords} decks={currentDecks} onOpenCard={openDeckCardDetail} />}
           {activeOverlay.type === "proof-excel-review" && (
-            <ProofExcelReview decks={deck.decks} records={proofs.records} onOpenCard={openDeckCardDetail} onOpenReview={openOverlay} />
+            <ProofExcelReview activeDeck={activeDeck} taskFlow={taskFlow} records={currentRecords} onOpenReview={openOverlay} />
           )}
-          {activeOverlay.type === "summary-review" && <SummaryReview summary={proofs.summaryDocument} analysisTitle={analysis?.goalUnderstanding} />}
-          {activeOverlay.type === "proof-record-review" && <ProofRecordReview record={proofs.records.find((item) => item.id === activeOverlay.id)} />}
+          {activeOverlay.type === "summary-review" && <SummaryReview summary={makeCurrentSummary(currentRecords)} analysisTitle={analysis?.goalUnderstanding} />}
+          {activeOverlay.type === "proof-record-review" && (
+            <ProofRecordReview record={currentRecords.find((item) => item.id === activeOverlay.id) ?? proofs.records.find((item) => item.id === activeOverlay.id)} />
+          )}
         </div>
       </section>
+    </div>
+  );
+}
+
+function makeCurrentSummary(records: ProofRecord[]) {
+  const evidence = records.filter((record) => record.status === "completed" || record.status === "rewarded" || record.status === "frozen");
+
+  if (evidence.length === 0) {
+    return "今天 0 条证据。完成第一张卡后，这里会生成当前目标的复盘。";
+  }
+
+  const completed = evidence.filter((record) => record.status === "completed" || record.status === "rewarded").length;
+  const frozen = evidence.filter((record) => record.status === "frozen").length;
+  const burning = records.filter((record) => record.timeStatus === "burning-completed" || record.lastDamageEffect === "burn").length;
+
+  return `当前目标已留下 ${evidence.length} 条证据，其中 ${completed} 条完成，${frozen} 条冰冻任务，${burning} 条使用燃烧节奏。`;
+}
+
+function CompletionReceipt({
+  decks,
+  records,
+  taskFlow,
+  lastCompletion,
+  onGoProof,
+  onNewGoal,
+  onOpenProgress
+}: {
+  decks: TaskDeck[];
+  records: ProofRecord[];
+  taskFlow: TaskFlowState | null;
+  lastCompletion?: { deckId: string; cardId: string; proofId: string };
+  onGoProof: () => void;
+  onNewGoal: () => void;
+  onOpenProgress: () => void;
+}) {
+  const found = findCardWithDeck(decks, lastCompletion?.cardId);
+  const record = records.find((item) => item.id === lastCompletion?.proofId);
+
+  if (!found || !record || !lastCompletion) {
+    return <EmptyOverlay message="还没有可展示的完成收据。" />;
+  }
+
+  const { deck, card } = found;
+  const node = taskFlow?.nodes.find((item) => item.id === card.flowNodeId);
+  const actualMinutes = deck.cards.reduce((sum, item) => sum + Math.ceil(item.elapsedSeconds / 60), 0);
+
+  return (
+    <div className="relative flex h-full min-h-0 flex-col overflow-hidden px-5 pb-5 pt-[max(env(safe-area-inset-top),1rem)]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_8%,rgba(255,255,255,0.92),transparent_18rem),linear-gradient(180deg,#fff8f1,#edf5ef_58%,#fff)]" aria-hidden />
+      <div className="pointer-events-none absolute -right-16 top-12 size-52 rounded-full bg-moss/10 blur-2xl" aria-hidden />
+      <div className="relative z-10 flex items-center justify-between">
+        <div className="text-sm font-medium tracking-[0.01em] text-ink">Next Card</div>
+        <span className="rounded-full bg-moss/10 px-3 py-1 text-xs font-semibold text-moss">proof saved</span>
+      </div>
+
+      <div className="relative z-10 mt-10">
+        <div className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-fern">Mission complete</div>
+        <h1 className="mt-3 font-editorial text-[2.6rem] leading-[0.98] text-ink">任务完成</h1>
+        <p className="mt-4 max-w-[19rem] text-sm leading-6 text-ink/62">
+          整组任务已保存为 proof。后台会按任务个体记录，不再展开单张卡。
+        </p>
+      </div>
+
+      <article className="relative z-10 mt-8 overflow-hidden rounded-[1.65rem] border border-moss/16 bg-white/76 p-5 shadow-[0_24px_70px_rgba(31,81,53,0.16)] backdrop-blur">
+        <div className="absolute inset-x-7 -bottom-8 h-24 rounded-full bg-moss/12 blur-2xl" aria-hidden />
+        <div className="relative z-10 flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <div className="text-[0.66rem] font-semibold uppercase tracking-[0.18em] text-fern">完成卡片</div>
+            <h2 className="mt-2 font-editorial text-[2rem] leading-tight text-ink">{deck.coverTitle}</h2>
+            <p className="mt-3 line-clamp-2 text-sm leading-6 text-ink/62">{record.lastAction}</p>
+          </div>
+          <div className="grid size-14 shrink-0 place-items-center rounded-[1.1rem] bg-moss text-white shadow-[0_16px_30px_rgba(15,83,53,0.22)]">
+            <CheckCircle2 size={26} />
+          </div>
+        </div>
+
+        <div className="relative z-10 mt-5 grid grid-cols-3 gap-2">
+          <ReceiptMetric label="卡片" value={`${deck.completedCards}/${deck.totalCards}`} />
+          <ReceiptMetric label="用时" value={`${Math.max(record.actualMinutes, actualMinutes)}m`} />
+          <ReceiptMetric label="进度" value={`${record.progress}%`} />
+        </div>
+
+        <div className="relative z-10 mt-5 h-2 overflow-hidden rounded-full bg-ink/8">
+          <div className="h-full rounded-full bg-[linear-gradient(90deg,#0d3b2a,#6f9b79)]" style={{ width: `${record.progress}%` }} />
+        </div>
+        <div className="relative z-10 mt-3 text-xs font-semibold text-ink/44">
+          当前阶段：{node?.title ?? "任务收尾"}
+        </div>
+      </article>
+
+      <div className="relative z-10 mt-auto grid gap-2">
+        <button
+          type="button"
+          onClick={onGoProof}
+          className="flex h-12 items-center justify-center rounded-full bg-ink text-sm font-semibold text-white shadow-[0_16px_28px_rgba(6,63,39,0.18)]"
+        >
+          返回 Proof
+        </button>
+        <button
+          type="button"
+          onClick={onOpenProgress}
+          className="flex h-12 items-center justify-center rounded-full border border-ink/10 bg-white/72 text-sm font-semibold text-ink"
+        >
+          查看任务记录
+        </button>
+        <button
+          type="button"
+          onClick={onNewGoal}
+          className="flex h-12 items-center justify-center rounded-full border border-ink/10 bg-[#edf5ef] text-sm font-semibold text-ink"
+        >
+          开始新目标
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ReceiptMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-[1rem] border border-ink/8 bg-white/66 px-3 py-3">
+      <div className="text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-ink/36">{label}</div>
+      <div className="mt-1 truncate text-sm font-semibold text-ink">{value}</div>
     </div>
   );
 }
@@ -125,7 +286,11 @@ function TaskNodeDetail({
   selectedPlan: PlanOption | undefined;
 }) {
   const node = taskFlow?.nodes.find((item) => item.id === nodeId) ?? taskFlow?.nodes[0];
-  const nodeCards = activeDeck?.cards.filter((card) => card.flowNodeId === node?.id).slice(0, 3) ?? [];
+  const nodeCards = activeDeck?.cards.filter((card) => card.flowNodeId === node?.id) ?? [];
+  const completed = nodeCards.filter((card) => card.status === "completed" || card.status === "rewarded").length;
+  const frozen = nodeCards.filter((card) => card.status === "frozen" || card.damageEffect === "freeze").length;
+  const failed = nodeCards.filter((card) => card.damageEffect === "burn" || card.urgencyStage === "expired").length;
+  const totalMinutes = nodeCards.reduce((sum, card) => sum + card.estimatedMinutes, 0);
 
   if (!node) {
     return <EmptyOverlay message="还没有可复盘的任务节点。" />;
@@ -141,17 +306,15 @@ function TaskNodeDetail({
           ["时间压力", node.timeLabel],
           ["当前状态", node.status],
           ["推进度", `${node.progress}%`],
-          ["方案节奏", selectedPlan?.name ?? "方案一"]
+          ["方案节奏", selectedPlan?.name ?? "方案一"],
+          ["包含卡片", `${nodeCards.length} 张`],
+          ["预计时长", `${totalMinutes}m`]
         ]}
       />
-      <OverlaySection title="会生成哪些行动卡">
-        {nodeCards.length > 0 ? (
-          nodeCards.map((card) => (
-            <MiniLine key={card.id} title={card.title} detail={`${card.estimatedMinutes} min · ${card.urgencyStage}`} />
-          ))
-        ) : (
-          <p className="text-sm leading-6 text-ink/64">这个节点暂时没有关联卡片，进入 deck 后会从当前 active card 开始。</p>
-        )}
+      <OverlaySection title="任务组摘要">
+        <MiniLine title="卡片数量" detail={`这一组包含 ${nodeCards.length} 张行动卡，后台只保留任务组记录。`} />
+        <MiniLine title="完成情况" detail={`${completed}/${nodeCards.length} 已完成 · 冰冻 ${frozen} · 燃烧 ${failed}`} />
+        <MiniLine title="展示规则" detail="详情默认不铺开单张卡，避免 proof 后台变成卡片流水账。" />
       </OverlaySection>
       <OverlaySection title="方案一/二/三怎么选">
         <MiniLine title="方案一" detail="适合先做最低可交付版本，快进 deck。" />
@@ -165,11 +328,13 @@ function TaskNodeDetail({
 function PlanCatalogDetail({
   taskFlow,
   activeDeck,
+  currentCardId,
   selectedPlan,
   onOpenCard
 }: {
   taskFlow: TaskFlowState | null;
   activeDeck: TaskDeck | undefined;
+  currentCardId: string | null;
   selectedPlan: PlanOption | undefined;
   onOpenCard: (cardId: string) => void;
 }) {
@@ -177,113 +342,15 @@ function PlanCatalogDetail({
     return <EmptyOverlay message="还没有可打开的计划目录。" />;
   }
 
-  const completedCards = activeDeck.cards.filter((card) => card.status === "completed" || card.status === "rewarded").length;
-  const remainingCards = Math.max(0, activeDeck.cards.length - completedCards);
-  const progress = activeDeck.cards.length === 0 ? taskFlow.overallProgress : Math.round((completedCards / activeDeck.cards.length) * 100);
-
   return (
-    <div className="grid gap-3">
-      <div className="grid grid-cols-3 gap-2 rounded-[1.25rem] border border-ink/10 bg-white/64 p-3">
-        <CompactStat label="方案" value={selectedPlan?.name ?? "当前"} />
-        <CompactStat label="完成度" value={`${progress}%`} />
-        <CompactStat label="剩余" value={`${remainingCards} 张`} />
-      </div>
-      <OverlaySection title="计划目录表">
-        {taskFlow.nodes.map((node, index) => {
-          const cards = activeDeck.cards.filter((card) => card.flowNodeId === node.id);
-          const completed = cards.length > 0
-            ? cards.every((card) => card.status === "completed" || card.status === "rewarded")
-            : node.status === "completed" || node.status === "rewarded";
-          const markerTone = getCatalogMarkerTone(cards, completed, node.urgencyStage);
-
-          return (
-            <div
-              key={node.id}
-              className={`relative overflow-hidden rounded-[1rem] px-3 py-3 ${markerTone.rowClass}`}
-            >
-              <span className={`pointer-events-none absolute inset-x-3 top-5 h-5 -rotate-1 rounded-full ${markerTone.markerClass}`} aria-hidden />
-              <div className="grid h-12 grid-cols-[2.4rem_minmax(0,1fr)_4.2rem] items-center gap-2">
-                <span className={`relative z-10 font-editorial text-[1.35rem] leading-none ${completed ? "line-through" : ""}`}>
-                  0{index + 1}
-                </span>
-                <div className="relative z-10 min-w-0">
-                  <h3 className={`truncate text-base font-black leading-5 tracking-[0.01em] ${completed ? "line-through" : ""}`}>{node.title}</h3>
-                  <div className="mt-0.5 truncate text-[0.66rem] font-semibold uppercase tracking-[0.08em] opacity-55">
-                    {node.timeLabel} · {node.status}
-                  </div>
-                </div>
-                <span className="relative z-10 justify-self-end rounded-full bg-white/70 px-2.5 py-1 text-xs font-semibold">{node.progress}%</span>
-              </div>
-              {cards.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {cards.map((card) => (
-                    <CatalogCardPill key={card.id} card={card} onClick={() => onOpenCard(card.id)} />
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </OverlaySection>
-    </div>
+    <CompactPlanCatalog
+      deck={activeDeck}
+      taskFlow={taskFlow}
+      currentCardId={currentCardId ?? activeDeck.cards.find((card) => card.status === "active")?.id}
+      selectedPlanName={selectedPlan?.name}
+      onOpenCard={onOpenCard}
+    />
   );
-}
-
-function CompactStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="min-w-0 rounded-[0.9rem] bg-ink/[0.045] px-3 py-2">
-      <div className="truncate text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-ink/40">{label}</div>
-      <div className="mt-1 truncate text-sm font-semibold text-ink">{value}</div>
-    </div>
-  );
-}
-
-function CatalogCardPill({ card, onClick }: { card: TaskCard; onClick: () => void }) {
-  const tone = getCardTone(card);
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`max-w-full truncate rounded-full px-3 py-1.5 text-xs font-semibold shadow-sm ${tone.rowClass}`}
-    >
-      <span className={`${card.status === "completed" || card.status === "rewarded" ? "line-through opacity-70" : ""}`}>
-        {card.title}
-      </span>
-    </button>
-  );
-}
-
-function getCatalogMarkerTone(cards: TaskCard[], completed: boolean, urgencyStage: string) {
-  const frozen = cards.some((card) => card.status === "frozen" || card.damageEffect === "freeze");
-  const burning = cards.some((card) => card.urgencyStage === "burning" || card.damageEffect === "burn") || urgencyStage === "burning";
-  const active = cards.some((card) => card.status === "active");
-
-  if (completed) {
-    return {
-      rowClass: "bg-emerald-50 text-ink/42",
-      markerClass: "bg-emerald-300/38"
-    };
-  }
-
-  if (burning) {
-    return {
-      rowClass: "bg-[#fff0e8] text-ink",
-      markerClass: "bg-[#e7784b]/46"
-    };
-  }
-
-  if (frozen) {
-    return {
-      rowClass: "bg-[#eefbff] text-sky-950",
-      markerClass: "bg-[#8fd8ea]/48"
-    };
-  }
-
-  return {
-    rowClass: active ? "bg-[#fff7cd] text-ink" : "bg-white/72 text-ink",
-    markerClass: active ? "bg-[#ffe05d]/70" : "bg-[#ffe08a]/44"
-  };
 }
 
 function EvidenceReview({ records }: { records: ProofRecord[] }) {
@@ -314,45 +381,32 @@ function RewardReview({ records, rewardCount }: { records: ProofRecord[]; reward
 
 function FrozenTodoReview({
   records,
-  decks,
-  onOpenCard
+  decks
 }: {
   records: ProofRecord[];
   decks: TaskDeck[];
   onOpenCard: (cardId: string) => void;
 }) {
   const frozen = records.filter((record) => record.status === "frozen" || record.timeStatus === "frozen-rescheduled");
-  const frozenCards = decks.flatMap((deck) =>
-    deck.cards
-      .filter((card) => card.status === "frozen" || card.damageEffect === "freeze")
-      .map((card) => ({ deck, card, record: findRecordForCard(records, deck, card) }))
-  );
+  const frozenDecks = decks.filter((deck) => deck.deckStatus === "frozen");
+  const frozenCards = frozenDecks.reduce((sum, deck) => sum + deck.cards.filter((card) => card.status === "frozen").length, 0);
 
   return (
     <div className="grid gap-3">
-      <OverlayCard icon={Snowflake} title={`${frozen.length + frozenCards.length} 个冻结代办`}>
-        冻结不是失败，是保存上下文。这里把需要稍后恢复的卡片、冻结原因和下一步建议放在一起。
+      <OverlayCard icon={Snowflake} title={`${frozenDecks.length || frozen.length} 个冰冻任务`}>
+        冰冻不是失败，是把当前卡和后续卡片缓存到后台。这里仅展示任务级摘要，不展开单张卡片。
       </OverlayCard>
       <DetailGrid
         items={[
-          ["冻结记录", frozen.length.toString()],
-          ["冻结卡片", frozenCards.length.toString()],
-          ["恢复队列", frozenCards.filter(({ card }) => card.suggestedStartAt).length.toString()],
+          ["冰冻记录", frozen.length.toString()],
+          ["冰冻任务", frozenDecks.length.toString()],
+          ["包含卡片", frozenCards.toString()],
           ["最近建议", frozen[0]?.nextSuggestion ?? "继续执行 deck 后生成"]
         ]}
       />
-      <OverlaySection title="为什么被冻结">
-        <MiniLine title="上下文已保存" detail="卡片不会从 deck 消失，只是变成稍后恢复的代办。" />
-        <MiniLine title="任务需要变小" detail="如果冻结次数变多，说明下一轮应该拆得更轻。" />
-      </OverlaySection>
-      <OverlaySection title="可点击冻结卡片">
-        {frozenCards.length > 0 ? (
-          frozenCards.map(({ deck, card, record }) => (
-            <CardReviewButton key={card.id} deck={deck} card={card} record={record} onClick={() => onOpenCard(card.id)} />
-          ))
-        ) : (
-          <p className="text-sm leading-6 text-ink/64">还没有冻结卡片。下滑卡片并选择“先冻结”后会出现在这里。</p>
-        )}
+      <OverlaySection title="为什么被冰冻">
+        <MiniLine title="上下文已保存" detail="冰冻后停止后续打卡，后台只保留任务个体和卡片数量。" />
+        <MiniLine title="稍后继续" detail="从 Proof 恢复后，会回到当时被冻结的当前卡。" />
       </OverlaySection>
     </div>
   );
@@ -360,204 +414,265 @@ function FrozenTodoReview({
 
 function BurnFailedReview({
   records,
-  decks,
-  onOpenCard
+  decks
 }: {
   records: ProofRecord[];
   decks: TaskDeck[];
   onOpenCard: (cardId: string) => void;
 }) {
-  const burning = records.filter((record) => record.timeStatus === "burning-completed" || record.lastDamageEffect === "burn");
-  const riskyCards = decks.flatMap((deck) =>
-    deck.cards
-      .filter((card) => card.urgencyStage === "burning" || card.urgencyStage === "expired" || card.damageEffect === "burn")
-      .map((card) => ({ deck, card, record: findRecordForCard(records, deck, card) }))
-  );
+  const failedRecords = records.filter((record) => record.status === "failed" || record.timeStatus === "expired" || record.lastDamageEffect === "burn");
+  const failedDecks = decks.filter((deck) => deck.deckStatus === "failed");
+  const failedCards = failedDecks.reduce((sum, deck) => sum + deck.cards.filter((card) => card.damageEffect === "burn").length, 0);
 
   return (
     <div className="grid gap-3">
-      <OverlayCard icon={Flame} title={`${burning.length + riskyCards.length} 条燃烧风险`}>
-        燃烧代表行动窗口变窄。这里同时展示已经燃烧完成的记录，以及仍然需要提前安排的风险卡。
+      <OverlayCard icon={Flame} title={`${failedDecks.length || failedRecords.length} 个失败任务`}>
+        燃烧后整组任务锁定，不能继续打卡，也不能再次开始旧任务。
       </OverlayCard>
       <DetailGrid
         items={[
-          ["燃烧记录", burning.length.toString()],
-          ["风险卡片", riskyCards.length.toString()],
-          ["已完成", riskyCards.filter(({ card }) => card.status === "completed" || card.status === "rewarded").length.toString()],
-          ["下一步", burning[0]?.nextSuggestion ?? "先完成最小动作"]
+          ["失败记录", failedRecords.length.toString()],
+          ["失败任务", failedDecks.length.toString()],
+          ["包含卡片", failedCards.toString()],
+          ["下一步", failedRecords[0]?.nextSuggestion ?? "从 Input 新建任务"]
         ]}
       />
       <OverlaySection title="燃烧原因">
-        <MiniLine title="窗口正在收窄" detail="这些卡通常靠近 deadline，或被手动切入快速燃烧。" />
-        <MiniLine title="提前安排" detail="如果燃烧卡变多，下一轮适合切到方案二的平衡节奏。" />
-      </OverlaySection>
-      <OverlaySection title="可点击燃烧卡片">
-        {riskyCards.length > 0 ? (
-          riskyCards.map(({ deck, card, record }) => (
-            <CardReviewButton key={card.id} deck={deck} card={card} record={record} onClick={() => onOpenCard(card.id)} />
-          ))
-        ) : (
-          <p className="text-sm leading-6 text-ink/64">还没有燃烧风险卡片。快速燃烧或近截止卡会在这里出现。</p>
-        )}
+        <MiniLine title="任务已锁定" detail="后台只保留任务个体，不展开燃烧卡，也不提供继续按钮。" />
+        <MiniLine title="重新开始" detail="如果要重做，请创建一个新目标，让系统重新生成任务组。" />
       </OverlaySection>
     </div>
   );
 }
 
-function DeckStackReview({ decks, onOpenCard }: { decks: TaskDeck[]; onOpenCard: (cardId: string) => void }) {
-  const unfinished = decks.flatMap((deck) =>
-    deck.cards
-      .filter((card) => card.status !== "completed" && card.status !== "rewarded")
-      .map((card) => ({ deck, card }))
-  );
-  const groups = [
-    {
-      title: "进行中",
-      cards: unfinished.filter(({ card }) => card.status === "active")
-    },
-    {
-      title: "待办",
-      cards: unfinished.filter(({ card }) => card.status === "queued" || card.status === "needs-review")
-    },
-    {
-      title: "冻结",
-      cards: unfinished.filter(({ card }) => card.status === "frozen" || card.damageEffect === "freeze")
-    },
-    {
-      title: "燃烧风险",
-      cards: unfinished.filter(({ card }) => card.urgencyStage === "burning" || card.urgencyStage === "expired" || card.damageEffect === "burn")
-    }
-  ];
+function DeckStackReview({ decks }: { decks: TaskDeck[]; onOpenCard: (cardId: string) => void }) {
+  const taskRows = decks.map((deck) => {
+    const completed = deck.cards.filter((card) => card.status === "completed" || card.status === "rewarded").length;
+    const frozen = deck.deckStatus === "frozen" ? deck.totalCards - completed : 0;
+    const failed = deck.deckStatus === "failed" ? deck.totalCards - completed : 0;
+    const progress = deck.totalCards === 0 ? 0 : Math.round((completed / deck.totalCards) * 100);
+
+    return {
+      deck,
+      completed,
+      frozen,
+      failed,
+      progress,
+      minutes: deck.cards.reduce((sum, card) => sum + card.estimatedMinutes, 0)
+    };
+  });
+  const lockedCount = taskRows.filter((row) => row.deck.deckStatus === "frozen" || row.deck.deckStatus === "failed").length;
 
   return (
     <div className="grid gap-3">
-      <OverlayCard icon={Layers3} title={`${unfinished.length} 张未完成卡`}>
-        这是 deck 卡堆的全屏详情。完成过的卡片会转移到 proof，这里只保留还需要行动的卡。
+      <OverlayCard icon={Layers3} title={`${taskRows.length} 个任务组`}>
+        后台只按任务个体展示，不展开冻结卡或燃烧卡。冻结与失败会锁定整组任务。
       </OverlayCard>
-      {groups.map((group) => (
-        <OverlaySection key={group.title} title={group.title}>
-          {group.cards.length > 0 ? (
-            group.cards.map(({ deck, card }) => (
-              <CardReviewButton key={`${group.title}-${card.id}`} deck={deck} card={card} onClick={() => onOpenCard(card.id)} />
-            ))
-          ) : (
-            <p className="text-sm leading-6 text-ink/54">暂无{group.title}卡片。</p>
-          )}
-        </OverlaySection>
-      ))}
+      <DetailGrid
+        items={[
+          ["任务总数", taskRows.length.toString()],
+          ["锁定任务", lockedCount.toString()],
+          ["完成任务", taskRows.filter((row) => row.deck.deckStatus === "completed").length.toString()],
+          ["进行任务", taskRows.filter((row) => row.deck.deckStatus === "active" || row.deck.deckStatus === "new").length.toString()]
+        ]}
+      />
+      <OverlaySection title="任务组记录">
+        {taskRows.length > 0 ? (
+          taskRows.map((row) => (
+            <TaskGroupLine
+              key={row.deck.id}
+              title={row.deck.coverTitle}
+              status={row.deck.deckStatus}
+              detail={`${row.deck.totalCards} 张卡 · ${row.completed}/${row.deck.totalCards} 已完成 · ${row.minutes}m`}
+              progress={row.progress}
+            />
+          ))
+        ) : (
+          <p className="text-sm leading-6 text-ink/54">还没有任务组。</p>
+        )}
+      </OverlaySection>
     </div>
   );
 }
 
 function ProofExcelReview({
-  decks,
+  activeDeck,
+  taskFlow,
   records,
-  onOpenCard,
   onOpenReview
 }: {
-  decks: TaskDeck[];
+  activeDeck: TaskDeck | undefined;
+  taskFlow: TaskFlowState | null;
   records: ProofRecord[];
-  onOpenCard: (cardId: string) => void;
   onOpenReview: (type: OverlayType, id?: string) => void;
 }) {
   const [showCompleted, setShowCompleted] = useState(false);
-  const rows = decks.flatMap((deck) => deck.cards.map((card) => ({ deck, card })));
-  const completedRows = rows.filter(({ card }) => card.status === "completed" || card.status === "rewarded");
-  const frozenRows = rows.filter(({ card }) => card.status === "frozen" || card.damageEffect === "freeze");
-  const burningRows = rows.filter(({ card }) => card.urgencyStage === "burning" || card.urgencyStage === "expired" || card.damageEffect === "burn");
-  const activeRows = rows
-    .filter(({ card }) =>
-      card.status !== "completed" &&
-      card.status !== "rewarded" &&
-      card.status !== "frozen" &&
-      card.damageEffect !== "freeze" &&
-      card.urgencyStage !== "burning" &&
-      card.urgencyStage !== "expired" &&
-      card.damageEffect !== "burn"
-    )
-    .sort((left, right) => getStatusWeight(left.card) - getStatusWeight(right.card));
-  const completion = rows.length === 0
-    ? 0
-    : Math.round((completedRows.length / rows.length) * 100);
-  const completedMinutes = completedRows.reduce((sum, { deck, card }) => {
-    const record = findRecordForCard(records, deck, card);
 
-    return sum + (record?.actualMinutes ?? Math.ceil(card.elapsedSeconds / 60));
-  }, 0);
-  const frozenSuggestions = frozenRows.filter(({ card }) => card.suggestedStartAt).length;
-  const burningRisk = burningRows.filter(({ card }) => card.urgencyStage === "expired" || card.damageProgress > 80).length;
+  if (!activeDeck || !taskFlow) {
+    return <EmptyOverlay message="还没有可展示的大任务进度。" />;
+  }
+
+  const totalProgress = activeDeck.totalCards === 0
+    ? 0
+    : Math.round((activeDeck.completedCards / activeDeck.totalCards) * 100);
+  const nodeRows = taskFlow.nodes.map((node) => {
+    const cards = activeDeck.cards.filter((card) => card.flowNodeId === node.id);
+    const completed = cards.filter((card) => card.status === "completed" || card.status === "rewarded").length;
+    const frozen = cards.filter((card) => card.status === "frozen" || card.damageEffect === "freeze").length;
+    const burning = cards.filter((card) => card.urgencyStage === "burning" || card.urgencyStage === "expired" || card.damageEffect === "burn").length;
+    const evidence = records.filter((record) => cards.some((card) => record.cardId === card.id)).length;
+    const progress = cards.length === 0 ? node.progress : Math.round((completed / cards.length) * 100);
+    const status: NodeRowStatus =
+      cards.length > 0 && completed === cards.length
+        ? "completed"
+        : frozen > 0
+          ? "frozen"
+          : burning > 0
+            ? "burning"
+            : cards.some((card) => card.status === "active")
+              ? "active"
+              : "queued";
+
+    return { node, cards, completed, frozen, burning, evidence, progress, status };
+  });
+  const completedNodes = nodeRows.filter((row) => row.status === "completed");
+  const openNodes = nodeRows.filter((row) => row.status !== "completed");
 
   return (
     <div className="grid gap-3">
-      <StackSummaryCard
-        title="完成卡堆"
-        label={`${completedRows.length} 张`}
-        detail={`${completedMinutes}m · ${completedRows.length}/${rows.length || 0}`}
-        metric={`${completion}%`}
-        tone="done"
-        expanded={showCompleted}
-        onClick={() => setShowCompleted((value) => !value)}
-      />
-      {showCompleted && completedRows.length > 0 && (
-        <OverlaySection title="完成卡片">
-          {completedRows.slice(0, 3).map(({ deck, card }) => (
-            <CompactStatusRow
-              key={card.id}
-              deck={deck}
-              card={card}
-              record={findRecordForCard(records, deck, card)}
-              onClick={() => onOpenCard(card.id)}
-            />
+      <article className="rounded-[1.35rem] border border-ink/10 bg-white/70 p-4 shadow-sm">
+        <div className="flex items-end justify-between gap-3">
+          <div className="min-w-0">
+            <div className="text-[0.66rem] font-semibold uppercase tracking-[0.18em] text-fern">大任务进度表</div>
+            <h3 className="mt-1 truncate font-editorial text-[1.6rem] leading-tight text-ink">{activeDeck.coverTitle}</h3>
+          </div>
+          <span className="grid size-14 shrink-0 place-items-center rounded-[1rem] bg-ink text-sm font-semibold text-white">{totalProgress}%</span>
+        </div>
+        <div className="mt-3 h-2 overflow-hidden rounded-full bg-ink/8">
+          <div className="h-full rounded-full bg-moss" style={{ width: `${totalProgress}%` }} />
+        </div>
+      </article>
+
+      {completedNodes.length > 0 && (
+        <StackSummaryCard
+          title="已完成任务组"
+          label={`${completedNodes.length} 个`}
+          detail={`${completedNodes.reduce((sum, row) => sum + row.cards.length, 0)} 张卡已归档`}
+          metric="完成"
+          tone="done"
+          expanded={showCompleted}
+          onClick={() => setShowCompleted((value) => !value)}
+        />
+      )}
+
+      {showCompleted && completedNodes.length > 0 && (
+        <OverlaySection title="已完成大任务">
+          {completedNodes.map((row) => (
+            <NodeProgressRow key={row.node.id} row={row} onClick={() => onOpenReview("task-node-detail", row.node.id)} />
           ))}
-          {completedRows.length > 3 && (
-            <div className="rounded-[1rem] bg-ink/[0.045] px-3 py-3 text-sm font-semibold text-ink/58">
-              还有 {completedRows.length - 3} 张已完成卡，完整记录在 proof 证据中。
-            </div>
-          )}
         </OverlaySection>
       )}
-      <div className="grid grid-cols-2 gap-3">
-        <StackSummaryCard
-          title="冻结卡堆"
-          label={`${frozenRows.length} 张`}
-          detail={`${frozenSuggestions} 个恢复建议`}
-          metric="冻结"
-          tone="frozen"
-          onClick={() => onOpenReview("frozen-todo-review")}
-        />
-        <StackSummaryCard
-          title="燃烧卡堆"
-          label={`${burningRows.length} 张`}
-          detail={`${burningRisk} 个高风险`}
-          metric="燃烧"
-          tone="burn"
-          onClick={() => onOpenReview("burn-failed-review")}
-        />
-      </div>
-      <OverlaySection title="当前进行">
-        {activeRows.slice(0, 3).map(({ deck, card }) => (
-          <CompactStatusRow
-            key={card.id}
-            deck={deck}
-            card={card}
-            record={findRecordForCard(records, deck, card)}
-            onClick={() => onOpenCard(card.id)}
-          />
-        ))}
-        {activeRows.length > 3 && (
-          <div className="rounded-[1rem] bg-ink/[0.045] px-3 py-3 text-sm font-semibold text-ink/58">
-            还有 {activeRows.length - 3} 张待做卡，可从计划目录继续查看。
-          </div>
-        )}
-        {activeRows.length === 0 && rows.length > 0 && (
-          <div className="rounded-[1rem] bg-white/62 px-4 py-4 text-sm font-semibold text-ink/58">没有正在展开的待做卡。</div>
-        )}
-        {rows.length === 0 && (
-          <div className="px-3 py-8 text-center text-sm text-ink/56">还没有可展示的卡片。</div>
+
+      <OverlaySection title="继续推进">
+        {openNodes.length > 0 ? (
+          openNodes.map((row) => (
+            <NodeProgressRow key={row.node.id} row={row} onClick={() => onOpenReview("task-node-detail", row.node.id)} />
+          ))
+        ) : (
+          <div className="rounded-[1rem] bg-emerald-700 px-4 py-4 text-sm font-semibold text-white">所有大任务已经完成。</div>
         )}
       </OverlaySection>
     </div>
   );
+}
+
+type NodeRowStatus = "completed" | "frozen" | "burning" | "active" | "queued";
+
+type NodeProgressRowData = {
+  node: TaskFlowState["nodes"][number];
+  cards: TaskCard[];
+  completed: number;
+  frozen: number;
+  burning: number;
+  evidence: number;
+  progress: number;
+  status: NodeRowStatus;
+};
+
+function NodeProgressRow({ row, onClick }: { row: NodeProgressRowData; onClick: () => void }) {
+  const tone = getNodeTone(row.status);
+  const total = row.cards.length;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`grid h-16 w-full grid-cols-[minmax(0,1fr)_4.6rem] items-center gap-3 rounded-[1rem] px-3 text-left shadow-sm ${tone.rowClass}`}
+    >
+      <div className="min-w-0">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className={`grid h-5 w-14 shrink-0 place-items-center rounded-full text-[0.62rem] font-black ${tone.badgeClass}`}>
+            {tone.label}
+          </span>
+          <span className={`truncate text-sm font-black ${tone.titleClass}`}>{row.node.title}</span>
+        </div>
+        <div className={`mt-1 truncate text-[0.68rem] font-semibold ${tone.mutedClass}`}>
+          {row.completed}/{total} 完成 · 冻结 {row.frozen} · 燃烧 {row.burning} · 证据 {row.evidence}
+        </div>
+      </div>
+      <span className={`justify-self-end rounded-full px-2.5 py-1 text-xs font-semibold ${tone.badgeClass}`}>{row.progress}%</span>
+    </button>
+  );
+}
+
+function getNodeTone(status: NodeRowStatus) {
+  if (status === "completed") {
+    return {
+      label: "完成",
+      rowClass: "bg-emerald-700 text-white",
+      badgeClass: "bg-white/20 text-white",
+      titleClass: "line-through decoration-white/70",
+      mutedClass: "text-white/72"
+    };
+  }
+
+  if (status === "frozen") {
+    return {
+      label: "冰冻",
+      rowClass: "bg-[#cdebf0] text-sky-950",
+      badgeClass: "bg-white/55 text-sky-950",
+      titleClass: "text-sky-950",
+      mutedClass: "text-sky-950/62"
+    };
+  }
+
+  if (status === "burning") {
+    return {
+      label: "燃烧",
+      rowClass: "bg-[#e7784b] text-white",
+      badgeClass: "bg-white/20 text-white",
+      titleClass: "text-white",
+      mutedClass: "text-white/72"
+    };
+  }
+
+  if (status === "active") {
+    return {
+      label: "进行",
+      rowClass: "bg-[#ffe08a] text-ink",
+      badgeClass: "bg-white/55 text-ink",
+      titleClass: "text-ink",
+      mutedClass: "text-ink/62"
+    };
+  }
+
+  return {
+    label: "待做",
+    rowClass: "bg-[#edf5ef] text-ink",
+    badgeClass: "bg-white/60 text-ink",
+    titleClass: "text-ink",
+    mutedClass: "text-ink/54"
+  };
 }
 
 function SummaryReview({ summary, analysisTitle }: { summary: string; analysisTitle?: string }) {
@@ -734,58 +849,6 @@ function StackSummaryCard({
   );
 }
 
-function CompactStatusRow({
-  deck,
-  card,
-  record,
-  onClick
-}: {
-  deck: TaskDeck;
-  card: TaskCard;
-  record?: ProofRecord;
-  onClick: () => void;
-}) {
-  const tone = getCardTone(card);
-  const progress = getCardProgress(card);
-  const actualMinutes = record?.actualMinutes ?? Math.ceil(card.elapsedSeconds / 60);
-  const minutes = actualMinutes || card.estimatedMinutes;
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`grid h-16 w-full grid-cols-[minmax(0,1fr)_4.2rem] items-center gap-3 rounded-[1rem] px-3 text-left shadow-sm ${tone.rowClass}`}
-    >
-      <div className="min-w-0">
-        <div className={`truncate text-[0.62rem] font-semibold uppercase tracking-[0.1em] ${tone.mutedClass}`}>
-          {tone.label} · {minutes}m
-        </div>
-        <div className={`mt-1 truncate text-sm font-semibold ${card.status === "completed" || card.status === "rewarded" ? "line-through opacity-75" : ""}`}>
-          {card.title}
-        </div>
-        <div className={`mt-0.5 truncate text-[0.62rem] font-semibold ${tone.mutedClass}`}>{deck.coverTitle}</div>
-      </div>
-      <span className={`justify-self-end rounded-full px-2.5 py-1 text-xs font-semibold ${tone.chipClass}`}>{progress}%</span>
-    </button>
-  );
-}
-
-function getStatusWeight(card: TaskCard) {
-  if (card.status === "active") {
-    return 0;
-  }
-
-  if (card.urgencyStage === "burning" || card.urgencyStage === "expired" || card.damageEffect === "burn") {
-    return 1;
-  }
-
-  if (card.status === "frozen" || card.damageEffect === "freeze") {
-    return 2;
-  }
-
-  return 3;
-}
-
 function getCardProgress(card: TaskCard) {
   if (card.status === "completed" || card.status === "rewarded") {
     return 100;
@@ -870,47 +933,61 @@ function findCardWithDeck(decks: TaskDeck[], cardId?: string) {
 
 function findRecordForCard(records: ProofRecord[], deck: TaskDeck, card: TaskCard) {
   return records.find((record) =>
-    record.goalTitle === deck.coverTitle &&
-    (record.lastAction.includes(card.title) || record.timeDamageEvents.some((event) => event.includes(card.title)))
+    record.cardId === card.id ||
+    (
+      record.deckId === deck.id &&
+      (record.lastAction.includes(card.title) || record.timeDamageEvents.some((event) => event.includes(card.title)))
+    )
   );
 }
 
-function CardReviewButton({
-  deck,
-  card,
-  record,
-  compact = false,
-  onClick
+function TaskGroupLine({
+  title,
+  status,
+  detail,
+  progress
 }: {
-  deck: TaskDeck;
-  card: TaskCard;
-  record?: ProofRecord;
-  compact?: boolean;
-  onClick: () => void;
+  title: string;
+  status: TaskDeck["deckStatus"];
+  detail: string;
+  progress: number;
 }) {
-  const tone = getCardTone(card);
-  const progress = getCardProgress(card);
+  const tone = getTaskGroupTone(status);
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`w-full rounded-[1rem] text-left shadow-sm ${tone.rowClass} ${compact ? "px-3 py-2" : "p-3"}`}
-    >
+    <div className="rounded-[1.05rem] border border-ink/8 bg-white/70 px-3 py-3">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className={`truncate text-[0.62rem] font-semibold uppercase tracking-[0.12em] ${tone.mutedClass}`}>{deck.coverTitle}</div>
-          <div className={`mt-1 truncate text-sm font-semibold ${card.status === "completed" || card.status === "rewarded" ? "line-through opacity-70" : ""}`}>
-            {card.title}
-          </div>
+          <div className="truncate text-sm font-semibold text-ink">{title}</div>
+          <div className="mt-1 truncate text-xs font-medium text-ink/54">{detail}</div>
         </div>
-        <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${tone.chipClass}`}>{progress}%</span>
+        <span className={`shrink-0 rounded-full px-2.5 py-1 text-[0.68rem] font-semibold ${tone.chipClass}`}>{tone.label}</span>
       </div>
-      {!compact && (
-        <p className={`mt-2 line-clamp-2 text-xs leading-5 ${tone.mutedClass}`}>{record?.nextSuggestion ?? card.cardBackNote}</p>
-      )}
-    </button>
+      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-ink/8">
+        <div className={`h-full rounded-full ${tone.barClass}`} style={{ width: `${progress}%` }} />
+      </div>
+    </div>
   );
+}
+
+function getTaskGroupTone(status: TaskDeck["deckStatus"]) {
+  if (status === "completed") {
+    return { label: "完成", chipClass: "bg-moss/10 text-moss", barClass: "bg-moss" };
+  }
+
+  if (status === "frozen") {
+    return { label: "冰冻", chipClass: "bg-sky-100 text-sky-800", barClass: "bg-sky-300" };
+  }
+
+  if (status === "failed") {
+    return { label: "燃烧", chipClass: "bg-[#fbe3d4] text-[#9b351a]", barClass: "bg-[#e7784b]" };
+  }
+
+  if (status === "active") {
+    return { label: "进行", chipClass: "bg-amber-100 text-amber-800", barClass: "bg-amber-300" };
+  }
+
+  return { label: "待办", chipClass: "bg-ink/6 text-ink/64", barClass: "bg-ink/24" };
 }
 
 function ReviewFrame({
