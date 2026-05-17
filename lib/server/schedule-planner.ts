@@ -54,7 +54,7 @@ export function createSchedulePlan(input: SchedulePlannerInput): SchedulePlanner
           targetId: item.id,
           title: item.title,
           priority: vector.score,
-          position: orderedQueue.indexOf(item.id),
+          position: safePosition(orderedQueue.indexOf(item.id), orderedQueue.length),
           now: input.now,
           reason: hardLocked ? "任务带硬时间锁，只插入可见队列，不改时间。" : "新任务进入全局队列排序。"
         })
@@ -144,22 +144,30 @@ export function createSchedulePlan(input: SchedulePlannerInput): SchedulePlanner
 
 function buildOrderedQueue(items: QueueItem[], sortedUnlocked: QueueItem[], input: SchedulePlannerInput) {
   const ordered: string[] = [];
-  const lockedByPosition = new Map<number, QueueItem>();
+  const lockedByPosition = new Map<number, QueueItem[]>();
   const maxLength = items.length;
+  let fallbackPosition = 0;
 
   for (const item of items) {
     if (hasHardTimeLock(item, input.timeLocks)) {
       const position = item.position ?? input.activeQueue.indexOf(item.id);
-      lockedByPosition.set(position >= 0 ? position : ordered.length, item);
+      const safeLockedPosition = position >= 0 ? position : fallbackPosition;
+      const existing = lockedByPosition.get(safeLockedPosition) ?? [];
+      lockedByPosition.set(safeLockedPosition, [...existing, item]);
+      fallbackPosition += 1;
     }
   }
 
   let unlockedIndex = 0;
   for (let index = 0; index < maxLength; index += 1) {
-    const locked = lockedByPosition.get(index);
+    const locked = lockedByPosition.get(index) ?? [];
 
-    if (locked) {
-      ordered.push(locked.id);
+    if (locked.length > 0) {
+      for (const item of locked) {
+        if (!ordered.includes(item.id)) {
+          ordered.push(item.id);
+        }
+      }
       continue;
     }
 
@@ -180,7 +188,22 @@ function buildOrderedQueue(items: QueueItem[], sortedUnlocked: QueueItem[], inpu
     }
   }
 
+  for (const [position, locked] of [...lockedByPosition.entries()].sort((left, right) => left[0] - right[0])) {
+    if (position < maxLength) {
+      continue;
+    }
+    for (const item of locked) {
+      if (!ordered.includes(item.id)) {
+        ordered.push(item.id);
+      }
+    }
+  }
+
   return ordered;
+}
+
+function safePosition(position: number, fallback: number) {
+  return position >= 0 ? position : fallback;
 }
 
 function dedupeActions(actions: QueueAction[]) {

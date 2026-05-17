@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
+import { readJsonWithLimit } from "@/lib/server/http-guards";
 import { exportProofJson, exportProofMarkdown } from "@/lib/server/proof-export";
 import type { ProofExportPayload } from "@/lib/server/proof-export";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
-  const body = await request.json().catch(() => null);
+  const parsed = await readJsonWithLimit<unknown>(request, { label: "proof export", maxBytes: 256_000 });
+  if (parsed.error) {
+    return parsed.error;
+  }
+  const body = parsed.value;
   const url = new URL(request.url);
   const format = url.searchParams.get("format") === "json" ? "json" : "markdown";
   const payload = normalizePayload(body);

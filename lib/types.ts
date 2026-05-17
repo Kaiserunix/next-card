@@ -433,6 +433,7 @@ export type FrozenTaskEntry = {
   reason: string;
   minReentryMinutes: number;
   contextSnapshot: string[];
+  timeLocks?: TimeLock[];
 };
 
 export type FreezeReturnDecision = {

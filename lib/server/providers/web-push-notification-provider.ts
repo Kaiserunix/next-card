@@ -67,6 +67,15 @@ export function createWebPushNotificationProvider(input: {
         };
       }
 
+      if (isFutureReminder(action)) {
+        return {
+          providerId: `web-push:${action.targetId}`,
+          status: "scheduled",
+          sentCount: 0,
+          failedCount: 0
+        };
+      }
+
       assertVapidConfig(input.config);
       client.setVapidDetails(input.config.subject, input.config.publicKey, input.config.privateKey);
 
@@ -121,6 +130,10 @@ export function createWebPushNotificationProvider(input: {
 
 function isReminderAction(action: QueueAction) {
   return action.kind === "create-reminder" || action.kind === "update-reminder";
+}
+
+function isFutureReminder(action: QueueAction) {
+  return Boolean(action.scheduledFor && new Date(action.scheduledFor).getTime() > Date.now());
 }
 
 function assertVapidConfig(config: WebPushNotificationProviderConfig) {

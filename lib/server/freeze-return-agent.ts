@@ -1,13 +1,15 @@
-import type { FreezeReturnDecision, FrozenTaskEntry, QueueItem, TaskCard } from "@/lib/types";
+import type { FreezeReturnDecision, FrozenTaskEntry, QueueItem, TaskCard, TimeLock } from "@/lib/types";
 import { calculatePriorityVector, createQueueAction } from "@/lib/server/priority-engine";
 
 export function analyzeFrozenTaskReturn(input: {
   now: string;
   entry: FrozenTaskEntry;
   currentQueue: QueueItem[];
+  timeLocks?: TimeLock[];
 }): FreezeReturnDecision {
-  const frozenItem = frozenEntryToQueueItem(input.entry);
-  const priorityVector = calculatePriorityVector(frozenItem, input.now);
+  const timeLocks = input.timeLocks ?? [];
+  const frozenItem = frozenEntryToQueueItem(input.entry, timeLocks);
+  const priorityVector = calculatePriorityVector(frozenItem, input.now, timeLocks);
   const nowMs = new Date(input.now).getTime();
   const returnAfterMs = new Date(input.entry.returnAfter).getTime();
 
@@ -28,7 +30,7 @@ export function analyzeFrozenTaskReturn(input: {
   }
 
   const urgentCurrent = input.currentQueue
-    .map((item) => ({ item, vector: calculatePriorityVector(item, input.now) }))
+    .map((item) => ({ item, vector: calculatePriorityVector(item, input.now, timeLocks) }))
     .sort((left, right) => right.vector.score - left.vector.score)[0];
 
   if (urgentCurrent && urgentCurrent.vector.score >= priorityVector.score + 15 && urgentCurrent.vector.urgency >= 85) {
@@ -89,7 +91,10 @@ export function analyzeFrozenTaskReturn(input: {
   };
 }
 
-function frozenEntryToQueueItem(entry: FrozenTaskEntry): QueueItem {
+function frozenEntryToQueueItem(entry: FrozenTaskEntry, globalLocks: TimeLock[]): QueueItem {
+  const entryLocks = entry.timeLocks ?? [];
+  const matchingGlobalLocks = globalLocks.filter((lock) => lock.targetId === entry.card.id);
+
   return {
     id: entry.card.id,
     title: entry.card.title,
@@ -105,7 +110,7 @@ function frozenEntryToQueueItem(entry: FrozenTaskEntry): QueueItem {
     cardId: entry.card.id,
     frozenAt: entry.frozenAt,
     returnAfter: entry.returnAfter,
-    timeLocks: []
+    timeLocks: [...entryLocks, ...matchingGlobalLocks]
   };
 }
 

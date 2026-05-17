@@ -1,4 +1,3 @@
-import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { BackendPorts } from "@/lib/server/backend-ports";
 import { runBackendWorkerTick } from "@/lib/server/backend-worker";
@@ -11,10 +10,11 @@ import { createWebPushNotificationProvider } from "@/lib/server/providers/web-pu
 import { JsonFileQueueRepository, MemoryQueueRepository } from "@/lib/server/queue-repository";
 import { createSchedulePlan } from "@/lib/server/schedule-planner";
 
-const localQueuePath = process.env.NEXT_CARD_QUEUE_FILE ?? join(tmpdir(), "next-card", "queue-snapshot.json");
+const localStateDir = process.env.NEXT_CARD_LOCAL_STATE_DIR ?? join(process.cwd(), ".next-card-data");
+const localQueuePath = process.env.NEXT_CARD_QUEUE_FILE ?? join(localStateDir, "queue-snapshot.json");
 export const localPushSubscriptionsPath =
-  process.env.NEXT_CARD_PUSH_SUBSCRIPTIONS_FILE ?? join(tmpdir(), "next-card", "push-subscriptions.json");
-export const localCalendarDir = process.env.NEXT_CARD_CALENDAR_DIR ?? join(tmpdir(), "next-card", "calendar");
+  process.env.NEXT_CARD_PUSH_SUBSCRIPTIONS_FILE ?? join(localStateDir, "push-subscriptions.json");
+export const localCalendarDir = process.env.NEXT_CARD_CALENDAR_DIR ?? join(localStateDir, "calendar");
 
 export const pushSubscriptionRepository = new JsonFilePushSubscriptionRepository(localPushSubscriptionsPath);
 

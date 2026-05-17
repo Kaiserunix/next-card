@@ -46,6 +46,7 @@ function normalizePushSubscription(input: unknown, userId: string): PushSubscrip
     !("auth" in input.keys) ||
     typeof input.keys.auth !== "string" ||
     !input.endpoint ||
+    !isAllowedPushEndpoint(input.endpoint) ||
     !input.keys.p256dh ||
     !input.keys.auth
   ) {
@@ -64,4 +65,13 @@ function normalizePushSubscription(input: unknown, userId: string): PushSubscrip
     },
     createdAt: new Date().toISOString()
   };
+}
+
+function isAllowedPushEndpoint(endpoint: string) {
+  try {
+    const url = new URL(endpoint);
+    return url.protocol === "https:" && endpoint.length <= 2048;
+  } catch {
+    return false;
+  }
 }

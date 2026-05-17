@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { NEXT_CARD_SYSTEM_PROMPT } from "@/lib/ai-prompts";
 import { mockAnalyzeInput, mockGeneratePlanOptions } from "@/lib/mock-ai";
 import { backendPorts } from "@/lib/server/backend-services";
+import { enforceRateLimit, readJsonWithLimit } from "@/lib/server/http-guards";
 import { resolveMimoProviderConfig } from "@/lib/server/providers/mimo-ai-provider";
 import type {
   AIReplyPayload,
@@ -40,15 +41,18 @@ const FALLBACK_PAYLOAD: AIReplyPayload = {
 };
 
 export async function POST(request: NextRequest) {
-  let body: ChatRequestBody;
-
-  try {
-    body = (await request.json()) as ChatRequestBody;
-  } catch {
-    return jsonResponse({ error: "invalid json" }, 400);
+  const limited = enforceRateLimit(request, { bucket: "chat", limit: 60, windowMs: 60_000 });
+  if (limited) {
+    return limited;
   }
 
-  if (!Array.isArray(body.messages)) {
+  const parsed = await readJsonWithLimit<ChatRequestBody>(request, { label: "chat", maxBytes: 128_000 });
+  if (parsed.error) {
+    return parsed.error;
+  }
+  const body = parsed.value;
+
+  if (!Array.isArray(body?.messages)) {
     return jsonResponse({ error: "messages is required" }, 400);
   }
 

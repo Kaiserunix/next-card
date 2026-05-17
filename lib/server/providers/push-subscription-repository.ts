@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import type { PushSubscriptionRecord, PushSubscriptionRepository } from "@/lib/server/providers/web-push-notification-provider";
 
@@ -44,6 +44,10 @@ export class JsonFilePushSubscriptionRepository implements PushSubscriptionRepos
       if (isMissingFile(error)) {
         return [];
       }
+      if (error instanceof SyntaxError) {
+        await rename(this.filePath, `${this.filePath}.corrupt-${Date.now()}`).catch(() => undefined);
+        throw new Error(`Push subscription store is corrupt: ${this.filePath}`);
+      }
 
       throw error;
     }
@@ -51,7 +55,9 @@ export class JsonFilePushSubscriptionRepository implements PushSubscriptionRepos
 
   private async writeAll(records: PushSubscriptionRecord[]) {
     await mkdir(dirname(this.filePath), { recursive: true });
-    await writeFile(this.filePath, `${JSON.stringify(records, null, 2)}\n`, "utf8");
+    const tempPath = `${this.filePath}.${process.pid}.${Date.now()}.tmp`;
+    await writeFile(tempPath, `${JSON.stringify(records, null, 2)}\n`, "utf8");
+    await rename(tempPath, this.filePath);
   }
 }
 

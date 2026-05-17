@@ -26,17 +26,15 @@ Before handing off a change, run:
 
 ```bash
 pnpm lint
+pnpm test
 pnpm build
+pnpm audit --audit-level moderate
 ```
 
-`pnpm build` uses `output: "export"` and produces a static bundle in:
-
-```text
-out/
-```
-
-That folder is the APK WebView handoff artifact if the Android wrapper wants to
-load local assets instead of a hosted URL.
+`pnpm build` currently produces a normal Next.js server build in `.next/`.
+There is no `out/` static-export artifact in this version. If the Android
+wrapper needs local static assets later, reintroduce `output: "export"` only
+after verifying every API-backed feature has a static fallback.
 
 ## Current Stack
 
@@ -46,10 +44,13 @@ load local assets instead of a hosted URL.
 - Zustand with localStorage persistence
 - Framer Motion
 - lucide-react
-- Playwright as a dev-only smoke-test helper
+- Vitest for backend/unit verification
+- Playwright as an optional dev-only smoke-test helper
 
-No real OCR, OpenAI API, backend, auth, reminders, calendar sync, or notification
-service is connected yet.
+Backend route handlers and provider adapters are present under `app/api/*` and
+`lib/server/*`. Real AI, push, and calendar providers activate only when their
+environment variables are configured; internal side-effect endpoints require
+`NEXT_CARD_INTERNAL_API_TOKEN`.
 
 ## Mobile WebView Target
 
@@ -69,7 +70,8 @@ Current decisions:
 - The root viewport uses `viewport-fit=cover` and CSS safe-area env values.
 - The UI supports practical Android widths from `360px` upward.
 - State persists through `localStorage`, so Android WebView must enable DOM storage.
-- The Next build exports static files for WebView packaging.
+- The current Next build does not export static files. It is a server build with
+  API routes.
 
 Android wrapper requirements:
 
@@ -80,9 +82,8 @@ webView.settings.loadWithOverviewMode = true
 webView.settings.useWideViewPort = true
 ```
 
-If loading the exported app locally, point the WebView at the generated static
-entry after copying `out/` into Android assets. If loading remotely, use an HTTPS
-deployment of the same static export.
+If loading the app in an Android WebView today, use an HTTPS deployment of the
+server build. Local `out/` packaging is not available in this version.
 
 Do not add desktop breakpoints or dashboard-style layouts. Any new page or
 component should be designed inside the same mobile WebView frame first.
@@ -318,14 +319,15 @@ Tune the deck execution surface on real mobile WebView.
 
 Minimum scope:
 
-1. Install the static `out/` bundle in an Android WebView wrapper.
+1. Deploy the server build to HTTPS for an Android WebView wrapper.
 2. Test drag thresholds, double click, triple click, and WebAudio on device.
 3. Add native back-button handling for `input / deck / proof` mode history.
 4. Add a resume screen for frozen cards in `rescheduleQueue`.
-5. Run `pnpm lint` and `pnpm build`.
+5. Run `pnpm lint`, `pnpm test`, `pnpm build`, and `pnpm audit --audit-level moderate`.
 
-Do not start real OCR, OpenAI API, backend, reminders, or calendar sync until the
-mock deck loop is complete and demo-stable.
+Keep provider-backed AI/import/reminder/calendar work behind adapters and
+server-side configuration. Do not expose side-effect backend routes without
+`NEXT_CARD_INTERNAL_API_TOKEN`.
 
 ## Suggested APK Wrapper Work
 
@@ -335,10 +337,11 @@ separate native wrapper project or a later `android/` folder.
 Recommended Android-side steps:
 
 1. Run `pnpm build`.
-2. Copy `out/` into Android assets or deploy it to HTTPS.
+2. Deploy the server build to HTTPS; this version does not produce a local
+   static export folder.
 3. Create a single-Activity WebView wrapper.
 4. Enable JavaScript and DOM storage.
-5. Load the local `index.html` or hosted URL.
+5. Load the hosted URL.
 6. Set the status/navigation bar colors to match `#fbf1ea`.
 7. Preserve safe-area/inset behavior and avoid injecting desktop viewport rules.
 8. Later add a bridge only for reminders, calendar, notifications, sound, and

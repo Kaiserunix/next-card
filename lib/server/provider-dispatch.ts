@@ -13,12 +13,17 @@ export type ProviderDispatchResult = {
 
 export async function dispatchProviderActions(
   actions: QueueAction[],
-  ports: Pick<BackendPorts, "notifications" | "calendar">
+  ports: Pick<BackendPorts, "notifications" | "calendar">,
+  nowInput: string | Date = new Date()
 ): Promise<ProviderDispatchResult[]> {
   const results: ProviderDispatchResult[] = [];
+  const now = typeof nowInput === "string" ? new Date(nowInput) : nowInput;
 
   for (const action of actions) {
     if (action.kind === "create-reminder" || action.kind === "update-reminder") {
+      if (!isDue(action, now)) {
+        continue;
+      }
       results.push(await dispatchNotification(action, ports));
       continue;
     }
@@ -29,6 +34,22 @@ export async function dispatchProviderActions(
   }
 
   return results;
+}
+
+export function getProcessableProviderActions(actions: QueueAction[], nowInput: string | Date = new Date()) {
+  const now = typeof nowInput === "string" ? new Date(nowInput) : nowInput;
+
+  return actions.filter((action) => {
+    if (action.kind === "create-reminder" || action.kind === "update-reminder") {
+      return isDue(action, now);
+    }
+
+    return action.kind === "create-calendar-event" || action.kind === "update-calendar-event";
+  });
+}
+
+function isDue(action: QueueAction, now: Date) {
+  return !action.scheduledFor || new Date(action.scheduledFor).getTime() <= now.getTime();
 }
 
 async function dispatchNotification(action: QueueAction, ports: Pick<BackendPorts, "notifications">) {

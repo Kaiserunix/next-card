@@ -5,7 +5,7 @@ export type WebViewTarget = {
   layoutMode: "mobile-only";
   safeArea: "css-env";
   storage: "localStorage";
-  exportMode: "next-static-export";
+  exportMode: "next-server";
 };
 
 export type AndroidWebViewRequirement = {
@@ -21,7 +21,7 @@ export const WEBVIEW_TARGET: WebViewTarget = {
   layoutMode: "mobile-only",
   safeArea: "css-env",
   storage: "localStorage",
-  exportMode: "next-static-export"
+  exportMode: "next-server"
 };
 
 export const ANDROID_WEBVIEW_REQUIREMENTS: AndroidWebViewRequirement[] = [
@@ -41,9 +41,9 @@ export const ANDROID_WEBVIEW_REQUIREMENTS: AndroidWebViewRequirement[] = [
     reason: "The app locks to device width and uses safe-area CSS env values."
   },
   {
-    name: "File or HTTPS asset loading",
+    name: "HTTPS app loading",
     required: true,
-    reason: "The APK can load the static `out/` bundle locally or a deployed HTTPS URL."
+    reason: "This version is a Next server build with API routes, so the WebView should load a deployed HTTPS URL."
   },
   {
     name: "Back button bridge",

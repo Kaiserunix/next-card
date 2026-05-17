@@ -1,12 +1,21 @@
 import { NextResponse } from "next/server";
 import { backendPorts } from "@/lib/server/backend-services";
+import { enforceRateLimit, readJsonWithLimit } from "@/lib/server/http-guards";
 import { resolveMimoProviderConfig } from "@/lib/server/providers/mimo-ai-provider";
 import type { SourceType } from "@/lib/types";
 
 export const runtime = "nodejs";
+const MAX_IMPORT_BODY_BYTES = 6 * 1024 * 1024;
+const MAX_RAW_TEXT_CHARS = 40_000;
+const MAX_IMAGE_DATA_URL_CHARS = 5_500_000;
 
 export async function POST(request: Request) {
-  const body = (await request.json().catch(() => null)) as
+  const limited = enforceRateLimit(request, { bucket: "import-review", limit: 30, windowMs: 60_000 });
+  if (limited) {
+    return limited;
+  }
+
+  const parsed = await readJsonWithLimit<
     | {
         sourceType?: SourceType;
         rawText?: string;
@@ -15,7 +24,13 @@ export async function POST(request: Request) {
         imageBase64?: string;
         imageMimeType?: string;
       }
-    | null;
+    | null
+  >(request, { label: "import review", maxBytes: MAX_IMPORT_BODY_BYTES });
+  if (parsed.error) {
+    return parsed.error;
+  }
+
+  const body = parsed.value;
 
   const rawText = typeof body?.rawText === "string" ? body.rawText.trim() : "";
   const imageMimeType = normalizeImageMimeType(body?.imageMimeType);
@@ -23,6 +38,14 @@ export async function POST(request: Request) {
 
   if (!body || (!rawText && !imageDataUrl)) {
     return NextResponse.json({ error: "rawText or imageDataUrl is required" }, { status: 400 });
+  }
+
+  if (rawText.length > MAX_RAW_TEXT_CHARS) {
+    return NextResponse.json({ error: `rawText must be ${MAX_RAW_TEXT_CHARS} characters or fewer` }, { status: 413 });
+  }
+
+  if (imageDataUrl && imageDataUrl.length > MAX_IMAGE_DATA_URL_CHARS) {
+    return NextResponse.json({ error: "image data is too large" }, { status: 413 });
   }
 
   if ((body.imageDataUrl || body.imageBase64) && !imageDataUrl) {
@@ -40,7 +63,7 @@ export async function POST(request: Request) {
     const result = await backendPorts.multimodalImportParser.parseImport({
       sourceType: body.sourceType ?? (imageDataUrl ? "image" : "text"),
       rawText,
-      attachmentName: body.attachmentName,
+      attachmentName: normalizeAttachmentName(body.attachmentName),
       imageDataUrl,
       imageMimeType
     });
@@ -58,6 +81,10 @@ function normalizeImageMimeType(value: unknown) {
   return typeof value === "string" && /^image\/(?:jpeg|jpg|png|webp)$/i.test(value.trim())
     ? value.trim().toLowerCase().replace("image/jpg", "image/jpeg")
     : "image/jpeg";
+}
+
+function normalizeAttachmentName(value: unknown) {
+  return typeof value === "string" ? value.trim().slice(0, 200) : undefined;
 }
 
 function normalizeImageDataUrl(imageDataUrl: unknown, imageBase64: unknown, imageMimeType: string) {

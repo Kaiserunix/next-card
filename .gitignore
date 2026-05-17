@@ -32,5 +32,8 @@ Thumbs.db
 .codex-*
 tsconfig.tsbuildinfo
 
+# local backend state
+.next-card-data/
+
 # Claude Code local settings
 .claude/
