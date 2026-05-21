@@ -1,34 +1,13 @@
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Next Card",
-  description: "Turn goals and timetables into calm action card decks.",
-  applicationName: "Next Card",
-  appleWebApp: {
-    capable: true,
-    title: "Next Card",
-    statusBarStyle: "default"
-  },
-  formatDetection: {
-    telephone: false
-  }
+  description: "Next Card backend-capable MVP shell",
 };
 
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  viewportFit: "cover",
-  themeColor: "#fbf1ea"
-};
-
-export default function RootLayout({
-  children
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="zh-CN">
       <body>{children}</body>

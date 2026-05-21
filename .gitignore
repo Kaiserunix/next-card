@@ -36,3 +36,6 @@ playwright-report/
 
 # Local planning notes
 任务/
+废弃文件夹/
+external/
+.nextcard-data/

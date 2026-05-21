@@ -1,6 +1,5 @@
-node_modules/
-.next/
-out/
-dist/
-build/
-next-env.d.ts
+.next
+node_modules
+external
+废弃文件夹
+.nextcard-data
