@@ -3,11 +3,11 @@
 Next Card is a demo-ready Web MVP for turning a one-sentence goal, written plan,
 attachment, notification, or timetable into an AI-planned task card deck.
 
-The first implementation pass is now a runnable Next.js app. The app is forced
-into a mobile-only WebView shape so it can later be wrapped as an Android APK.
-The current focus is the `input` experience: a calm Pi-inspired composer, mock
-Plan Mode analysis, three execution plans, task-flow generation, a generated deck
-cover, and an initial proof record.
+The first implementation pass is now a runnable Next.js app with a mobile-only
+WebView shape and a backend service layer. The visible frontend loop is usable,
+while current work focuses on production-facing backend capabilities: structured
+Plan Mode, import review, priority scheduling, freeze return, worker ticks, and
+pluggable notification/calendar/database ports.
 
 ## Run
 
@@ -30,14 +30,9 @@ pnpm test
 pnpm build
 ```
 
-`pnpm build` uses `output: "export"` and produces a static bundle in:
-
-```text
-out/
-```
-
-That folder is the APK WebView handoff artifact if the Android wrapper wants to
-load local assets instead of a hosted URL.
+This repo now uses a Next.js server runtime because `app/api/backend/*` routes
+are part of the product surface. Static `out/` exports are historical artifacts,
+not the current backend-capable run target.
 
 ## Current Stack
 
@@ -58,10 +53,117 @@ docs/AI-BEHAVIOR.md
 ```
 
 Use it together with `docs/backend-extension-boundaries.md` before replacing
-mock planning, OCR, persistence, reminders, or calendar behavior.
+local fallback planning, multimodal import parsing, persistence, reminders, or calendar
+behavior.
 
-No real OCR, OpenAI API, backend, auth, reminders, calendar sync, or notification
-service is connected yet.
+Core backend services are present under `lib/server/*`. Web Push, iCalendar,
+and Mimo OpenAI-compatible AI providers are wired; login, production database,
+and cloud storage are outside the current slice.
+
+## Backend API Surface
+
+Current route handlers:
+
+```text
+GET  /api/backend/health
+POST /api/backend/plan-mode
+POST /api/backend/import/review
+POST /api/backend/schedule/plan
+POST /api/backend/freeze/return
+POST /api/backend/worker/tick
+GET  /api/backend/push/public-key
+POST /api/backend/push/subscriptions
+POST /api/backend/push/send
+POST /api/backend/calendar/events
+```
+
+Core backend modules:
+
+```text
+lib/server/backend-ports.ts
+lib/server/backend-services.ts
+lib/server/schedule-planner.ts
+lib/server/freeze-return-agent.ts
+lib/server/import-coverage.ts
+lib/server/plan-mode-service.ts
+lib/server/backend-worker.ts
+lib/server/queue-repository.ts
+lib/server/provider-dispatch.ts
+lib/server/agent-runtime.ts
+lib/server/providers/mimo-ai-provider.ts
+lib/server/providers/web-push-notification-provider.ts
+lib/server/providers/push-subscription-repository.ts
+lib/server/providers/ics-calendar-provider.ts
+```
+
+Agent runtime relationships are documented in:
+
+```text
+docs/agent-runtime-architecture.md
+```
+
+## Voice Backend Slice
+
+The first backend-capable slice covers voice input only:
+
+- `POST /api/backend/voice/transcribe`
+- `POST /api/backend/voice/normalize`
+- `POST /api/backend/voice/readiness`
+- `POST /api/backend/voice/confirm`
+
+The experience version uses Volcengine ASR through `VOLCENGINE_ASR_API_KEY` and `VOLCENGINE_ASR_RESOURCE_ID=volc.bigasr.auc_turbo`.
+
+Limits:
+
+- 30 seconds per clip
+- 30 clips per anonymous device per day
+- 10 total minutes per anonymous device per day
+
+The backend stores voice usage records and confirmed transcript metadata in local JSON. Deck and proof state remain frontend `localStorage` state in this slice.
+
+## Real Mimo AI Provider
+
+Plan Mode uses `MIMO_PLANNER_MODEL` and multimodal import review uses
+`MIMO_MULTIMODAL_MODEL` when `MIMO_API_KEY` is present. Without a key, both
+ports fall back to deterministic local behavior.
+
+```text
+MIMO_BASE_URL=https://token-plan-cn.xiaomimimo.com/v1
+MIMO_API_KEY=
+MIMO_PLANNER_MODEL=mimo-v2.5-pro
+MIMO_MULTIMODAL_MODEL=mimo-v2.5
+MIMO_TIMEOUT_MS=30000
+NEXT_CARD_AI_STRICT=false
+```
+
+The browser composer also calls `/api/backend/plan-mode` after local deck
+creation and merges returned model analysis into the visible plan summary.
+
+## Real Push And Calendar Providers
+
+Push provider: Web Push / VAPID.
+
+```text
+NEXT_CARD_PUSH_VAPID_SUBJECT=mailto:admin@example.com
+NEXT_CARD_PUSH_VAPID_PUBLIC_KEY=...
+NEXT_CARD_PUSH_VAPID_PRIVATE_KEY=...
+NEXT_CARD_PUSH_SUBSCRIPTIONS_FILE=optional path
+```
+
+The browser reads `GET /api/backend/push/public-key`, creates a
+`PushSubscription`, then posts that JSON to `POST /api/backend/push/subscriptions`.
+Reminder actions from the worker are dispatched through the same provider.
+
+Calendar provider: iCalendar / `.ics`.
+
+```text
+NEXT_CARD_CALENDAR_DIR=optional path
+NEXT_CARD_CALENDAR_NAME=Next Card
+NEXT_CARD_CALENDAR_DEFAULT_DURATION_MINUTES=25
+```
+
+Calendar actions write deterministic `.ics` files that common calendar clients
+can import.
 
 ## Mobile WebView Target
 
@@ -81,7 +183,7 @@ Current decisions:
 - The root viewport uses `viewport-fit=cover` and CSS safe-area env values.
 - The UI supports practical Android widths from `360px` upward.
 - State persists through `localStorage`, so Android WebView must enable DOM storage.
-- The Next build exports static files for WebView packaging.
+- The Next build runs with server API routes for backend-capable WebView testing.
 
 Android wrapper requirements:
 
@@ -92,9 +194,9 @@ webView.settings.loadWithOverviewMode = true
 webView.settings.useWideViewPort = true
 ```
 
-If loading the exported app locally, point the WebView at the generated static
-entry after copying `out/` into Android assets. If loading remotely, use an HTTPS
-deployment of the same static export.
+If the Android wrapper needs the backend-capable build, load an HTTPS or local
+LAN deployment of the Next.js server. A purely static local asset bundle will not
+include `app/api/backend/*`.
 
 Do not add desktop breakpoints or dashboard-style layouts. Any new page or
 component should be designed inside the same mobile WebView frame first.
@@ -181,10 +283,9 @@ Main actions:
 
 Next work:
 
-- Keep mock planning stable while the deck interaction is built.
-- Later replace `mockAnalyzeInput` and plan generation with a real planning API.
-- When real OCR arrives, connect it through the existing `imageSchedule` and
-  `parsedText` fields instead of creating a separate page.
+- Expand the composer from backend Plan Mode calibration to fully backend-owned deck generation.
+- Wire real uploaded image bytes into `/api/backend/import/review`; current UI still uses mock attachment/image text.
+- Keep the local fallback stable whenever Mimo is unavailable or `NEXT_CARD_AI_STRICT=false`.
 
 ## Deck Page Contract
 
@@ -276,7 +377,7 @@ Next work:
 
 ## Mock AI Contract
 
-All mock AI lives in:
+Local fallback AI lives in:
 
 ```text
 lib/mock-ai.ts
@@ -294,8 +395,15 @@ Current functions:
 - `mockRescheduleFrozenCard`
 - `mockGenerateProofSummary`
 
-Keep these deterministic. The MVP should feel smart, but it should not call real
-AI services yet.
+Keep these deterministic so backend/API work can fall back safely when provider
+adapters are unavailable.
+
+Real AI provider adapters live in:
+
+```text
+lib/server/providers/mimo-ai-provider.ts
+lib/client/plan-mode-client-adapter.ts
+```
 
 Backend extension boundaries are documented in:
 
@@ -303,8 +411,8 @@ Backend extension boundaries are documented in:
 docs/backend-extension-boundaries.md
 ```
 
-Use that boundary map before wiring real OCR, OpenAI planning, backend
-persistence, reminders, calendar sync, or proof export.
+Use that boundary map before changing multimodal import parsing, AI planning, backend persistence,
+reminders, calendar sync, or proof export.
 
 ## State Contract
 
@@ -339,14 +447,15 @@ Tune the deck execution surface on real mobile WebView.
 
 Minimum scope:
 
-1. Install the static `out/` bundle in an Android WebView wrapper.
+1. Run the backend-capable Next.js app from a reachable HTTPS/LAN URL.
 2. Test drag thresholds, double click, triple click, and WebAudio on device.
 3. Add native back-button handling for `input / deck / proof` mode history.
 4. Add a resume screen for frozen cards in `rescheduleQueue`.
 5. Run `pnpm lint`, `pnpm test`, and `pnpm build`.
 
-Do not start real OCR, OpenAI API, backend, reminders, or calendar sync until the
-mock deck loop is complete and demo-stable.
+Do not bypass `lib/server/backend-ports.ts` when adding multimodal import parsing, AI planning,
+database, reminders, or calendar sync. Keep the local fallback path working while
+provider adapters are added.
 
 ## Suggested APK Wrapper Work
 
@@ -356,7 +465,7 @@ separate native wrapper project or a later `android/` folder.
 Recommended Android-side steps:
 
 1. Run `pnpm build`.
-2. Copy `out/` into Android assets or deploy it to HTTPS.
+2. Deploy/run the Next.js server target for backend-capable API routes.
 3. Create a single-Activity WebView wrapper.
 4. Enable JavaScript and DOM storage.
 5. Load the local `index.html` or hosted URL.
