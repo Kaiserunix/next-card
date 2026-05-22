@@ -10,6 +10,86 @@ Next Card turns a user's one-sentence goal, written plan, attachment, notificati
 
 The product must feel like a modern, calm, card-based action companion. It must not feel like a normal Todo list, a backend dashboard, a marketing landing page, or a word-memorization app.
 
+## Active 2026-05-21 Alignment
+
+This section resolves the latest PM realignment and overrides older ambiguous wording in this file.
+
+### Product Positioning
+
+- First feeling: `I speak lightly, then the app plans`.
+- `只做一张卡` is allowed only as low-pressure input-page copy. It is not the core product doctrine and must not replace explicit Plan Mode.
+- First redesign target: student course, assignment, timetable, early-class, and deadline pressure scenarios first; general personal tasks remain compatible.
+- The teammate frontend in `external/next-card-119` is a reference for mobile WebView framing, compact input, `今日证据`, catalog drawer, and card detail overlay patterns. It is not the final product contract.
+
+### Fixed Product Decisions
+
+- Explicit Codex-like Plan Mode remains mandatory: understand first, decompose second, offer A/B/C choices third.
+- Do not default directly into `方案一`.
+- Formal deck execution uses the old gesture baseline: left/right complete, down shows status, deeper down freezes.
+- Voice confirmation can use left reject / right continue where already decided.
+- Burning is pressure feedback only. It must not fail, shame, lock, or hard-stop the deck.
+- Proof uses the full evidence system: colored table, charts, blog-style journal, and summary. `今日证据` may be the friendly top entrance inside proof.
+- Summary document must be copyable in the redesigned product. Download/export is future work.
+- Card details should expand inline for short detail and use an overlay for long detail.
+- Deck catalog can exist only as a drawer/status layer. It must not turn active deck execution into a Todo list.
+
+### Voice And Backend Slice
+
+- First backend implementation is voice-only: ASR, quota, transcript review contract, light normalization, readiness gate, and confirmed transcript metadata.
+- First backend implementation assumes a backend-capable Next server. Do not treat static export as the primary backend shape for this slice.
+- Core voice routes live under `app/api/backend/voice/*`.
+- `POST /api/backend/plan-mode` and streaming voice sessions are future boundaries, not part of the first voice slice.
+- Post-voice Plan Mode backend is designed in `docs/superpowers/specs/2026-05-21-post-voice-plan-mode-backend-design.md`: it accepts `PlanCompilerHandoff`, returns a `PlanModeDraft` with explicit A/B/C options, and must not commit decks, write proof, create reminders, schedule cards, or default to option A.
+- Plan Mode drafts may be stored for regeneration and later deck commit reference, but committed deck/card/proof/reminder authority remains in separate services.
+- Volcengine ASR is the first implemented provider, using the newer `X-Api-Key` route:
+  - `VOLCENGINE_ASR_API_KEY`
+  - `VOLCENGINE_ASR_RESOURCE_ID=volc.bigasr.auc_turbo`
+- Aliyun and Tencent remain provider types and adapter slots only in the first slice. Do not implement their clients yet.
+- Experience quota: 30 seconds per clip, 30 clips per anonymous device per day, 10 total minutes per anonymous device per day.
+- `localStorage` remains the deck/proof persistence baseline and offline fallback for this phase. Backend local JSON is authoritative only for voice usage records and confirmed transcript metadata.
+- System input-method dictation is treated as voice-like in the user flow, labeled `manual-dictation`, and does not count toward Volcengine ASR usage.
+
+### Import And Review Gates
+
+- Small voice/text inputs should stay lightweight.
+- Large or multimodal imports must pass review/coverage before deck creation.
+- Hard time locks remain non-negotiable. User-fixed notebook/calendar times cannot be silently moved.
+
+### Hidden Agent And Profile Architecture
+
+- All agents are hidden internal software capabilities. Do not expose agent layers, agent names, or multi-agent chat as user-facing product language.
+- The current architecture direction is three hidden capability layers: input organizing, time guardian, and action review/profile. A layer may contain multiple workers, adapters, services, and policy modules; it does not mean one agent per layer.
+- Hidden agents/model workers may only produce candidates, drafts, proposals, policy hints, and explanations. Authoritative writes must go through deterministic services, review gates, policy gates, permission gates, and authority stores.
+- The runtime control plane owns state authority, routing, idempotency, conflict resolution, audit logging, profile/policy versioning, and rollback-safe writes. It is not a user-facing agent.
+- The input organizing layer preserves raw input, lightly normalizes user speech/text, accepts multimodal course/task inputs such as timetable images, PDF/Word requirements, and notification text, extracts task/time/location entities, judges semantic sufficiency, and prepares deck drafts without bypassing explicit A/B/C Plan Mode.
+- Before entering a committed deck, the user must confirm core facts: event/task, time/deadline/window, location when relevant, task type, fixed-vs-one-off lifecycle, and high-risk source evidence. Large inputs should first ask for rough scope confirmation such as time/location/deadline ranges, then only drill into risky or ambiguous facts.
+- The time guardian layer owns automatic analysis and internal event insertion: schedule insertion, card execution windows, hard-time-lock protection, guaranteed user-default reminders, additional nudges, deadline warnings, soft-task good lines, and freeze-return review. Its detailed architecture source is `docs/superpowers/specs/2026-05-21-time-guardian-architecture.md`.
+- Time Guardian must represent mutations as validated `QueueAction` records over a versioned schedule snapshot. It may insert internal schedule events around verified facts, but it must not silently invent or move `TimeLock`, schedule unchosen A/B/C options, delete baseline reminders, fake external notification delivery, or directly append proof.
+- Default reminder lead time is 30 minutes, but users may choose 15/30/45/custom; agent output may refine or add reminders but must not remove the guaranteed user-default reminder.
+- The action review/profile layer is a lightweight adaptation layer, not an MVP blocker or personality engine. Its detailed adaptation source is `docs/superpowers/specs/2026-05-21-action-review-profile-adaptation-plan.md`.
+- The action review/profile layer reads proof events and emits versioned `ProfileSnapshot` / `AgentPolicy` suggestions. It must not directly mutate deck, card, reminder, proof, deadline, or hard-lock state.
+- MVP profile behavior should default to static/unknown or explicit user preference. Automatic profile updates, adaptive reminders, and system-generated soft tasks are V1/experiment features unless a later plan explicitly enables them.
+- Profile is a behavior-support model, not a psychological diagnosis or moral score. Use neutral concepts such as activation support, time-estimate calibration, progress rhythm, reminder pressure fit, task granularity, reminder strength, and time buffer.
+- Do not use user-facing labels such as lazy, low self-discipline, personality score, or failure tendency. Low-start-support behavior should lower the first-step threshold, not permanently lower the user's goal.
+- Each deck should preserve goal integrity: baseline goal, standard goal, progress goal, and quality debt. Policy may shrink the next progress step but must not silently reduce baseline or standard goals.
+- High-risk multimodal inputs such as image schedules, PDF/Word course requirements, and notification messages that change deadlines or hard locks require review gates with source evidence before authoritative commit.
+
+### Soft Tasks And Deck Library
+
+- The deck library means canonical generated deck/task data, not a template marketplace. It includes user-generated decks, system-generated soft tasks, fixed recurring tasks, one-off tasks, future scheduled decks, frozen decks/cards, and proof-linked history.
+- Soft tasks are deadline-flexible, not necessarily deadline-free. Before Agent2's recommended good action line they are optional; after that line they can become required, repeatedly nudged, or deadline-sensitive.
+- Agent2 decides whether a task is soft, recommended, deadline-sensitive, or hard at setup/scheduling time. It may push soft tasks when time is available, but must protect hard locks.
+- Agent3 may generate system tasks, and those system-generated tasks are soft by default. Agent2 decides when to surface them.
+- Freezing does not delete a task from the deck library. It returns the task/deck to Agent2 review for factual rescheduling.
+- Agent1 produces a deck once from a user input and must classify fixed recurring tasks separately from one-off tasks. The user should be able to see that lifecycle classification after deck generation.
+
+### Work Tracks
+
+Use two separate tracks:
+
+- PM Q&A track: update decisions, ask unresolved product questions, inspect reference frontend for inspiration, and write specs/plans only. Do not implement product code in this track.
+- Execution track: implement from written plans only. Do not reopen PM questions unless the plan has a contradiction or blocker.
+
 ## Core Loop
 
 ```text
@@ -33,7 +113,9 @@ Open app
 - The top navigation must expose exactly three primary modes: `input`, `deck`, `proof`.
 - Every generated card must be an already-decomposed action task, not a broad goal.
 - Do not display the active deck as a Todo list. The execution surface should focus on one important card at a time.
-- Use mock AI, mock OCR, and local state for MVP. Do not connect real OCR, real OpenAI API, real backend, login, or calendar sync in this version.
+- The frontend loop is usable enough; new work should be backend-first unless the user explicitly asks for UI redesign.
+- Keep deterministic local fallbacks, but core backend services and API routes are now allowed and expected. Real provider adapters must plug into `lib/server/backend-ports.ts`.
+- Agent scheduling must respect hard time locks. User-fixed notebook/calendar times cannot be silently moved; the agent may suggest, insert, reveal, or ask for review.
 - Time UI must live on the task card itself, not only on the overview page.
 - Burning, sparks, freezing, cracking, and weathering are state feedback. They must not block card readability or shame the user.
 - `proof` must turn behavior into visible evidence: colored table, charts, actual time, burn/freeze records, and readable summary.
@@ -458,7 +540,7 @@ type ProofsState = {
 
 ## Mock AI Requirements
 
-Do not use real AI services in MVP. Mock functions must produce realistic, stable outputs.
+`lib/mock-ai.ts` remains the deterministic local fallback. Production-facing backend work should wrap or replace it through service adapters instead of importing provider clients in UI components.
 
 Required mock functions:
 
@@ -508,7 +590,10 @@ Visual rules:
 - Use Framer Motion for swipe, freeze, and card transitions.
 - Use CSS animation or Framer Motion for sparks, burn, time rail, crack, and weathering.
 - Do not introduce heavy particle engines.
-- Do not implement real OCR, backend, OpenAI API, auth, calendar sync, or notifications in MVP.
+- Core backend route handlers live under `app/api/backend/*`.
+- Backend business logic belongs in `lib/server/*`; API routes should stay thin.
+- Multimodal import parsing, AI planning, notifications, calendar sync, and database persistence must be adapter-backed through `lib/server/backend-ports.ts`.
+- Keep localStorage as an offline frontend fallback, but do not treat it as canonical production state.
 - If audio is blocked, degrade gracefully to visual feedback.
 
 ## Recommended Structure
@@ -551,28 +636,68 @@ components/proof/ProofCharts.tsx
 components/proof/SummaryDocument.tsx
 lib/mock-ai.ts
 lib/types.ts
-store/useCodeXStore.ts
+lib/server/backend-ports.ts
+lib/server/schedule-planner.ts
+lib/server/freeze-return-agent.ts
+lib/server/import-coverage.ts
+lib/server/plan-mode-service.ts
+lib/server/backend-worker.ts
+store/useNextCardStore.ts
 ```
 
 ## Implementation Order
 
-Implement in this order:
+Current backend-first order:
 
-1. Initialize project and base style.
-2. Implement top `input / deck / proof` mode switching.
-3. Implement input composer and mock AI analysis.
-4. Implement plan option selection and `否，重新生成`.
-5. Implement task flow overview.
-6. Implement deck library and single active card.
-7. Implement card time UI: estimated time, time window, urgency stage, timing, burning state.
-8. Implement double-click sparks/timing and triple-click quick burning mode.
-9. Implement left/right swipe completion.
-10. Implement down-swipe status bar and deeper down-swipe freeze prompt.
-11. Implement frozen-card reschedule queue.
-12. Implement reward cards with time performance.
-13. Implement proof table, charts, actual time, burn/freeze records, and summary document.
-14. Add localStorage persistence.
-15. Run verification and fix issues.
+1. Keep the `input / deck / proof` contract and the Active 2026-05-21 Alignment above.
+2. Execute the first backend slice from `docs/superpowers/plans/2026-05-21-voice-backend-implementation-plan.md`.
+3. Keep first-slice backend logic in typed services under `lib/server/voice/*` and provider ports under `lib/server/backend-ports.ts`.
+4. Keep Plan Mode, deck/proof backend writes, streaming ASR, Android bridge, Aliyun/Tencent clients, and frontend redesign out of the first voice slice.
+5. For later planner work, protect `PriorityVector`, `QueueAction`, and `TimeLock` rules with tests before changing planner behavior.
+6. Route large or multimodal imports through coverage review before deck creation.
+7. Swap provider implementations through `backend-ports`, not UI components.
+8. Run verification and fix issues.
+
+## Git Worktree Commit Model
+
+When this repo is in a mixed backend/frontend/documentation dirty state, do not use `git add .`.
+
+Default commit discipline:
+
+1. Inspect the active branch and dirty state with `git status --short --branch`.
+2. Stage only the files for the completed package or execution slice.
+3. Keep GitHub governance files, old frontend removal, backend runtime, MiMo adapters, and architecture docs in separate commits unless the user explicitly asks for a combined checkpoint.
+4. Before committing, run `git diff --staged --stat` and `git diff --staged --check`.
+5. Verify the staged package with the narrow package tests plus the repo gate required by the touched area.
+6. Commit only after the staged diff is self-contained enough for the branch history.
+7. Push the branch only after the local commit succeeds and the user has not asked to keep it local.
+
+For MiMo A/B/C import packages, the intended staged set is:
+
+```powershell
+git add -- `
+  app/api/backend/import `
+  lib/server/import-review `
+  lib/server/input-layer/mimo-extraction-validator.ts `
+  lib/server/input-layer/mimo-multimodal-extractor.ts `
+  lib/server/mimo/image-preprocess.ts `
+  lib/server/backend-ports.ts `
+  scripts/real-mimo-test-service.mjs `
+  package.json `
+  tests/api/backend/import `
+  tests/server/import-review `
+  tests/server/input-layer/mimo-extraction-validator.test.ts `
+  tests/server/input-layer/mimo-multimodal-extractor.test.ts `
+  tests/server/mimo/image-preprocess.test.ts
+```
+
+If that staged set references uncommitted backend foundation files, stage the required backend dependency files explicitly instead of relying on unstaged files. Never include unrelated `components/`, `store/`, old frontend tests, or `.github` deletions in a MiMo A/B/C commit.
+
+Recommended MiMo A/B/C commit message:
+
+```text
+feat: route real MiMo image imports through input review
+```
 
 ## Acceptance Criteria
 
@@ -617,4 +742,4 @@ Final implementation summary must include:
 - How to run.
 - Verification results.
 - Remaining mocked capabilities.
-- Extension points for real OCR, OpenAI API, backend, reminders, or calendar sync.
+- Extension points for multimodal import parsing, AI provider, backend, reminders, or calendar sync.

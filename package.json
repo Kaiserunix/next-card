@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node --max-old-space-size=8192 ./node_modules/next/dist/bin/next build --turbopack",
     "lint": "eslint . --ext .ts,.tsx",
+    "real:mimo": "node scripts/real-mimo-test-service.mjs",
     "test": "vitest run",
     "typecheck": "tsc --noEmit --incremental false"
   },
@@ -24,9 +25,14 @@
     "autoprefixer": "10.4.22",
     "eslint": "8.57.1",
     "eslint-config-next": "15.5.18",
-    "postcss": "8.5.6",
+    "postcss": "8.5.14",
     "tailwindcss": "3.4.19",
     "typescript": "5.9.3",
     "vitest": "4.0.14"
+  },
+  "pnpm": {
+    "overrides": {
+      "postcss": "8.5.14"
+    }
   }
 }
