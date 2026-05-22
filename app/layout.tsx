@@ -3,8 +3,8 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Next Card",
-  description: "Next Card backend-capable MVP shell",
+  title: "Next Card Simulation",
+  description: "Next Card time guardian timeline simulation",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
