@@ -188,3 +188,35 @@ DOCX 成功走本地文本抽取、PDF fallback blocked 时，`providerUsage()` 
 理由：
 
 后端主链路已经够完整，继续堆服务收益下降。现在最大的风险变成“真实人怎么使用确认/选择/执行这条链”，也就是 dogfood 入口和 timeline 可理解性。
+
+## Post-P0 Dogfood 收口状态
+
+更新时间：2026-05-22。
+
+已收口：
+
+1. Proof Timeline 不再把 `reminder_created` 投影成 `reminder_delivered`，当前只表达 `提醒已记录`。
+2. DOCX/PDF import 的 `providerUsage` 改为按实际 extraction path 上报：DOCX/TXT 本地文本抽取为 `document-text used:true`，PDF 不可抽取 fallback 为 `document-text used:false reason:document_text_unavailable`。
+3. Card Runtime 的 `freeze-card` queue action 已进入 `validateQueueAction()` 校验；校验失败时返回 user-review queue action，不写冻结状态或 proof。
+4. `pnpm backend:chain` 已明确打印 `multimodal provider: mock` 或 `route`，避免把 direct mock chain 误读成真实 MiMo。
+5. 新增 `pnpm backend:dogfood`，可跑 `import -> confirm -> A/B/C -> card action -> proof timeline` 的开发者 CLI dogfood 链路。
+
+本轮验证：
+
+```text
+pnpm test: 98 files / 556 tests passed.
+pnpm typecheck: passed.
+pnpm lint: passed.
+pnpm build: passed.
+pnpm backend:chain text-assignment: mock provider, deck_committed/card_started/card_completed.
+pnpm backend:chain crowded-timeline: mock provider, defer-card, card_deferred.
+pnpm backend:chain strict-image-confirmed: mock provider, strict review confirmed, card_completed.
+pnpm backend:dogfood text: IMPORT_REVIEW strict, PLAN_OPTIONS plan-a/plan-b/plan-c, SELECTED plan-b, proof timeline deck_committed/card_started/card_completed.
+pnpm real:mimo text: OK text-course-hardlock, parsed=true, options=3.
+pnpm real:mimo image: OK courseSchedule, parsed=true, events=11, times=11, locations=2.
+```
+
+仍非阻塞：
+
+- `pnpm real:mimo` 仍会输出 `MODULE_TYPELESS_PACKAGE_JSON` warning；这不影响 smoke 结果，仍不建议为了该 warning 给整个 package 增加 `"type": "module"`。
+- 生产数据库、外部通知 delivery audit、日历 sync、OCR PDF/table reconstruction、完整前端 dogfood UI 仍然刻意不做。
