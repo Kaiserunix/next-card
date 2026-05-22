@@ -65,6 +65,35 @@ describe("CardRuntimeService", () => {
     expect(second.boundaryWarnings).toContain("idempotent-replay: duplicate requestId returned existing result");
   });
 
+  it("rejects requestId reuse for a different deck/card/action tuple", async () => {
+    const harness = await createCommittedDeckHarness("plan-b", { get current() { return tempDir; }, set current(value) { tempDir = value; } });
+    const firstCard = harness.cards[0];
+    const secondCard = harness.cards[1];
+
+    await harness.runtimeService.applyAction({
+      requestId: "card_req_idempotency_conflict",
+      deckId: harness.deck.deckId,
+      cardId: firstCard.cardId,
+      action: "complete",
+      actualMinutes: 5,
+      clientContext: { now: "2026-05-22T09:10:00.000Z", timezone: "Asia/Shanghai" },
+    });
+
+    await expect(
+      harness.runtimeService.applyAction({
+        requestId: "card_req_idempotency_conflict",
+        deckId: harness.deck.deckId,
+        cardId: secondCard.cardId,
+        action: "freeze",
+        clientContext: { now: "2026-05-22T09:11:00.000Z", timezone: "Asia/Shanghai" },
+      }),
+    ).rejects.toMatchObject({
+      code: "CARD_RUNTIME_IDEMPOTENCY_CONFLICT",
+      status: 409,
+    });
+    expect((await harness.ledger.getTimeline()).events.filter((event) => event.type === "card_completed")).toHaveLength(1);
+  });
+
   it("freezes without deleting the committed card and returns a Time Guardian review action", async () => {
     const harness = await createCommittedDeckHarness("plan-c", { get current() { return tempDir; }, set current(value) { tempDir = value; } });
     const card = harness.cards[1];

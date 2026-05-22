@@ -52,4 +52,22 @@ describe("POST /api/backend/sandbox/run", () => {
     expect(body.proofTimeline[0].type).toBe("deck_committed");
     expect(serialized).not.toContain("tp-test-secret");
   });
+
+  it("rejects local filePath input on the public HTTP route", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/backend/sandbox/run", {
+        method: "POST",
+        body: JSON.stringify({
+          sourceType: "image",
+          filePath: "C:\\Windows\\win.ini",
+          selectedOptionId: "plan-b",
+        }),
+      }),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.message).toContain("filePath is disabled");
+    expect(body.recoverable).toBe(true);
+  });
 });

@@ -8,7 +8,7 @@ import {
   type PlanModeDraftRepository,
 } from "@/lib/server/plan-mode/plan-mode-repository";
 import { validatePlanModeRequest } from "@/lib/server/plan-mode/request-validation";
-import type { PlanModeDraft, PlanModeProviderPort, PlanModeResponse } from "@/lib/server/plan-mode/types";
+import type { PlanModeDraft, PlanModeProviderPort, PlanModeRequest, PlanModeResponse } from "@/lib/server/plan-mode/types";
 
 export type PlanModeServiceOptions = {
   provider?: PlanModeProviderPort;
@@ -38,6 +38,7 @@ export class PlanModeService {
 
   async createDraft(input: unknown): Promise<PlanModeResponse> {
     const request = validatePlanModeRequest(input);
+    await this.assertRegenerateUsesSameHandoff(request);
     const createdAt = this.now();
     const draft = validatePlanModeDraft(
       await this.generateWithFallback(async (provider) => {
@@ -69,6 +70,27 @@ export class PlanModeService {
       return fallbackDraft;
     } catch (fallbackError) {
       throw normalizeProviderError(fallbackError);
+    }
+  }
+
+  private async assertRegenerateUsesSameHandoff(request: PlanModeRequest): Promise<void> {
+    if (request.operation !== "regenerate") return;
+
+    const previous = await this.repository.getDraft(request.previousPlanModeDraftId!);
+    if (!previous) {
+      throw new PlanModeServiceError("INVALID_PLAN_MODE_REQUEST", "previousPlanModeDraftId was not found.", 404, true);
+    }
+
+    if (
+      previous.planCompilerHandoffId !== request.planCompilerHandoff.id ||
+      previous.verifiedInputBundleId !== request.planCompilerHandoff.verifiedInputBundleId
+    ) {
+      throw new PlanModeServiceError(
+        "INVALID_PLAN_MODE_REQUEST",
+        "Regenerate must use the same PlanCompilerHandoff as the previous draft.",
+        409,
+        true,
+      );
     }
   }
 }

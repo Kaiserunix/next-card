@@ -33,4 +33,37 @@ describe("plan mode regeneration", () => {
     expect((await repository.getDraft(first.draft.id))?.previousPlanModeDraftId).toBeUndefined();
     expect(await repository.listDraftsByHandoff(first.draft.verifiedInputBundleId)).toHaveLength(2);
   });
+
+  it("rejects regenerate requests that swap the original PlanCompilerHandoff", async () => {
+    tempDir = await mkdtemp(join(tmpdir(), "nextcard-plan-mode-regen-"));
+    const repository = new JsonFilePlanModeDraftRepository(join(tempDir, "drafts.json"));
+    const service = new PlanModeService({ repository, now: () => "2026-05-21T12:00:00.000Z" });
+
+    const first = await service.createDraft(voiceConfirmed);
+    const regenerate = structuredClone(regenerateRequest) as PlanModeRequest;
+    regenerate.previousPlanModeDraftId = first.draft.id;
+    regenerate.planCompilerHandoff = {
+      ...regenerate.planCompilerHandoff,
+      id: "handoff_other_input",
+      verifiedInputBundleId: "bundle_other_input",
+    };
+
+    await expect(service.createDraft(regenerate)).rejects.toMatchObject({
+      code: "INVALID_PLAN_MODE_REQUEST",
+      status: 409,
+    });
+    expect(await repository.listDraftsByHandoff(first.draft.verifiedInputBundleId)).toHaveLength(1);
+  });
+
+  it("rejects regenerate requests when the previous draft cannot be loaded", async () => {
+    tempDir = await mkdtemp(join(tmpdir(), "nextcard-plan-mode-regen-"));
+    const repository = new JsonFilePlanModeDraftRepository(join(tempDir, "drafts.json"));
+    const service = new PlanModeService({ repository, now: () => "2026-05-21T12:00:00.000Z" });
+    const regenerate = structuredClone(regenerateRequest) as PlanModeRequest;
+
+    await expect(service.createDraft(regenerate)).rejects.toMatchObject({
+      code: "INVALID_PLAN_MODE_REQUEST",
+      status: 404,
+    });
+  });
 });

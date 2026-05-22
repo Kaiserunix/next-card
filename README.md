@@ -37,6 +37,15 @@ pnpm backend:chain -- --case text-assignment --selected-option plan-b
 pnpm backend:chain -- --case crowded-timeline --selected-option plan-b
 ```
 
+Developer backend dogfood entry:
+
+```bash
+pnpm backend:dogfood -- --text "今晚八点前交英语作文" --selected-option plan-b --actions start,complete
+pnpm backend:dogfood -- --source image --file "C:\path\schedule.jpg" --confirm --selected-option plan-b --actions complete
+```
+
+`backend:dogfood` is a developer CLI for the backend chain, not the final product UI. It prints import review facts, A/B/C plan options, the selected option, card runtime actions, and proof timeline entries, then writes a JSON report under `.nextcard-data/backend-dogfood-runs/`.
+
 This repo now uses a Next.js server runtime because `app/api/backend/*` routes
 are part of the product surface. Static `out/` exports are historical artifacts,
 not the current backend-capable run target.
