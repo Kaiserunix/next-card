@@ -99,7 +99,31 @@ describe("real-mimo-test-service", () => {
         times: 2,
         eventTimes: 2,
         standaloneTimes: 0,
+        locations: 2,
       });
+
+      const runDir = runDirLine!.slice("runDir=".length);
+      const { stdout: summaryStdout } = await execFileAsync(process.execPath, [scriptPath, "--summarize", runDir], {
+        cwd,
+        env: { ...process.env },
+        timeout: 10000,
+      });
+      expect(summaryStdout).toContain("ok=1 failed=0 skipped=0");
+      expect(summaryStdout).toContain("totals events=2 times=2 locations=2");
+
+      const summary = JSON.parse(await readFile(join(runDir, "summary.json"), "utf8"));
+      expect(summary.imageSourceKindDistribution).toEqual({ courseSchedule: 1 });
+
+      const { stdout: exportStdout } = await execFileAsync(process.execPath, [scriptPath, "--export-fixtures", runDir], {
+        cwd,
+        env: { ...process.env },
+        timeout: 10000,
+      });
+      expect(exportStdout).toContain("EXPORT_FIXTURES");
+      const fixture = await readFile(join(runDir, "exported-fixtures", "image-001-schedule.json"), "utf8");
+      expect(fixture).not.toContain("data:image/");
+      expect(fixture).not.toContain("tp-test-secret");
+      expect(fixture).not.toContain('"content"');
     } finally {
       await new Promise<void>((resolveClose) => server.close(() => resolveClose()));
     }

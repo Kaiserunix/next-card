@@ -62,6 +62,22 @@ const config = {
   maxTokens: numberArg("max-tokens", 900),
 };
 
+if (args.summarize) {
+  const existingRunDir = resolveExistingRunDir(args.summarize);
+  const summary = summarizeRun(existingRunDir);
+  writeJson(join(existingRunDir, "summary.json"), summary);
+  printRunSummary(summary);
+  process.exit(summary.failed > 0 ? 1 : 0);
+}
+
+if (args["export-fixtures"]) {
+  const existingRunDir = resolveExistingRunDir(args["export-fixtures"]);
+  const exportReport = exportFixtures(existingRunDir);
+  writeJson(join(existingRunDir, "export-fixtures-report.json"), exportReport);
+  console.log(`EXPORT_FIXTURES ${exportReport.outputDir} count=${exportReport.count}`);
+  process.exit(0);
+}
+
 if (!config.apiKey) {
   fail("MIMO_API_KEY is missing. Put it in .env.local; this runner never prints it.");
 }
@@ -373,6 +389,7 @@ function summarizeResult(result) {
       times: eventTimes + standaloneTimes,
       eventTimes,
       standaloneTimes,
+      locations: Array.isArray(parsed.extractedLocations) ? parsed.extractedLocations.length : 0,
       warnings: Array.isArray(parsed.warnings) ? parsed.warnings.length : 0,
       sentBytes: result.image?.sentBytes,
       resized: result.image?.resized,
@@ -460,6 +477,136 @@ function resolveRunDir(resumeArg) {
   }
 
   return join(DATA_ROOT, `${timestampForPath()}-${randomUUID().slice(0, 8)}`);
+}
+
+function resolveExistingRunDir(value) {
+  mkdirSync(DATA_ROOT, { recursive: true });
+  if (String(value) === "latest") {
+    const dirs = readdirSync(DATA_ROOT, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => join(DATA_ROOT, entry.name))
+      .sort();
+    if (dirs.length === 0) fail("No previous run exists.");
+    return dirs.at(-1);
+  }
+
+  return resolve(String(value));
+}
+
+function summarizeRun(currentRunDir) {
+  const events = readEvents(currentRunDir);
+  const summary = {
+    runDir: currentRunDir,
+    ok: events.filter((event) => event.status === "ok").length,
+    failed: events.filter((event) => event.status === "failed").length,
+    skipped: events.filter((event) => event.status === "skipped").length,
+    timeoutCount: events.filter((event) => /timed out|timeout/i.test(event.error ?? "")).length,
+    nonJsonCount: events.filter(isNonJsonEvent).length,
+    schemaInvalidCount: events.filter(isSchemaInvalidEvent).length,
+    imageSourceKindDistribution: {},
+    totals: {
+      extractedEvents: 0,
+      extractedTimes: 0,
+      extractedLocations: 0,
+    },
+  };
+
+  for (const event of events) {
+    const sourceKind = event.summary?.sourceKind;
+    if (sourceKind) {
+      summary.imageSourceKindDistribution[sourceKind] = (summary.imageSourceKindDistribution[sourceKind] ?? 0) + 1;
+    }
+    summary.totals.extractedEvents += Number(event.summary?.events ?? 0);
+    summary.totals.extractedTimes += Number(event.summary?.times ?? 0);
+    summary.totals.extractedLocations += Number(event.summary?.locations ?? 0);
+  }
+
+  return summary;
+}
+
+function printRunSummary(summary) {
+  console.log(`SUMMARY ${summary.runDir}`);
+  console.log(`ok=${summary.ok} failed=${summary.failed} skipped=${summary.skipped}`);
+  console.log(`timeout=${summary.timeoutCount} nonJson=${summary.nonJsonCount} schemaInvalid=${summary.schemaInvalidCount}`);
+  console.log(
+    `totals events=${summary.totals.extractedEvents} times=${summary.totals.extractedTimes} locations=${summary.totals.extractedLocations}`,
+  );
+  console.log(`sourceKinds=${JSON.stringify(summary.imageSourceKindDistribution)}`);
+}
+
+function exportFixtures(currentRunDir) {
+  const outputDir = join(currentRunDir, "exported-fixtures");
+  mkdirSync(outputDir, { recursive: true });
+  const responseDir = join(currentRunDir, "responses");
+  const files = [];
+  if (!existsSync(responseDir)) {
+    return { runDir: currentRunDir, outputDir, count: 0, files };
+  }
+
+  for (const name of readdirSync(responseDir).sort()) {
+    if (!name.endsWith(".json")) continue;
+    const sourcePath = join(responseDir, name);
+    const raw = JSON.parse(readFileSync(sourcePath, "utf8"));
+    const targetPath = join(outputDir, name);
+    writeJson(targetPath, sanitizeFixture(raw));
+    files.push(relativeToCwd(targetPath));
+  }
+
+  return { runDir: currentRunDir, outputDir, count: files.length, files };
+}
+
+function sanitizeFixture(raw) {
+  return stripSensitive({
+    id: raw.id,
+    model: raw.model,
+    parsed: raw.parsed,
+    contentLength: typeof raw.content === "string" ? raw.content.length : undefined,
+  });
+}
+
+function stripSensitive(value) {
+  if (typeof value === "string") {
+    if (/data:image\/[a-zA-Z0-9.+-]+;base64,/i.test(value)) return "[redacted-data-url]";
+    if (/tp-[A-Za-z0-9_-]{8,}|sk-[A-Za-z0-9_-]{8,}/.test(value)) return "[redacted-token]";
+    return value;
+  }
+
+  if (Array.isArray(value)) return value.map(stripSensitive);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([key, nested]) => [key, stripSensitive(nested)]));
+  }
+
+  return value;
+}
+
+function readEvents(currentRunDir) {
+  const eventsPath = join(currentRunDir, "events.jsonl");
+  if (!existsSync(eventsPath)) return [];
+  return readFileSync(eventsPath, "utf8")
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .map((line) => {
+      try {
+        return JSON.parse(line);
+      } catch {
+        return { status: "failed", error: "events.jsonl line is non-JSON" };
+      }
+    });
+}
+
+function isNonJsonEvent(event) {
+  return event.summary?.parsed === false || /non-JSON|invalid json/i.test(event.error ?? "");
+}
+
+function isSchemaInvalidEvent(event) {
+  if (event.status !== "ok") return false;
+  if (event.id?.startsWith("image-")) {
+    return event.summary?.needsStrictReview !== true;
+  }
+  if (event.id?.startsWith("text-")) {
+    return Number(event.summary?.options ?? 0) !== 3;
+  }
+  return false;
 }
 
 function readCompletedEvents(currentRunDir) {
@@ -592,6 +739,8 @@ Usage:
   pnpm real:mimo -- --mode image --image "C:\\path\\schedule.jpg" --limit 1
   pnpm real:mimo -- --mode image --image-dir "${DEFAULT_IMAGE_DIR}" --limit 5 --delay-ms 1500
   pnpm real:mimo -- --mode image --resume latest --limit 10
+  pnpm real:mimo -- --summarize latest
+  pnpm real:mimo -- --export-fixtures latest
 
 Modes:
   text   Direct MiMo planner smoke with student task text.
@@ -611,5 +760,8 @@ Options:
   --jpeg-quality N          JPEG quality for prepared images. Default 76.
   --no-resize               Send originals. Not recommended for large generated PNGs.
   --route-url URL           Backend route for --mode route.
+  --summarize latest|DIR    Print and write summary.json for an existing run.
+  --export-fixtures latest|DIR
+                            Export sanitized response fixtures without raw content or data URLs.
 `);
 }

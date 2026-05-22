@@ -62,6 +62,35 @@ pnpm exec next dev -H 127.0.0.1 -p 3022
 pnpm real:mimo -- --mode route --route-url "http://127.0.0.1:3022/api/backend/plan-mode" --limit 1
 ```
 
+汇总最近一次运行：
+
+```powershell
+pnpm real:mimo -- --summarize latest
+```
+
+这会读取 `events.jsonl`，输出并写入 `summary.json`：
+
+- `ok / failed / skipped`
+- timeout count
+- non-json count
+- schema-invalid count
+- image `sourceKind` 分布
+- extracted events / times / locations totals
+
+导出可提交的脱敏 fixture：
+
+```powershell
+pnpm real:mimo -- --export-fixtures latest
+```
+
+导出位置：
+
+```text
+.nextcard-data/mimo-test-runs/<run>/exported-fixtures/
+```
+
+导出文件只保留 `id`、`model`、`parsed` 和 `contentLength`。不会包含 token、原始 data URL 或模型原文 `content`。
+
 ## 设计边界
 
 - 工具读取 `.env.local` 里的 `MIMO_API_KEY`，但不会打印 token。
@@ -70,6 +99,7 @@ pnpm real:mimo -- --mode route --route-url "http://127.0.0.1:3022/api/backend/pl
 - 大 PNG 默认会被压缩成 JPEG 再发送，避免 data URL 太大导致超时。
 - 图片、PDF 截图、课程表、通知等都按高风险来源处理，提示模型输出 `needsStrictReview: true`。
 - 这是测试服务，不写正式 deck、proof、reminder、profile。
+- `--summarize` 和 `--export-fixtures` 不需要 `MIMO_API_KEY`，只读取已有运行目录。
 
 ## 新对话接力提示
 
