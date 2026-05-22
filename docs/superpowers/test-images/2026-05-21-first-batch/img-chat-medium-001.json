@@ -1,0 +1,52 @@
+{
+  "id": "img-chat-medium-001",
+  "sourceType": "image",
+  "category": "chat",
+  "difficulty": "medium",
+  "documentType": "chat notification",
+  "language": "Simplified Chinese",
+  "imageStyle": "ordinary vertical group chat screenshot, portrait 9:16, light theme, message bubbles, visible sentAt times, slight blur and glare",
+  "expectedReview": "strict",
+  "visibleText": [
+    "课程任务群",
+    "2026年5月21日 星期四",
+    "08:12 林老师：同学们，实验记录拍照上传，明天交。",
+    "08:14 周小雨：收到，我今晚整理。",
+    "09:05 何小橙 转发消息",
+    "原消息 2026年5月18日 20:30",
+    "陈助教：阅读提纲明天交，先按旧要求。",
+    "10:20 林老师：提醒：上周的练习册还没交的今天补交，这不是新作业。",
+    "10:28 孙可：中午有人拼饭吗？"
+  ],
+  "expectedCandidates": {
+    "tasks": [
+      {
+        "title": "实验记录拍照上传",
+        "deadline": "2026-05-22",
+        "sourceEvidence": "08:12 林老师：同学们，实验记录拍照上传，明天交。"
+      }
+    ],
+    "staleCandidatesForReview": [
+      {
+        "title": "阅读提纲",
+        "originalSentAt": "2026-05-18 20:30",
+        "relativeDeadlineText": "明天交",
+        "resolvedStaleDate": "2026-05-19"
+      }
+    ],
+    "ignoredText": [
+      "这不是新作业",
+      "中午有人拼饭吗？"
+    ]
+  },
+  "expectedWarnings": [
+    "forwarded_old_relative_date",
+    "teacher_reminder_not_new_deadline",
+    "unrelated_chat_message"
+  ],
+  "mustNotDo": [
+    "create a new deadline from the stale forwarded message without review",
+    "create a task from unrelated lunch chat",
+    "treat teacher reminder marked not new as new assignment"
+  ]
+}

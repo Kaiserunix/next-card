@@ -1,0 +1,23 @@
+﻿{
+    "id":  "img-assignment-hard-003",
+    "sourceType":  "image",
+    "category":  "assignment",
+    "difficulty":  "hard",
+    "imageFile":  "img-assignment-hard-003.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "Reading Response 2",
+                               "outline tonight",
+                               "final before class",
+                               "corrected old date"
+                           ],
+    "expectedWarnings":  [
+                             "due before class",
+                             "corrected date",
+                             "rubric not task"
+                         ],
+    "mustNotDo":  [
+                      "use old corrected date",
+                      "set deadline to end of day"
+                  ]
+}

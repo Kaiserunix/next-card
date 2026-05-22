@@ -1,0 +1,21 @@
+{
+  "requestId": "pm_req_multimodal_timetable_001",
+  "anonymousDeviceId": "anon-device-003",
+  "operation": "generate",
+  "source": "multimodal-confirmed",
+  "planCompilerHandoff": {
+    "id": "handoff_timetable_001",
+    "verifiedInputBundleId": "bundle_timetable_001",
+    "userFacingSummary": "根据已确认课程表，明早 08:00 有实验课，需要今晚准备实验记录本。",
+    "constraints": ["明早 08:00 实验课", "今晚准备实验记录本", "课程地点已由用户确认"],
+    "assumptions": ["实验材料在宿舍"],
+    "missingButNonBlocking": ["是否需要预习报告可稍后补充"],
+    "sourceType": "image",
+    "mustGenerateABC": true
+  },
+  "clientContext": {
+    "now": "2026-05-21T21:00:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "locale": "zh-CN"
+  }
+}

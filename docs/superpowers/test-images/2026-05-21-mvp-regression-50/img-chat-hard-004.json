@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-chat-hard-004",
+    "sourceType":  "image",
+    "category":  "chat",
+    "difficulty":  "hard",
+    "imageFile":  "img-chat-hard-004.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "old forwarded paper format",
+                               "stale deadline warning",
+                               "reference only"
+                           ],
+    "expectedWarnings":  [
+                             "forwarded old message",
+                             "current intent reference"
+                         ],
+    "mustNotDo":  [
+                      "schedule old deadline",
+                      "ignore forwarded timestamp"
+                  ]
+}

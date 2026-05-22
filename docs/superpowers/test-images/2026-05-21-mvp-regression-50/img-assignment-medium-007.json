@@ -1,0 +1,22 @@
+﻿{
+    "id":  "img-assignment-medium-007",
+    "sourceType":  "image",
+    "category":  "assignment",
+    "difficulty":  "medium",
+    "imageFile":  "img-assignment-medium-007.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "Lab 6 Web API",
+                               "main deadline",
+                               "optional extension request",
+                               "deliverables"
+                           ],
+    "expectedWarnings":  [
+                             "optional extension deadline",
+                             "checklist review"
+                         ],
+    "mustNotDo":  [
+                      "submit code only",
+                      "make optional request required"
+                  ]
+}

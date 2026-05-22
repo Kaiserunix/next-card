@@ -1,0 +1,46 @@
+{
+  "caseId": "ambiguous-voice-that-assignment",
+  "path": "light",
+  "rawInput": {
+    "id": "raw_voice_ambiguous_assignment",
+    "sourceType": "voice",
+    "text": "明天那个作业提醒我一下",
+    "sourceHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "locale": "zh-CN",
+    "timezone": "Asia/Shanghai",
+    "createdAt": "2026-05-21T08:05:00.000Z",
+    "receivedAt": "2026-05-21T08:05:00.000Z",
+    "privacyFlags": [],
+    "retentionPolicy": {
+      "rawRetentionDays": 7,
+      "derivedRetentionDays": 30,
+      "userDeletable": true
+    }
+  },
+  "extraction": {
+    "id": "extract_voice_ambiguous_assignment",
+    "rawInputId": "raw_voice_ambiguous_assignment",
+    "candidates": {
+      "tasks": [{ "id": "task_that_assignment", "title": "那个作业", "taskType": "assignment", "confidence": 0.55, "lifecycle": "unknown" }],
+      "timeConstraints": [{ "id": "time_tomorrow", "kind": "soft-window", "label": "明天", "isHard": false, "confidence": 0.65 }],
+      "locations": [],
+      "courses": [],
+      "reminders": [{ "id": "reminder_1", "label": "提醒我一下", "confidence": 0.7 }]
+    },
+    "confidence": 0.56,
+    "ambiguities": ["存在未解析指代", "缺少具体任务对象"],
+    "warnings": ["ambiguous_reference", "relative_date"],
+    "evidence": [{ "rawInputId": "raw_voice_ambiguous_assignment", "quote": "明天那个作业", "confidence": 0.56 }],
+    "reviewRequirement": "light"
+  },
+  "confirmationRequest": {
+    "id": "confirm_voice_ambiguous_assignment",
+    "rawInputId": "raw_voice_ambiguous_assignment",
+    "mode": "light-card",
+    "summary": "我听到你想提醒一个作业，但还不知道具体是哪一项。",
+    "facts": [{ "id": "fact_assignment_ref", "field": "event", "label": "任务", "value": "那个作业", "confidence": 0.55, "evidenceRefs": [] }],
+    "missingFields": ["event", "deadline"],
+    "riskReasons": ["ambiguous_reference", "relative_date"],
+    "canProceedToPlanMode": false
+  }
+}

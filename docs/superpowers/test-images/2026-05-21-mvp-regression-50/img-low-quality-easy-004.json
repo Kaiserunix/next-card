@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-low-quality-easy-004",
+    "sourceType":  "image",
+    "category":  "low-quality",
+    "difficulty":  "easy",
+    "imageFile":  "img-low-quality-easy-004.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "low-light notification",
+                               "lab report draft deadline",
+                               "ask for requirements"
+                           ],
+    "expectedWarnings":  [
+                             "low light",
+                             "content truncated"
+                         ],
+    "mustNotDo":  [
+                      "invent full requirements",
+                      "fake source"
+                  ]
+}

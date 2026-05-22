@@ -1,0 +1,74 @@
+{
+  "caseId": "chosen-plan-c-only",
+  "notificationCapability": "in_app_only",
+  "scheduleSnapshot": {
+    "id": "snapshot_plan_c",
+    "version": 1,
+    "now": "2026-05-21T07:00:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "committedDecks": [
+      {
+        "deckId": "deck_calculus",
+        "chosenPlanId": "plan-c",
+        "title": "Go to calculus class gently"
+      }
+    ],
+    "activeCards": [
+      {
+        "cardId": "card_c_prepare",
+        "deckId": "deck_calculus",
+        "chosenPlanId": "plan-c",
+        "tension": "hard",
+        "estimatedMinutes": 10,
+        "hardLockRefs": ["lock_class_8am"],
+        "nudgeReminderIds": [],
+        "scheduleStatus": "unscheduled"
+      }
+    ],
+    "scheduledEvents": [],
+    "timeLocks": [
+      {
+        "id": "lock_class_8am",
+        "userId": "anon",
+        "kind": "class_time",
+        "startAt": "2026-05-21T08:00:00+08:00",
+        "endAt": "2026-05-21T09:30:00+08:00",
+        "timezone": "Asia/Shanghai",
+        "movable": false,
+        "sourceRefs": [
+          {
+            "rawInputId": "raw_class",
+            "quote": "Calculus starts at 08:00",
+            "confidence": 0.98
+          }
+        ],
+        "reviewStatus": "verified",
+        "conflictStatus": "none"
+      }
+    ],
+    "availableWindows": [
+      {
+        "id": "window_before_class",
+        "startAt": "2026-05-21T07:00:00+08:00",
+        "endAt": "2026-05-21T08:00:00+08:00",
+        "timezone": "Asia/Shanghai",
+        "source": "derived",
+        "confidence": 0.95
+      }
+    ],
+    "frozenQueue": [],
+    "policySnapshotId": "policy_default"
+  },
+  "queueActions": [
+    {
+      "type": "insert-schedule-event",
+      "id": "action_insert_plan_c",
+      "snapshotId": "snapshot_plan_c",
+      "actor": "system-service",
+      "reason": "Only the user-selected plan C card may be scheduled.",
+      "createdAt": "2026-05-21T07:00:00+08:00",
+      "chosenPlanId": "plan-c",
+      "idempotencyKey": "deck_calculus:card_c_prepare:window"
+    }
+  ]
+}

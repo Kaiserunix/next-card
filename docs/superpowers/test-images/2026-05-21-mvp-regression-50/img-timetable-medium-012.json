@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-timetable-medium-012",
+    "sourceType":  "image",
+    "category":  "timetable",
+    "difficulty":  "medium",
+    "imageFile":  "img-timetable-medium-012.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "mobile document timetable",
+                               "elective course candidates",
+                               "one-week stop note"
+                           ],
+    "expectedWarnings":  [
+                             "viewer crop",
+                             "stop-once note review"
+                         ],
+    "mustNotDo":  [
+                      "delete recurring event automatically",
+                      "ignore week note"
+                  ]
+}

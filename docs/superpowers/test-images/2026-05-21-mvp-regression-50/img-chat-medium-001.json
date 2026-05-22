@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-chat-medium-001",
+    "sourceType":  "image",
+    "category":  "chat",
+    "difficulty":  "medium",
+    "imageFile":  "img-chat-medium-001.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "current chat deadline",
+                               "old forwarded stale evidence",
+                               "ignore unrelated chat"
+                           ],
+    "expectedWarnings":  [
+                             "forwarded old date",
+                             "not-new reminder"
+                         ],
+    "mustNotDo":  [
+                      "create deadline from stale forward",
+                      "create lunch task"
+                  ]
+}

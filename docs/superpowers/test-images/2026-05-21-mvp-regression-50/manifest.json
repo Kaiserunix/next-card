@@ -1,0 +1,453 @@
+﻿{
+    "id":  "nextcard-mvp-regression-50-2026-05-21",
+    "sourceSpec":  "docs/superpowers/specs/2026-05-21-freeze-rollback-and-test-image-standard.md",
+    "totalImages":  50,
+    "generatedDefaultDirectory":  "C:\\Users\\qwerf\\.codex\\generated_images\\019e4957-65a1-7460-b2ae-a705d832703d",
+    "excludedGeneratedSourceIndices":  [
+                                           12,
+                                           25,
+                                           28,
+                                           36,
+                                           52
+                                       ],
+    "mix":  [
+                {
+                    "category":  "assignment",
+                    "count":  10
+                },
+                {
+                    "category":  "blocked",
+                    "count":  2
+                },
+                {
+                    "category":  "chat",
+                    "count":  5
+                },
+                {
+                    "category":  "conflict",
+                    "count":  4
+                },
+                {
+                    "category":  "low-quality",
+                    "count":  5
+                },
+                {
+                    "category":  "notification",
+                    "count":  3
+                },
+                {
+                    "category":  "prompt-injection-like-document-content",
+                    "count":  3
+                },
+                {
+                    "category":  "relative-date",
+                    "count":  6
+                },
+                {
+                    "category":  "timetable",
+                    "count":  12
+                }
+            ],
+    "records":  [
+                    {
+                        "id":  "img-timetable-easy-001",
+                        "imageFile":  "img-timetable-easy-001.png",
+                        "category":  "timetable",
+                        "difficulty":  "easy",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  1
+                    },
+                    {
+                        "id":  "img-timetable-medium-002",
+                        "imageFile":  "img-timetable-medium-002.png",
+                        "category":  "timetable",
+                        "difficulty":  "medium",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  7
+                    },
+                    {
+                        "id":  "img-timetable-hard-003",
+                        "imageFile":  "img-timetable-hard-003.png",
+                        "category":  "timetable",
+                        "difficulty":  "hard",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  8
+                    },
+                    {
+                        "id":  "img-timetable-medium-004",
+                        "imageFile":  "img-timetable-medium-004.png",
+                        "category":  "timetable",
+                        "difficulty":  "medium",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  9
+                    },
+                    {
+                        "id":  "img-timetable-medium-005",
+                        "imageFile":  "img-timetable-medium-005.png",
+                        "category":  "timetable",
+                        "difficulty":  "medium",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  10
+                    },
+                    {
+                        "id":  "img-timetable-hard-006",
+                        "imageFile":  "img-timetable-hard-006.png",
+                        "category":  "timetable",
+                        "difficulty":  "hard",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  11
+                    },
+                    {
+                        "id":  "img-timetable-medium-007",
+                        "imageFile":  "img-timetable-medium-007.png",
+                        "category":  "timetable",
+                        "difficulty":  "medium",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  13
+                    },
+                    {
+                        "id":  "img-timetable-hard-008",
+                        "imageFile":  "img-timetable-hard-008.png",
+                        "category":  "timetable",
+                        "difficulty":  "hard",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  14
+                    },
+                    {
+                        "id":  "img-timetable-easy-009",
+                        "imageFile":  "img-timetable-easy-009.png",
+                        "category":  "timetable",
+                        "difficulty":  "easy",
+                        "expectedReview":  "light",
+                        "sourceIndex":  15
+                    },
+                    {
+                        "id":  "img-timetable-hard-010",
+                        "imageFile":  "img-timetable-hard-010.png",
+                        "category":  "timetable",
+                        "difficulty":  "hard",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  16
+                    },
+                    {
+                        "id":  "img-timetable-hard-011",
+                        "imageFile":  "img-timetable-hard-011.png",
+                        "category":  "timetable",
+                        "difficulty":  "hard",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  17
+                    },
+                    {
+                        "id":  "img-timetable-medium-012",
+                        "imageFile":  "img-timetable-medium-012.png",
+                        "category":  "timetable",
+                        "difficulty":  "medium",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  18
+                    },
+                    {
+                        "id":  "img-assignment-medium-001",
+                        "imageFile":  "img-assignment-medium-001.png",
+                        "category":  "assignment",
+                        "difficulty":  "medium",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  2
+                    },
+                    {
+                        "id":  "img-assignment-hard-002",
+                        "imageFile":  "img-assignment-hard-002.png",
+                        "category":  "assignment",
+                        "difficulty":  "hard",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  19
+                    },
+                    {
+                        "id":  "img-assignment-hard-003",
+                        "imageFile":  "img-assignment-hard-003.png",
+                        "category":  "assignment",
+                        "difficulty":  "hard",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  20
+                    },
+                    {
+                        "id":  "img-assignment-easy-004",
+                        "imageFile":  "img-assignment-easy-004.png",
+                        "category":  "assignment",
+                        "difficulty":  "easy",
+                        "expectedReview":  "light",
+                        "sourceIndex":  21
+                    },
+                    {
+                        "id":  "img-assignment-medium-005",
+                        "imageFile":  "img-assignment-medium-005.png",
+                        "category":  "assignment",
+                        "difficulty":  "medium",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  22
+                    },
+                    {
+                        "id":  "img-assignment-hard-006",
+                        "imageFile":  "img-assignment-hard-006.png",
+                        "category":  "assignment",
+                        "difficulty":  "hard",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  23
+                    },
+                    {
+                        "id":  "img-assignment-medium-007",
+                        "imageFile":  "img-assignment-medium-007.png",
+                        "category":  "assignment",
+                        "difficulty":  "medium",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  24
+                    },
+                    {
+                        "id":  "img-assignment-easy-008",
+                        "imageFile":  "img-assignment-easy-008.png",
+                        "category":  "assignment",
+                        "difficulty":  "easy",
+                        "expectedReview":  "light",
+                        "sourceIndex":  26
+                    },
+                    {
+                        "id":  "img-assignment-medium-009",
+                        "imageFile":  "img-assignment-medium-009.png",
+                        "category":  "assignment",
+                        "difficulty":  "medium",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  27
+                    },
+                    {
+                        "id":  "img-assignment-hard-010",
+                        "imageFile":  "img-assignment-hard-010.png",
+                        "category":  "assignment",
+                        "difficulty":  "hard",
+                        "expectedReview":  "blocked",
+                        "sourceIndex":  29
+                    },
+                    {
+                        "id":  "img-chat-medium-001",
+                        "imageFile":  "img-chat-medium-001.png",
+                        "category":  "chat",
+                        "difficulty":  "medium",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  3
+                    },
+                    {
+                        "id":  "img-notification-hard-001",
+                        "imageFile":  "img-notification-hard-001.png",
+                        "category":  "notification",
+                        "difficulty":  "hard",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  4
+                    },
+                    {
+                        "id":  "img-chat-medium-002",
+                        "imageFile":  "img-chat-medium-002.png",
+                        "category":  "chat",
+                        "difficulty":  "medium",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  30
+                    },
+                    {
+                        "id":  "img-chat-easy-003",
+                        "imageFile":  "img-chat-easy-003.png",
+                        "category":  "chat",
+                        "difficulty":  "easy",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  31
+                    },
+                    {
+                        "id":  "img-chat-hard-004",
+                        "imageFile":  "img-chat-hard-004.png",
+                        "category":  "chat",
+                        "difficulty":  "hard",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  32
+                    },
+                    {
+                        "id":  "img-notification-medium-002",
+                        "imageFile":  "img-notification-medium-002.png",
+                        "category":  "notification",
+                        "difficulty":  "medium",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  33
+                    },
+                    {
+                        "id":  "img-notification-medium-003",
+                        "imageFile":  "img-notification-medium-003.png",
+                        "category":  "notification",
+                        "difficulty":  "medium",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  34
+                    },
+                    {
+                        "id":  "img-chat-easy-005",
+                        "imageFile":  "img-chat-easy-005.png",
+                        "category":  "chat",
+                        "difficulty":  "easy",
+                        "expectedReview":  "light",
+                        "sourceIndex":  35
+                    },
+                    {
+                        "id":  "img-relative-easy-001",
+                        "imageFile":  "img-relative-easy-001.png",
+                        "category":  "relative-date",
+                        "difficulty":  "easy",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  37
+                    },
+                    {
+                        "id":  "img-relative-medium-002",
+                        "imageFile":  "img-relative-medium-002.png",
+                        "category":  "relative-date",
+                        "difficulty":  "medium",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  38
+                    },
+                    {
+                        "id":  "img-relative-medium-003",
+                        "imageFile":  "img-relative-medium-003.png",
+                        "category":  "relative-date",
+                        "difficulty":  "medium",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  39
+                    },
+                    {
+                        "id":  "img-relative-hard-004",
+                        "imageFile":  "img-relative-hard-004.png",
+                        "category":  "relative-date",
+                        "difficulty":  "hard",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  40
+                    },
+                    {
+                        "id":  "img-relative-medium-005",
+                        "imageFile":  "img-relative-medium-005.png",
+                        "category":  "relative-date",
+                        "difficulty":  "medium",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  41
+                    },
+                    {
+                        "id":  "img-relative-hard-006",
+                        "imageFile":  "img-relative-hard-006.png",
+                        "category":  "relative-date",
+                        "difficulty":  "hard",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  42
+                    },
+                    {
+                        "id":  "img-low-quality-medium-001",
+                        "imageFile":  "img-low-quality-medium-001.png",
+                        "category":  "low-quality",
+                        "difficulty":  "medium",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  43
+                    },
+                    {
+                        "id":  "img-low-quality-medium-002",
+                        "imageFile":  "img-low-quality-medium-002.png",
+                        "category":  "low-quality",
+                        "difficulty":  "medium",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  44
+                    },
+                    {
+                        "id":  "img-low-quality-hard-003",
+                        "imageFile":  "img-low-quality-hard-003.png",
+                        "category":  "low-quality",
+                        "difficulty":  "hard",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  45
+                    },
+                    {
+                        "id":  "img-low-quality-easy-004",
+                        "imageFile":  "img-low-quality-easy-004.png",
+                        "category":  "low-quality",
+                        "difficulty":  "easy",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  46
+                    },
+                    {
+                        "id":  "img-low-quality-medium-005",
+                        "imageFile":  "img-low-quality-medium-005.png",
+                        "category":  "low-quality",
+                        "difficulty":  "medium",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  47
+                    },
+                    {
+                        "id":  "img-conflict-hard-001",
+                        "imageFile":  "img-conflict-hard-001.png",
+                        "category":  "conflict",
+                        "difficulty":  "hard",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  48
+                    },
+                    {
+                        "id":  "img-conflict-medium-002",
+                        "imageFile":  "img-conflict-medium-002.png",
+                        "category":  "conflict",
+                        "difficulty":  "medium",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  49
+                    },
+                    {
+                        "id":  "img-conflict-medium-003",
+                        "imageFile":  "img-conflict-medium-003.png",
+                        "category":  "conflict",
+                        "difficulty":  "medium",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  50
+                    },
+                    {
+                        "id":  "img-conflict-hard-004",
+                        "imageFile":  "img-conflict-hard-004.png",
+                        "category":  "conflict",
+                        "difficulty":  "hard",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  51
+                    },
+                    {
+                        "id":  "img-injection-adversarial-001",
+                        "imageFile":  "img-injection-adversarial-001.png",
+                        "category":  "prompt-injection-like-document-content",
+                        "difficulty":  "adversarial",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  5
+                    },
+                    {
+                        "id":  "img-injection-hard-002",
+                        "imageFile":  "img-injection-hard-002.png",
+                        "category":  "prompt-injection-like-document-content",
+                        "difficulty":  "hard",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  53
+                    },
+                    {
+                        "id":  "img-injection-hard-003",
+                        "imageFile":  "img-injection-hard-003.png",
+                        "category":  "prompt-injection-like-document-content",
+                        "difficulty":  "hard",
+                        "expectedReview":  "strict",
+                        "sourceIndex":  54
+                    },
+                    {
+                        "id":  "img-blocked-hard-001",
+                        "imageFile":  "img-blocked-hard-001.png",
+                        "category":  "blocked",
+                        "difficulty":  "hard",
+                        "expectedReview":  "blocked",
+                        "sourceIndex":  6
+                    },
+                    {
+                        "id":  "img-blocked-hard-002",
+                        "imageFile":  "img-blocked-hard-002.png",
+                        "category":  "blocked",
+                        "difficulty":  "hard",
+                        "expectedReview":  "blocked",
+                        "sourceIndex":  55
+                    }
+                ]
+}

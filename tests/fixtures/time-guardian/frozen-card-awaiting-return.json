@@ -1,0 +1,54 @@
+{
+  "caseId": "frozen-card-awaiting-return",
+  "notificationCapability": "in_app_only",
+  "scheduleSnapshot": {
+    "id": "snapshot_frozen_return",
+    "version": 1,
+    "now": "2026-05-21T10:00:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "committedDecks": [
+      {
+        "deckId": "deck_calculus",
+        "chosenPlanId": "plan-b",
+        "title": "Go to calculus class"
+      }
+    ],
+    "activeCards": [],
+    "scheduledEvents": [],
+    "timeLocks": [],
+    "availableWindows": [
+      {
+        "id": "window_return",
+        "startAt": "2026-05-21T10:10:00+08:00",
+        "endAt": "2026-05-21T10:30:00+08:00",
+        "timezone": "Asia/Shanghai",
+        "source": "derived",
+        "confidence": 0.9
+      }
+    ],
+    "frozenQueue": [
+      {
+        "id": "frozen_prepare",
+        "cardId": "card_prepare",
+        "deckId": "deck_calculus",
+        "chosenPlanId": "plan-b",
+        "frozenAt": "2026-05-21T07:45:00+08:00",
+        "reason": "User saved context for later.",
+        "estimatedMinutes": 10,
+        "tension": "recommended"
+      }
+    ],
+    "policySnapshotId": "policy_default"
+  },
+  "queueActions": [
+    {
+      "type": "reinsert-frozen-card",
+      "id": "action_reinsert_frozen",
+      "snapshotId": "snapshot_frozen_return",
+      "actor": "system-service",
+      "reason": "Return the frozen card through Time Guardian review.",
+      "createdAt": "2026-05-21T10:00:00+08:00",
+      "chosenPlanId": "plan-b"
+    }
+  ]
+}

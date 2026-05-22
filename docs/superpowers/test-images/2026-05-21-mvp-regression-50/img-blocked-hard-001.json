@@ -1,0 +1,20 @@
+﻿{
+    "id":  "img-blocked-hard-001",
+    "sourceType":  "image",
+    "category":  "blocked",
+    "difficulty":  "hard",
+    "imageFile":  "img-blocked-hard-001.png",
+    "expectedReview":  "blocked",
+    "expectedCandidates":  [
+                               "weak fragments only",
+                               "request clearer upload"
+                           ],
+    "expectedWarnings":  [
+                             "low confidence",
+                             "missing core facts"
+                         ],
+    "mustNotDo":  [
+                      "create authoritative candidates",
+                      "invent course"
+                  ]
+}

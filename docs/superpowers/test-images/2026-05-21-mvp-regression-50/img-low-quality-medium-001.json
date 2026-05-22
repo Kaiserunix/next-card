@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-low-quality-medium-001",
+    "sourceType":  "image",
+    "category":  "low-quality",
+    "difficulty":  "medium",
+    "imageFile":  "img-low-quality-medium-001.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "cropped homework notice",
+                               "platform missing",
+                               "date confirmation"
+                           ],
+    "expectedWarnings":  [
+                             "image cropped",
+                             "source missing"
+                         ],
+    "mustNotDo":  [
+                      "guess platform",
+                      "commit without course name"
+                  ]
+}

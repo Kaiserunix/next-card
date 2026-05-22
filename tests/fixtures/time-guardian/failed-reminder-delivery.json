@@ -1,0 +1,23 @@
+{
+  "caseId": "failed-reminder-delivery",
+  "notificationCapability": "external_granted",
+  "scheduleSnapshot": {
+    "id": "snapshot_failed_delivery",
+    "version": 1,
+    "now": "2026-05-21T07:30:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "committedDecks": [],
+    "activeCards": [],
+    "scheduledEvents": [],
+    "timeLocks": [],
+    "availableWindows": [],
+    "frozenQueue": [],
+    "policySnapshotId": "policy_default"
+  },
+  "reminderDelivery": {
+    "reminderId": "baseline_prepare",
+    "deliveryStatus": "failed",
+    "countsAsUserIgnored": false
+  },
+  "queueActions": []
+}

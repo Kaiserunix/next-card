@@ -1,0 +1,40 @@
+{
+  "userId": "user-demo",
+  "policy": {
+    "id": "policy_profile_user-demo_default_v1",
+    "profileSnapshotId": "profile_user-demo_default_v1",
+    "version": 1,
+    "createdAt": "2026-05-21T12:00:00.000Z",
+    "appliesTo": "future-planning-only",
+    "planIntensity": "balanced",
+    "cardGranularity": "standard",
+    "cardMinuteRange": [8, 18],
+    "bufferMultiplier": 1.15,
+    "reminderStrictness": "normal",
+    "nudgeDailyCap": 2,
+    "burnSensitivity": 1,
+    "freezeRecoveryStyle": "resume-context",
+    "optionalContinuationCards": true,
+    "allowedInfluence": [
+      "future-first-card-size",
+      "future-card-minute-range",
+      "future-buffer-size",
+      "future-reminder-tone",
+      "future-nudge-daily-cap",
+      "future-burn-sensitivity",
+      "future-freeze-recovery-style",
+      "future-optional-continuation"
+    ],
+    "forbiddenInfluence": [
+      "deadline",
+      "hard-lock",
+      "baseline-reminder-existence",
+      "chosen-plan-override",
+      "proof",
+      "baseline-goal",
+      "standard-goal",
+      "committed-deck-card-reminder"
+    ],
+    "explanation": "后续计划保持均衡节奏，卡片大小和提醒强度只作为未来建议。"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "userId": "user-demo",
+  "profile": {
+    "id": "profile_user-demo_candidate_v2",
+    "userId": "user-demo",
+    "version": 2,
+    "createdAt": "2026-05-21T12:00:00.000Z",
+    "evidenceWindowDays": 14,
+    "confidence": 0.35,
+    "mode": "candidate",
+    "dimensions": {
+      "activationSupportLevel": {
+        "value": "medium",
+        "confidence": 0.35,
+        "evidenceCount": 3,
+        "lastUpdatedAt": "2026-05-21T12:00:00.000Z"
+      },
+      "timeEstimateCalibration": {
+        "value": "medium",
+        "confidence": 0.3,
+        "evidenceCount": 3,
+        "lastUpdatedAt": "2026-05-21T12:00:00.000Z"
+      },
+      "progressRhythm": {
+        "value": "unknown",
+        "confidence": 0,
+        "evidenceCount": 0,
+        "lastUpdatedAt": "2026-05-21T12:00:00.000Z"
+      },
+      "reminderPressureFit": {
+        "value": "unknown",
+        "confidence": 0,
+        "evidenceCount": 0,
+        "lastUpdatedAt": "2026-05-21T12:00:00.000Z"
+      }
+    },
+    "evidenceIds": ["evt_a", "evt_b", "evt_c"],
+    "userEditable": true,
+    "resettable": true
+  },
+  "candidates": [
+    {
+      "id": "soft_recover_evt_a",
+      "source": "recovery",
+      "kind": "recovery-task",
+      "title": "复习刚才冻结过的卡片上下文",
+      "reason": "先恢复上下文，再继续推进会更稳。",
+      "defaultTension": "soft",
+      "suggestedWindow": "下一段空档",
+      "evidenceIds": ["evt_a"],
+      "requiresTimeGuardianReview": true
+    }
+  ]
+}

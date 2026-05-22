@@ -1,0 +1,53 @@
+{
+  "caseId": "mixed-multi-goal-input",
+  "path": "rough-scope",
+  "rawInput": {
+    "id": "raw_mixed_multi_goal",
+    "sourceType": "mixed",
+    "text": "明天早八上课，晚上交作业，还要买饭",
+    "sourceHash": "1111111111111111111111111111111111111111111111111111111111111111",
+    "locale": "zh-CN",
+    "timezone": "Asia/Shanghai",
+    "createdAt": "2026-05-21T08:30:00.000Z",
+    "receivedAt": "2026-05-21T08:30:00.000Z",
+    "privacyFlags": [],
+    "retentionPolicy": {
+      "rawRetentionDays": 7,
+      "derivedRetentionDays": 30,
+      "userDeletable": true
+    }
+  },
+  "extraction": {
+    "id": "extract_mixed_multi_goal",
+    "rawInputId": "raw_mixed_multi_goal",
+    "candidates": {
+      "tasks": [
+        { "id": "task_class", "title": "明天早八上课", "taskType": "course-arrival", "confidence": 0.8, "lifecycle": "unknown" },
+        { "id": "task_homework", "title": "晚上交作业", "taskType": "assignment", "confidence": 0.76, "lifecycle": "one-off" },
+        { "id": "task_food", "title": "买饭", "taskType": "errand", "confidence": 0.7, "lifecycle": "one-off" }
+      ],
+      "timeConstraints": [
+        { "id": "time_class", "kind": "hard-lock", "label": "明天早八", "isHard": true, "confidence": 0.8 },
+        { "id": "time_homework", "kind": "deadline", "label": "晚上", "isHard": true, "confidence": 0.68 }
+      ],
+      "locations": [],
+      "courses": [],
+      "reminders": []
+    },
+    "confidence": 0.72,
+    "ambiguities": ["包含多个目标，需要先确认范围"],
+    "warnings": ["multiple_goals", "course_time", "submission_deadline"],
+    "evidence": [{ "rawInputId": "raw_mixed_multi_goal", "quote": "明天早八上课，晚上交作业，还要买饭", "confidence": 0.72 }],
+    "reviewRequirement": "strict"
+  },
+  "confirmationRequest": {
+    "id": "confirm_mixed_multi_goal",
+    "rawInputId": "raw_mixed_multi_goal",
+    "mode": "rough-scope",
+    "summary": "我看到 3 个目标：上课、交作业、买饭。先确认这次要处理的范围。",
+    "facts": [{ "id": "fact_scope", "field": "event", "label": "范围", "value": "3 个目标", "confidence": 0.72, "evidenceRefs": [] }],
+    "missingFields": ["event", "deadline"],
+    "riskReasons": ["multiple_goals", "course_time", "submission_deadline"],
+    "canProceedToPlanMode": false
+  }
+}

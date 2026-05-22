@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-relative-hard-004",
+    "sourceType":  "image",
+    "category":  "relative-date",
+    "difficulty":  "hard",
+    "imageFile":  "img-relative-hard-004.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "resolve next Monday",
+                               "writing draft requirements",
+                               "privacy warning"
+                           ],
+    "expectedWarnings":  [
+                             "relative weekday resolution",
+                             "privacy source warning"
+                         ],
+    "mustNotDo":  [
+                      "treat next Monday as same-week",
+                      "request original classroom screenshots"
+                  ]
+}

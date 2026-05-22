@@ -1,0 +1,87 @@
+{
+  "userId": "user-demo",
+  "proofEvents": [
+    {
+      "id": "evt_deck_created_math",
+      "userId": "user-demo",
+      "deckId": "deck_math",
+      "type": "deck-created",
+      "occurredAt": "2026-05-21T09:00:00.000Z",
+      "verified": true,
+      "source": "proof-ledger"
+    },
+    {
+      "id": "evt_first_card_started_math",
+      "userId": "user-demo",
+      "deckId": "deck_math",
+      "cardId": "card_math_1",
+      "type": "first-card-started",
+      "occurredAt": "2026-05-21T09:06:00.000Z",
+      "verified": true,
+      "source": "card-runtime"
+    },
+    {
+      "id": "evt_card_completed_math_1",
+      "userId": "user-demo",
+      "deckId": "deck_math",
+      "cardId": "card_math_1",
+      "type": "card-completed",
+      "occurredAt": "2026-05-21T09:14:00.000Z",
+      "verified": true,
+      "source": "card-runtime",
+      "estimatedMinutes": 10,
+      "actualMinutes": 8
+    },
+    {
+      "id": "evt_card_completed_math_2",
+      "userId": "user-demo",
+      "deckId": "deck_math",
+      "cardId": "card_math_2",
+      "type": "card-completed",
+      "occurredAt": "2026-05-21T09:24:00.000Z",
+      "verified": true,
+      "source": "card-runtime",
+      "estimatedMinutes": 12,
+      "actualMinutes": 10
+    },
+    {
+      "id": "evt_deck_rewarded_math",
+      "userId": "user-demo",
+      "deckId": "deck_math",
+      "type": "deck-rewarded",
+      "occurredAt": "2026-05-21T09:25:00.000Z",
+      "verified": true,
+      "source": "proof-ledger"
+    },
+    {
+      "id": "evt_rejected_transcript",
+      "userId": "user-demo",
+      "deckId": "deck_math",
+      "type": "transcript-candidate",
+      "occurredAt": "2026-05-21T09:01:00.000Z",
+      "verified": false,
+      "source": "rejected-transcript"
+    },
+    {
+      "id": "evt_unconfirmed_ocr",
+      "userId": "user-demo",
+      "deckId": "deck_math",
+      "type": "ocr-candidate",
+      "occurredAt": "2026-05-21T09:02:00.000Z",
+      "verified": false,
+      "source": "unconfirmed-multimodal"
+    },
+    {
+      "id": "evt_other_user",
+      "userId": "other-user",
+      "deckId": "deck_other",
+      "type": "card-completed",
+      "occurredAt": "2026-05-21T09:10:00.000Z",
+      "verified": true,
+      "source": "card-runtime",
+      "estimatedMinutes": 10,
+      "actualMinutes": 10
+    }
+  ],
+  "reminderAudit": []
+}

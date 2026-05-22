@@ -1,0 +1,43 @@
+{
+  "userId": "user-demo",
+  "proofEvents": [],
+  "reminderAudit": [],
+  "defaultProfile": {
+    "id": "profile_user-demo_default_v1",
+    "userId": "user-demo",
+    "version": 1,
+    "createdAt": "2026-05-21T12:00:00.000Z",
+    "evidenceWindowDays": 14,
+    "confidence": 0,
+    "mode": "default",
+    "dimensions": {
+      "activationSupportLevel": {
+        "value": "unknown",
+        "confidence": 0,
+        "evidenceCount": 0,
+        "lastUpdatedAt": "2026-05-21T12:00:00.000Z"
+      },
+      "timeEstimateCalibration": {
+        "value": "unknown",
+        "confidence": 0,
+        "evidenceCount": 0,
+        "lastUpdatedAt": "2026-05-21T12:00:00.000Z"
+      },
+      "progressRhythm": {
+        "value": "unknown",
+        "confidence": 0,
+        "evidenceCount": 0,
+        "lastUpdatedAt": "2026-05-21T12:00:00.000Z"
+      },
+      "reminderPressureFit": {
+        "value": "unknown",
+        "confidence": 0,
+        "evidenceCount": 0,
+        "lastUpdatedAt": "2026-05-21T12:00:00.000Z"
+      }
+    },
+    "evidenceIds": [],
+    "userEditable": true,
+    "resettable": true
+  }
+}

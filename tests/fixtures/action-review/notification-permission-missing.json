@@ -1,0 +1,29 @@
+{
+  "userId": "user-demo",
+  "proofEvents": [
+    {
+      "id": "evt_permission_context",
+      "userId": "user-demo",
+      "deckId": "deck_morning",
+      "cardId": "card_morning_1",
+      "type": "card-completed",
+      "occurredAt": "2026-05-21T07:40:00.000Z",
+      "verified": true,
+      "source": "card-runtime",
+      "estimatedMinutes": 5,
+      "actualMinutes": 5
+    }
+  ],
+  "reminderAudit": [
+    {
+      "id": "audit_permission_missing",
+      "userId": "user-demo",
+      "reminderId": "reminder_morning_1",
+      "occurredAt": "2026-05-21T07:30:00.000Z",
+      "deliveryStatus": "permission-missing",
+      "channel": "external",
+      "permission": "missing",
+      "reliable": false
+    }
+  ]
+}

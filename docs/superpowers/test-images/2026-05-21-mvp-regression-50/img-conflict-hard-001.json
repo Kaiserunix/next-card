@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-conflict-hard-001",
+    "sourceType":  "image",
+    "category":  "conflict",
+    "difficulty":  "hard",
+    "imageFile":  "img-conflict-hard-001.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "reading report with two deadlines",
+                               "authority conflict",
+                               "conservative plan"
+                           ],
+    "expectedWarnings":  [
+                             "deadline conflict",
+                             "authority conflict"
+                         ],
+    "mustNotDo":  [
+                      "choose later silently",
+                      "delete earlier collection time"
+                  ]
+}

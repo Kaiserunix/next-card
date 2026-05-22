@@ -1,0 +1,21 @@
+{
+  "requestId": "pm_req_text_study_001",
+  "anonymousDeviceId": "anon-device-002",
+  "operation": "generate",
+  "source": "text-confirmed",
+  "planCompilerHandoff": {
+    "id": "handoff_study_001",
+    "verifiedInputBundleId": "bundle_study_001",
+    "userFacingSummary": "周五前完成数据结构复习，先覆盖图和排序。",
+    "constraints": ["周五前完成", "重点是图和排序", "今天只有 40 分钟"],
+    "assumptions": ["用户已有教材或笔记"],
+    "missingButNonBlocking": ["具体考试题型未知"],
+    "sourceType": "text",
+    "mustGenerateABC": true
+  },
+  "clientContext": {
+    "now": "2026-05-21T18:30:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "locale": "zh-CN"
+  }
+}

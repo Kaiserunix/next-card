@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-low-quality-medium-002",
+    "sourceType":  "image",
+    "category":  "low-quality",
+    "difficulty":  "medium",
+    "imageFile":  "img-low-quality-medium-002.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "noisy timetable",
+                               "partial classroom",
+                               "early class reminder"
+                           ],
+    "expectedWarnings":  [
+                             "image noisy",
+                             "location partial"
+                         ],
+    "mustNotDo":  [
+                      "use partial room as final",
+                      "skip recurring confirmation"
+                  ]
+}

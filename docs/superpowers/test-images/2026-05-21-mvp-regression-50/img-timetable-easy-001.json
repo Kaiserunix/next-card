@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-timetable-easy-001",
+    "sourceType":  "image",
+    "category":  "timetable",
+    "difficulty":  "easy",
+    "imageFile":  "img-timetable-easy-001.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "weekly timetable candidates",
+                               "course time location extraction",
+                               "hard-lock confirmation"
+                           ],
+    "expectedWarnings":  [
+                             "user confirmation required",
+                             "handwritten annotation review"
+                         ],
+    "mustNotDo":  [
+                      "commit hard lock without confirmation",
+                      "create deck directly"
+                  ]
+}

@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-timetable-hard-008",
+    "sourceType":  "image",
+    "category":  "timetable",
+    "difficulty":  "hard",
+    "imageFile":  "img-timetable-hard-008.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "nested chat timetable image",
+                               "temporary schedule changes",
+                               "English cancellation"
+                           ],
+    "expectedWarnings":  [
+                             "nested screenshot",
+                             "cancellation scope"
+                         ],
+    "mustNotDo":  [
+                      "turn cancellation into active task",
+                      "schedule old and new together"
+                  ]
+}

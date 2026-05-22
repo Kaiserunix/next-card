@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-chat-medium-002",
+    "sourceType":  "image",
+    "category":  "chat",
+    "difficulty":  "medium",
+    "imageFile":  "img-chat-medium-002.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "group lab report plan",
+                               "tomorrow-before-class submission",
+                               "ask user responsibility"
+                           ],
+    "expectedWarnings":  [
+                             "group responsibility ambiguous",
+                             "course-relative deadline"
+                         ],
+    "mustNotDo":  [
+                      "assign user all roles",
+                      "create decks for all participants"
+                  ]
+}

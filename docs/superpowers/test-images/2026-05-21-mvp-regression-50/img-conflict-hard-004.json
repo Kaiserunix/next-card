@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-conflict-hard-004",
+    "sourceType":  "image",
+    "category":  "conflict",
+    "difficulty":  "hard",
+    "imageFile":  "img-conflict-hard-004.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "two courses overlap exactly",
+                               "human review",
+                               "do not auto-schedule"
+                           ],
+    "expectedWarnings":  [
+                             "overlapping hard times",
+                             "do not autoschedule"
+                         ],
+    "mustNotDo":  [
+                      "delete one course",
+                      "create simultaneous departure decks"
+                  ]
+}

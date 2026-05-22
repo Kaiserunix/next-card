@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-relative-medium-002",
+    "sourceType":  "image",
+    "category":  "relative-date",
+    "difficulty":  "medium",
+    "imageFile":  "img-relative-medium-002.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "resolve tomorrow",
+                               "send experiment screenshot",
+                               "exclude full report"
+                           ],
+    "expectedWarnings":  [
+                             "shared document review",
+                             "excluded work present"
+                         ],
+    "mustNotDo":  [
+                      "invent link",
+                      "turn excluded work into task"
+                  ]
+}

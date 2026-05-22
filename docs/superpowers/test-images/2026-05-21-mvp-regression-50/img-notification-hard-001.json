@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-notification-hard-001",
+    "sourceType":  "image",
+    "category":  "notification",
+    "difficulty":  "hard",
+    "imageFile":  "img-notification-hard-001.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "quiz reschedule",
+                               "Q\u0026A cancellation",
+                               "ambiguous next-class-before task"
+                           ],
+    "expectedWarnings":  [
+                             "hard schedule change",
+                             "ambiguous relative deadline"
+                         ],
+    "mustNotDo":  [
+                      "resolve without context",
+                      "create task for canceled event"
+                  ]
+}

@@ -1,0 +1,11 @@
+{
+  "requestId": "pm_req_invalid_missing_handoff",
+  "operation": "generate",
+  "source": "text-confirmed",
+  "rawTranscript": "今晚写作业",
+  "clientContext": {
+    "now": "2026-05-21T19:00:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "locale": "zh-CN"
+  }
+}

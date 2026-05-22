@@ -1,0 +1,22 @@
+﻿{
+    "id":  "img-assignment-hard-006",
+    "sourceType":  "image",
+    "category":  "assignment",
+    "difficulty":  "hard",
+    "imageFile":  "img-assignment-hard-006.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "management case analysis",
+                               "topic deadline",
+                               "PPT deadline",
+                               "next Monday speech prep"
+                           ],
+    "expectedWarnings":  [
+                             "multiple deadlines",
+                             "relative deadline"
+                         ],
+    "mustNotDo":  [
+                      "treat scoring as task list",
+                      "ignore speech prep"
+                  ]
+}

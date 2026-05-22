@@ -1,0 +1,24 @@
+{
+  "requestId": "pm_req_regenerate_001",
+  "anonymousDeviceId": "anon-device-001",
+  "operation": "regenerate",
+  "source": "voice-confirmed",
+  "confirmedTranscriptId": "voice_tx_calculus_confirmed_001",
+  "previousPlanModeDraftId": "draft_previous_001",
+  "regenerateHint": "more-gentle",
+  "planCompilerHandoff": {
+    "id": "handoff_calculus_001",
+    "verifiedInputBundleId": "bundle_calculus_001",
+    "userFacingSummary": "明天早八去高数课，7 点 40 前需要准备好并出门。",
+    "constraints": ["明天 08:00 高数课", "7:40 前出门", "需要带课本和上次作业"],
+    "assumptions": ["用户希望今天先准备，明早减少压力"],
+    "missingButNonBlocking": ["具体教室可稍后确认"],
+    "sourceType": "voice",
+    "mustGenerateABC": true
+  },
+  "clientContext": {
+    "now": "2026-05-21T20:05:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "locale": "zh-CN"
+  }
+}

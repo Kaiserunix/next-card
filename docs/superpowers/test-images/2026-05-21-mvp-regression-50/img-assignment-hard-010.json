@@ -1,0 +1,22 @@
+﻿{
+    "id":  "img-assignment-hard-010",
+    "sourceType":  "image",
+    "category":  "assignment",
+    "difficulty":  "hard",
+    "imageFile":  "img-assignment-hard-010.png",
+    "expectedReview":  "blocked",
+    "expectedCandidates":  [
+                               "rubric-only input",
+                               "ask for missing prompt and deadline",
+                               "quality criteria only"
+                           ],
+    "expectedWarnings":  [
+                             "no deadline",
+                             "no topic",
+                             "rubric only"
+                         ],
+    "mustNotDo":  [
+                      "invent essay topic",
+                      "create deadline from nothing"
+                  ]
+}

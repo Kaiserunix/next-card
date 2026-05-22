@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-relative-medium-003",
+    "sourceType":  "image",
+    "category":  "relative-date",
+    "difficulty":  "medium",
+    "imageFile":  "img-relative-medium-003.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "resolve day after tomorrow",
+                               "submit data table v2",
+                               "exclude code"
+                           ],
+    "expectedWarnings":  [
+                             "whiteboard source review",
+                             "hard deadline"
+                         ],
+    "mustNotDo":  [
+                      "resolve date incorrectly",
+                      "create code task"
+                  ]
+}

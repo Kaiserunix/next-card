@@ -1,0 +1,20 @@
+﻿{
+    "id":  "img-conflict-medium-002",
+    "sourceType":  "image",
+    "category":  "conflict",
+    "difficulty":  "medium",
+    "imageFile":  "img-conflict-medium-002.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "class hard lock overlaps study plan",
+                               "reschedule essay work"
+                           ],
+    "expectedWarnings":  [
+                             "time-lock conflict",
+                             "reschedule needed"
+                         ],
+    "mustNotDo":  [
+                      "move class",
+                      "schedule essay during class"
+                  ]
+}

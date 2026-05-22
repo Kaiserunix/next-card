@@ -1,0 +1,45 @@
+{
+  "caseId": "image-timetable-low-confidence",
+  "path": "strict-review",
+  "rawInput": {
+    "id": "raw_image_timetable",
+    "sourceType": "image",
+    "contentRef": "upload://timetable.png",
+    "sourceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "locale": "zh-CN",
+    "createdAt": "2026-05-21T08:15:00.000Z",
+    "receivedAt": "2026-05-21T08:15:00.000Z",
+    "privacyFlags": ["unknown"],
+    "retentionPolicy": {
+      "rawRetentionDays": 7,
+      "derivedRetentionDays": 30,
+      "userDeletable": true
+    }
+  },
+  "extraction": {
+    "id": "extract_image_timetable",
+    "rawInputId": "raw_image_timetable",
+    "candidates": {
+      "tasks": [{ "id": "task_course", "title": "去高数课", "taskType": "course-arrival", "confidence": 0.62, "lifecycle": "fixed-recurring" }],
+      "timeConstraints": [{ "id": "time_course", "kind": "hard-lock", "label": "周一 1:00 或 10:00", "isHard": true, "confidence": 0.42 }],
+      "locations": [{ "id": "location_room", "name": "一教 302", "confidence": 0.6 }],
+      "courses": [{ "id": "course_math", "courseName": "高数", "confidence": 0.68 }],
+      "reminders": []
+    },
+    "confidence": 0.55,
+    "ambiguities": ["OCR 时间可能误读"],
+    "warnings": ["high_risk_multimodal", "low_confidence_time", "course_time", "missing_timezone"],
+    "evidence": [{ "rawInputId": "raw_image_timetable", "page": 1, "boundingBox": { "x": 120, "y": 80, "width": 240, "height": 60 }, "quote": "周一 1:00 高数", "confidence": 0.42 }],
+    "reviewRequirement": "strict"
+  },
+  "confirmationRequest": {
+    "id": "confirm_image_timetable",
+    "rawInputId": "raw_image_timetable",
+    "mode": "strict-review",
+    "summary": "课表图片里可能有高数课，但时间置信度低，需要核对。",
+    "facts": [{ "id": "fact_course_time", "field": "time", "label": "课程时间", "value": "周一 1:00 或 10:00", "confidence": 0.42, "evidenceRefs": [] }],
+    "missingFields": ["time", "lifecycle"],
+    "riskReasons": ["high_risk_multimodal", "low_confidence_time", "course_time", "missing_timezone"],
+    "canProceedToPlanMode": false
+  }
+}

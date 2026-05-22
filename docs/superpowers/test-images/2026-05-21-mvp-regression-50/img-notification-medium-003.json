@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-notification-medium-003",
+    "sourceType":  "image",
+    "category":  "notification",
+    "difficulty":  "medium",
+    "imageFile":  "img-notification-medium-003.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "quiz review canceled",
+                               "homework deadline unchanged",
+                               "separate cancellation from deadline"
+                           ],
+    "expectedWarnings":  [
+                             "cancellation scope",
+                             "deadline unchanged"
+                         ],
+    "mustNotDo":  [
+                      "cancel homework task",
+                      "treat no class as no work"
+                  ]
+}

@@ -1,0 +1,46 @@
+{
+  "caseId": "notification-relative-date",
+  "path": "strict-review",
+  "rawInput": {
+    "id": "raw_notification_relative_date",
+    "sourceType": "notification",
+    "text": "老师通知：明天交实验报告",
+    "sourceHash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "locale": "zh-CN",
+    "timezone": "Asia/Shanghai",
+    "createdAt": "2026-05-21T08:25:00.000Z",
+    "receivedAt": "2026-05-21T08:25:00.000Z",
+    "privacyFlags": ["contains_third_party_info"],
+    "retentionPolicy": {
+      "rawRetentionDays": 7,
+      "derivedRetentionDays": 30,
+      "userDeletable": true
+    }
+  },
+  "extraction": {
+    "id": "extract_notification_relative_date",
+    "rawInputId": "raw_notification_relative_date",
+    "candidates": {
+      "tasks": [{ "id": "task_lab_report", "title": "交实验报告", "taskType": "assignment", "confidence": 0.82, "lifecycle": "one-off" }],
+      "timeConstraints": [{ "id": "time_lab_relative", "kind": "deadline", "label": "明天", "isHard": true, "confidence": 0.7 }],
+      "locations": [],
+      "courses": [],
+      "reminders": []
+    },
+    "confidence": 0.74,
+    "ambiguities": ["相对日期需要结合通知时间确认"],
+    "warnings": ["relative_date", "submission_deadline"],
+    "evidence": [{ "rawInputId": "raw_notification_relative_date", "quote": "明天交实验报告", "confidence": 0.74 }],
+    "reviewRequirement": "strict"
+  },
+  "confirmationRequest": {
+    "id": "confirm_notification_relative_date",
+    "rawInputId": "raw_notification_relative_date",
+    "mode": "strict-review",
+    "summary": "通知里写的是相对日期“明天”，需要确认具体日期。",
+    "facts": [{ "id": "fact_relative_deadline", "field": "deadline", "label": "截止", "value": "明天", "confidence": 0.7, "evidenceRefs": [] }],
+    "missingFields": ["deadline"],
+    "riskReasons": ["relative_date", "submission_deadline"],
+    "canProceedToPlanMode": false
+  }
+}

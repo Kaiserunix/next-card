@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-relative-medium-005",
+    "sourceType":  "image",
+    "category":  "relative-date",
+    "difficulty":  "medium",
+    "imageFile":  "img-relative-medium-005.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "resolve this Friday",
+                               "outline 5 titles",
+                               "tonight suggested window"
+                           ],
+    "expectedWarnings":  [
+                             "synthetic recipient",
+                             "suggested window not deadline"
+                         ],
+    "mustNotDo":  [
+                      "create contact details",
+                      "turn no-PPT into PPT task"
+                  ]
+}

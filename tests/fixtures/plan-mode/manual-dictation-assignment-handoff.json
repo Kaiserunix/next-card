@@ -1,0 +1,21 @@
+{
+  "requestId": "pm_req_manual_assignment_001",
+  "anonymousDeviceId": "anon-device-001",
+  "operation": "generate",
+  "source": "manual-dictation",
+  "planCompilerHandoff": {
+    "id": "handoff_assignment_001",
+    "verifiedInputBundleId": "bundle_assignment_001",
+    "userFacingSummary": "今晚 22:00 前提交英语作文初稿。",
+    "constraints": ["今晚 22:00 截止", "需要先写最低可提交版本"],
+    "assumptions": ["作文题目已经在作业通知里确认"],
+    "missingButNonBlocking": [],
+    "sourceType": "manual-dictation",
+    "mustGenerateABC": true
+  },
+  "clientContext": {
+    "now": "2026-05-21T19:00:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "locale": "zh-CN"
+  }
+}

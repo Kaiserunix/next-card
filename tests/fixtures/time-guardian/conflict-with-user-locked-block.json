@@ -1,0 +1,46 @@
+{
+  "caseId": "conflict-with-user-locked-block",
+  "notificationCapability": "in_app_only",
+  "scheduleSnapshot": {
+    "id": "snapshot_locked_block",
+    "version": 1,
+    "now": "2026-05-21T11:50:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "committedDecks": [],
+    "activeCards": [],
+    "scheduledEvents": [],
+    "timeLocks": [
+      {
+        "id": "lock_lunch",
+        "userId": "anon",
+        "kind": "user_locked_block",
+        "startAt": "2026-05-21T12:00:00+08:00",
+        "endAt": "2026-05-21T13:00:00+08:00",
+        "timezone": "Asia/Shanghai",
+        "movable": false,
+        "sourceRefs": [
+          {
+            "rawInputId": "raw_locked",
+            "quote": "Do not schedule during lunch.",
+            "confidence": 1
+          }
+        ],
+        "reviewStatus": "user-confirmed",
+        "conflictStatus": "none"
+      }
+    ],
+    "availableWindows": [
+      {
+        "id": "window_locked",
+        "startAt": "2026-05-21T12:00:00+08:00",
+        "endAt": "2026-05-21T13:00:00+08:00",
+        "timezone": "Asia/Shanghai",
+        "source": "derived",
+        "confidence": 0.9
+      }
+    ],
+    "frozenQueue": [],
+    "policySnapshotId": "policy_default"
+  },
+  "queueActions": []
+}

@@ -1,0 +1,25 @@
+{
+  "caseId": "soft-task-before-good-line",
+  "notificationCapability": "in_app_only",
+  "softTaskTiming": {
+    "recommendedGoodLineAt": "2026-05-21T12:00:00+08:00",
+    "mustNudgeAfterAt": "2026-05-21T15:00:00+08:00",
+    "deadlineAt": "2026-05-21T20:00:00+08:00",
+    "hardensAt": "2026-05-21T18:00:00+08:00",
+    "reason": "Review remains flexible before noon."
+  },
+  "scheduleSnapshot": {
+    "id": "snapshot_soft_before",
+    "version": 1,
+    "now": "2026-05-21T09:00:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "committedDecks": [],
+    "activeCards": [],
+    "scheduledEvents": [],
+    "timeLocks": [],
+    "availableWindows": [],
+    "frozenQueue": [],
+    "policySnapshotId": "policy_default"
+  },
+  "queueActions": []
+}

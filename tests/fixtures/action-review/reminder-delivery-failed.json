@@ -1,0 +1,29 @@
+{
+  "userId": "user-demo",
+  "proofEvents": [
+    {
+      "id": "evt_failed_delivery_context",
+      "userId": "user-demo",
+      "deckId": "deck_review",
+      "cardId": "card_review_1",
+      "type": "card-completed",
+      "occurredAt": "2026-05-21T11:10:00.000Z",
+      "verified": true,
+      "source": "card-runtime",
+      "estimatedMinutes": 8,
+      "actualMinutes": 8
+    }
+  ],
+  "reminderAudit": [
+    {
+      "id": "audit_reminder_failed",
+      "userId": "user-demo",
+      "reminderId": "reminder_review_1",
+      "occurredAt": "2026-05-21T11:00:00.000Z",
+      "deliveryStatus": "failed",
+      "channel": "external",
+      "permission": "granted",
+      "reliable": false
+    }
+  ]
+}

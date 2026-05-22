@@ -1,0 +1,64 @@
+{
+  "id": "img-timetable-easy-001",
+  "sourceType": "image",
+  "category": "timetable",
+  "difficulty": "easy",
+  "documentType": "timetable",
+  "language": "Simplified Chinese",
+  "imageStyle": "clean smartphone screenshot of a weekly course timetable, portrait 9:16, mild compression and glare, OCR-readable",
+  "expectedReview": "strict",
+  "visibleText": [
+    "2026 春季 第 14 周",
+    "周一",
+    "08:00-09:30 高等数学 A101",
+    "10:00-11:30 大学英语 B204",
+    "周二",
+    "14:00-15:30 程序设计实验 C302 实验课另行通知",
+    "周三",
+    "08:00-09:30 线性代数 A205",
+    "周四",
+    "19:00-20:30 形势与政策 线上",
+    "周五",
+    "16:00-17:30 体育 西操场",
+    "明早别迟到"
+  ],
+  "expectedCandidates": {
+    "courses": [
+      "高等数学",
+      "大学英语",
+      "程序设计实验",
+      "线性代数",
+      "形势与政策",
+      "体育"
+    ],
+    "timeConstraints": [
+      "周一 08:00-09:30",
+      "周一 10:00-11:30",
+      "周二 14:00-15:30",
+      "周三 08:00-09:30",
+      "周四 19:00-20:30",
+      "周五 16:00-17:30"
+    ],
+    "locations": [
+      "A101",
+      "B204",
+      "C302",
+      "A205",
+      "线上",
+      "西操场"
+    ],
+    "notes": [
+      "实验课另行通知",
+      "明早别迟到"
+    ]
+  },
+  "expectedWarnings": [
+    "hard_time_lock_requires_user_confirmation",
+    "handwritten_annotation_requires_review"
+  ],
+  "mustNotDo": [
+    "commit hard lock without user confirmation",
+    "create deck directly without plan-mode review",
+    "silently treat handwritten note as authoritative schedule data"
+  ]
+}

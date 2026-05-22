@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-timetable-hard-006",
+    "sourceType":  "image",
+    "category":  "timetable",
+    "difficulty":  "hard",
+    "imageFile":  "img-timetable-hard-006.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "photo of another phone timetable",
+                               "1:00 lecture interpretation",
+                               "week 14 candidates"
+                           ],
+    "expectedWarnings":  [
+                             "one-o-clock ambiguity",
+                             "location to confirm"
+                         ],
+    "mustNotDo":  [
+                      "create overnight event",
+                      "guess pending location"
+                  ]
+}

@@ -1,0 +1,46 @@
+{
+  "caseId": "manual-dictation-reminder",
+  "path": "light",
+  "rawInput": {
+    "id": "raw_manual_dictation_reminder",
+    "sourceType": "manual-dictation",
+    "text": "今晚八点前交英语作文",
+    "sourceHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "locale": "zh-CN",
+    "timezone": "Asia/Shanghai",
+    "createdAt": "2026-05-21T08:10:00.000Z",
+    "receivedAt": "2026-05-21T08:10:00.000Z",
+    "privacyFlags": [],
+    "retentionPolicy": {
+      "rawRetentionDays": 7,
+      "derivedRetentionDays": 30,
+      "userDeletable": true
+    }
+  },
+  "extraction": {
+    "id": "extract_manual_dictation_reminder",
+    "rawInputId": "raw_manual_dictation_reminder",
+    "candidates": {
+      "tasks": [{ "id": "task_essay", "title": "交英语作文", "taskType": "assignment", "confidence": 0.92, "lifecycle": "one-off" }],
+      "timeConstraints": [{ "id": "time_essay", "kind": "deadline", "label": "今晚八点前", "isHard": true, "confidence": 0.93 }],
+      "locations": [],
+      "courses": [],
+      "reminders": []
+    },
+    "confidence": 0.92,
+    "ambiguities": [],
+    "warnings": ["submission_deadline"],
+    "evidence": [{ "rawInputId": "raw_manual_dictation_reminder", "quote": "今晚八点前", "confidence": 0.93 }],
+    "reviewRequirement": "light"
+  },
+  "confirmationRequest": {
+    "id": "confirm_manual_dictation_reminder",
+    "rawInputId": "raw_manual_dictation_reminder",
+    "mode": "light-card",
+    "summary": "我理解为：今晚八点前交英语作文。",
+    "facts": [{ "id": "fact_essay", "field": "deadline", "label": "截止", "value": "今晚八点前", "confidence": 0.93, "evidenceRefs": [] }],
+    "missingFields": ["location"],
+    "riskReasons": ["submission_deadline"],
+    "canProceedToPlanMode": false
+  }
+}

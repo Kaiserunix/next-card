@@ -1,0 +1,51 @@
+{
+  "id": "img-assignment-medium-001",
+  "sourceType": "image",
+  "category": "assignment",
+  "difficulty": "medium",
+  "documentType": "assignment notice",
+  "language": "mixed Chinese-English",
+  "imageStyle": "slightly blurry phone photo of a laptop screen showing a course notice page, portrait 9:16, mild moire and low contrast, OCR-readable",
+  "expectedReview": "strict",
+  "visibleText": [
+    "课程：学术写作",
+    "任务：Research Reflection 1",
+    "提交内容：800 字中文反思 + 1 段 English abstract",
+    "Draft deadline: 2026-05-23 18:00",
+    "Final deadline: 2026-05-26 23:00",
+    "评分说明：结构 30%，证据 40%，语言 30%",
+    "Late policy: final deadline 后提交会被标记为 late",
+    "备注：评分说明不是待办任务",
+    "先写草稿"
+  ],
+  "expectedCandidates": {
+    "assignments": [
+      "Research Reflection 1"
+    ],
+    "deliverables": [
+      "800 字中文反思",
+      "1 段 English abstract"
+    ],
+    "deadlines": [
+      "Draft deadline: 2026-05-23 18:00",
+      "Final deadline: 2026-05-26 23:00"
+    ],
+    "suggestedTasks": [
+      "先写草稿"
+    ],
+    "nonTaskText": [
+      "评分说明：结构 30%，证据 40%，语言 30%",
+      "Late policy: final deadline 后提交会被标记为 late"
+    ]
+  },
+  "expectedWarnings": [
+    "multiple_deadline_types",
+    "rubric_text_must_not_become_tasks",
+    "late_policy_is_constraint_not_task"
+  ],
+  "mustNotDo": [
+    "convert rubric percentages into task cards",
+    "choose draft or final deadline without review evidence",
+    "create deck directly without plan-mode review"
+  ]
+}

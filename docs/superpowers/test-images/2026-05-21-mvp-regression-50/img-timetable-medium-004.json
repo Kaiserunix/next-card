@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-timetable-medium-004",
+    "sourceType":  "image",
+    "category":  "timetable",
+    "difficulty":  "medium",
+    "imageFile":  "img-timetable-medium-004.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "temporary weekly paper timetable",
+                               "pending classroom review",
+                               "course design block"
+                           ],
+    "expectedWarnings":  [
+                             "pending location",
+                             "paper shadow"
+                         ],
+    "mustNotDo":  [
+                      "commit pending room",
+                      "skip location review"
+                  ]
+}

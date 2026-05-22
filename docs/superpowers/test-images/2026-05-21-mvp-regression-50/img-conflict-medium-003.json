@@ -1,0 +1,20 @@
+﻿{
+    "id":  "img-conflict-medium-003",
+    "sourceType":  "image",
+    "category":  "conflict",
+    "difficulty":  "medium",
+    "imageFile":  "img-conflict-medium-003.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "weekly lab plus one-off exception",
+                               "future recurrence confirmation"
+                           ],
+    "expectedWarnings":  [
+                             "recurring one-off conflict",
+                             "schedule exception"
+                         ],
+    "mustNotDo":  [
+                      "move all future labs",
+                      "ignore temporary adjustment"
+                  ]
+}

@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-chat-easy-005",
+    "sourceType":  "image",
+    "category":  "chat",
+    "difficulty":  "easy",
+    "imageFile":  "img-chat-easy-005.png",
+    "expectedReview":  "light",
+    "expectedCandidates":  [
+                               "casual dorm chat",
+                               "no academic task",
+                               "no deadline"
+                           ],
+    "expectedWarnings":  [
+                             "unrelated casual chat",
+                             "no candidates"
+                         ],
+    "mustNotDo":  [
+                      "invent reminders",
+                      "classify as assignment"
+                  ]
+}

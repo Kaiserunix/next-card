@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-assignment-medium-009",
+    "sourceType":  "image",
+    "category":  "assignment",
+    "difficulty":  "medium",
+    "imageFile":  "img-assignment-medium-009.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "math exercise set",
+                               "before-class deadline",
+                               "paper-copy reminder"
+                           ],
+    "expectedWarnings":  [
+                             "due before class",
+                             "paper submission"
+                         ],
+    "mustNotDo":  [
+                      "set deadline to 23:59",
+                      "move class time"
+                  ]
+}

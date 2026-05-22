@@ -1,0 +1,59 @@
+{
+  "userId": "user-demo",
+  "proofEvents": [
+    {
+      "id": "evt_deck_created_essay",
+      "userId": "user-demo",
+      "deckId": "deck_essay",
+      "type": "deck-created",
+      "occurredAt": "2026-05-21T10:00:00.000Z",
+      "verified": true,
+      "source": "proof-ledger"
+    },
+    {
+      "id": "evt_first_card_started_essay",
+      "userId": "user-demo",
+      "deckId": "deck_essay",
+      "cardId": "card_essay_1",
+      "type": "first-card-started",
+      "occurredAt": "2026-05-21T10:08:00.000Z",
+      "verified": true,
+      "source": "card-runtime"
+    },
+    {
+      "id": "evt_burn_started_essay_1",
+      "userId": "user-demo",
+      "deckId": "deck_essay",
+      "cardId": "card_essay_1",
+      "type": "card-burning-started",
+      "occurredAt": "2026-05-21T10:09:00.000Z",
+      "verified": true,
+      "source": "card-runtime"
+    },
+    {
+      "id": "evt_burn_completed_essay_1",
+      "userId": "user-demo",
+      "deckId": "deck_essay",
+      "cardId": "card_essay_1",
+      "type": "card-burn-completed",
+      "occurredAt": "2026-05-21T10:16:00.000Z",
+      "verified": true,
+      "source": "card-runtime",
+      "estimatedMinutes": 10,
+      "actualMinutes": 8
+    },
+    {
+      "id": "evt_card_completed_essay_1",
+      "userId": "user-demo",
+      "deckId": "deck_essay",
+      "cardId": "card_essay_1",
+      "type": "card-completed",
+      "occurredAt": "2026-05-21T10:16:00.000Z",
+      "verified": true,
+      "source": "card-runtime",
+      "estimatedMinutes": 10,
+      "actualMinutes": 8
+    }
+  ],
+  "reminderAudit": []
+}

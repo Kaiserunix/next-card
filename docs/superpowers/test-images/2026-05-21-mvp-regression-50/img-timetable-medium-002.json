@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-timetable-medium-002",
+    "sourceType":  "image",
+    "category":  "timetable",
+    "difficulty":  "medium",
+    "imageFile":  "img-timetable-medium-002.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "dorm laptop timetable",
+                               "double single week lab rule",
+                               "morning class reminder"
+                           ],
+    "expectedWarnings":  [
+                             "double-single week review",
+                             "glare near time text"
+                         ],
+    "mustNotDo":  [
+                      "drop week rule",
+                      "commit recurring class without review"
+                  ]
+}

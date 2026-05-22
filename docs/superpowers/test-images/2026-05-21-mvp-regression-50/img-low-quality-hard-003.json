@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-low-quality-hard-003",
+    "sourceType":  "image",
+    "category":  "low-quality",
+    "difficulty":  "hard",
+    "imageFile":  "img-low-quality-hard-003.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "tilted whiteboard",
+                               "draft deadline",
+                               "class presentation event"
+                           ],
+    "expectedWarnings":  [
+                             "ambiguous time",
+                             "multiple events"
+                         ],
+    "mustNotDo":  [
+                      "use presentation as only deadline",
+                      "assign team roles"
+                  ]
+}

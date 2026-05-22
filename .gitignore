@@ -29,6 +29,7 @@ Thumbs.db
 
 # local Codex verification artifacts
 .codex-*
+tmp-*
 
 # Playwright
 test-results/

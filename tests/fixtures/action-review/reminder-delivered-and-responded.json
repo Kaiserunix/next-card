@@ -1,0 +1,39 @@
+{
+  "userId": "user-demo",
+  "proofEvents": [
+    {
+      "id": "evt_reminder_context_card",
+      "userId": "user-demo",
+      "deckId": "deck_calculus",
+      "cardId": "card_pack_bag",
+      "type": "card-completed",
+      "occurredAt": "2026-05-21T07:35:00.000Z",
+      "verified": true,
+      "source": "card-runtime",
+      "estimatedMinutes": 5,
+      "actualMinutes": 4
+    }
+  ],
+  "reminderAudit": [
+    {
+      "id": "audit_reminder_delivered",
+      "userId": "user-demo",
+      "reminderId": "reminder_pack_bag",
+      "occurredAt": "2026-05-21T07:30:00.000Z",
+      "deliveryStatus": "delivered",
+      "channel": "external",
+      "permission": "granted",
+      "reliable": true
+    },
+    {
+      "id": "audit_reminder_responded",
+      "userId": "user-demo",
+      "reminderId": "reminder_pack_bag",
+      "occurredAt": "2026-05-21T07:33:00.000Z",
+      "deliveryStatus": "responded",
+      "channel": "external",
+      "permission": "granted",
+      "reliable": true
+    }
+  ]
+}

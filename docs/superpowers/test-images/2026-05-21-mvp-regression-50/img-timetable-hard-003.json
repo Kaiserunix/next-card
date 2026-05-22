@@ -1,0 +1,22 @@
+﻿{
+    "id":  "img-timetable-hard-003",
+    "sourceType":  "image",
+    "category":  "timetable",
+    "difficulty":  "hard",
+    "imageFile":  "img-timetable-hard-003.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "cropped old semester timetable",
+                               "1:00 and 10:00 ambiguity",
+                               "missing location review"
+                           ],
+    "expectedWarnings":  [
+                             "old semester",
+                             "time ambiguity",
+                             "missing room"
+                         ],
+    "mustNotDo":  [
+                      "treat old semester as current",
+                      "invent room number"
+                  ]
+}

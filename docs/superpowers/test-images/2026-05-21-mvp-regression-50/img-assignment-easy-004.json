@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-assignment-easy-004",
+    "sourceType":  "image",
+    "category":  "assignment",
+    "difficulty":  "easy",
+    "imageFile":  "img-assignment-easy-004.png",
+    "expectedReview":  "light",
+    "expectedCandidates":  [
+                               "OS lab report",
+                               "deadline 2026-05-21 20:00",
+                               "deliverable screenshot and analysis"
+                           ],
+    "expectedWarnings":  [
+                             "late policy constraint",
+                             "comment confirms deadline"
+                         ],
+    "mustNotDo":  [
+                      "create late-policy task",
+                      "ignore deliverables"
+                  ]
+}

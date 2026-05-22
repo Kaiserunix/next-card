@@ -1,0 +1,47 @@
+{
+  "caseId": "pdf-assignment-deadline",
+  "path": "strict-review",
+  "rawInput": {
+    "id": "raw_pdf_assignment",
+    "sourceType": "pdf",
+    "contentRef": "upload://english-assignment.pdf",
+    "text": "英语作文需在 5 月 22 日 20:00 前提交。",
+    "sourceHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "locale": "zh-CN",
+    "timezone": "Asia/Shanghai",
+    "createdAt": "2026-05-21T08:20:00.000Z",
+    "receivedAt": "2026-05-21T08:20:00.000Z",
+    "privacyFlags": ["unknown"],
+    "retentionPolicy": {
+      "rawRetentionDays": 7,
+      "derivedRetentionDays": 30,
+      "userDeletable": true
+    }
+  },
+  "extraction": {
+    "id": "extract_pdf_assignment",
+    "rawInputId": "raw_pdf_assignment",
+    "candidates": {
+      "tasks": [{ "id": "task_pdf_essay", "title": "交英语作文", "taskType": "assignment", "confidence": 0.9, "lifecycle": "one-off" }],
+      "timeConstraints": [{ "id": "time_pdf_essay", "kind": "deadline", "label": "5 月 22 日 20:00 前", "normalizedAt": "2026-05-22T20:00:00.000+08:00", "isHard": true, "confidence": 0.91 }],
+      "locations": [],
+      "courses": [],
+      "reminders": []
+    },
+    "confidence": 0.88,
+    "ambiguities": [],
+    "warnings": ["high_risk_multimodal", "submission_deadline"],
+    "evidence": [{ "rawInputId": "raw_pdf_assignment", "page": 1, "quote": "英语作文需在 5 月 22 日 20:00 前提交", "confidence": 0.91 }],
+    "reviewRequirement": "strict"
+  },
+  "confirmationRequest": {
+    "id": "confirm_pdf_assignment",
+    "rawInputId": "raw_pdf_assignment",
+    "mode": "strict-review",
+    "summary": "PDF 里出现提交截止时间，需要核对后才能进入计划。",
+    "facts": [{ "id": "fact_pdf_deadline", "field": "deadline", "label": "截止", "value": "5 月 22 日 20:00 前", "confidence": 0.91, "evidenceRefs": [] }],
+    "missingFields": [],
+    "riskReasons": ["high_risk_multimodal", "submission_deadline"],
+    "canProceedToPlanMode": false
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "caseId": "soft-task-after-hardens-at",
+  "notificationCapability": "in_app_only",
+  "softTaskTiming": {
+    "recommendedGoodLineAt": "2026-05-21T12:00:00+08:00",
+    "mustNudgeAfterAt": "2026-05-21T15:00:00+08:00",
+    "deadlineAt": "2026-05-21T20:00:00+08:00",
+    "hardensAt": "2026-05-21T17:00:00+08:00",
+    "reason": "Assignment review has reached the latest safe action line."
+  },
+  "scheduleSnapshot": {
+    "id": "snapshot_soft_after",
+    "version": 1,
+    "now": "2026-05-21T18:00:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "committedDecks": [],
+    "activeCards": [],
+    "scheduledEvents": [],
+    "timeLocks": [],
+    "availableWindows": [],
+    "frozenQueue": [],
+    "policySnapshotId": "policy_default"
+  },
+  "queueActions": [
+    {
+      "type": "update-soft-task-tension",
+      "id": "action_harden_soft_task",
+      "snapshotId": "snapshot_soft_after",
+      "actor": "system-service",
+      "reason": "The task passed hardensAt and should be treated as deadline-sensitive.",
+      "createdAt": "2026-05-21T18:00:00+08:00",
+      "chosenPlanId": "plan-b"
+    }
+  ]
+}

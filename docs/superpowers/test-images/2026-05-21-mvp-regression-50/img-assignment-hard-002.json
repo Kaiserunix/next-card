@@ -1,0 +1,22 @@
+﻿{
+    "id":  "img-assignment-hard-002",
+    "sourceType":  "image",
+    "category":  "assignment",
+    "difficulty":  "hard",
+    "imageFile":  "img-assignment-hard-002.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "data analysis report",
+                               "draft and final deadlines",
+                               "old template conflict"
+                           ],
+    "expectedWarnings":  [
+                             "deadline conflict",
+                             "late policy constraint",
+                             "rubric not task"
+                         ],
+    "mustNotDo":  [
+                      "silently choose later deadline",
+                      "turn rubric into task list"
+                  ]
+}

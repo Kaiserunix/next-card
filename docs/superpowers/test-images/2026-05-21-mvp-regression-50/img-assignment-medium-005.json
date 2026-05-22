@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-assignment-medium-005",
+    "sourceType":  "image",
+    "category":  "assignment",
+    "difficulty":  "medium",
+    "imageFile":  "img-assignment-medium-005.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "physics lab pre-report",
+                               "data processing deadline",
+                               "lab location"
+                           ],
+    "expectedWarnings":  [
+                             "multiple deadlines",
+                             "handwritten note source"
+                         ],
+    "mustNotDo":  [
+                      "merge deadlines",
+                      "ignore clarification"
+                  ]
+}

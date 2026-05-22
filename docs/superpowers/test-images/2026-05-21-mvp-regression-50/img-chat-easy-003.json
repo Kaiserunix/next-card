@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-chat-easy-003",
+    "sourceType":  "image",
+    "category":  "chat",
+    "difficulty":  "easy",
+    "imageFile":  "img-chat-easy-003.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "teacher reminder",
+                               "check existing task",
+                               "format constraint"
+                           ],
+    "expectedWarnings":  [
+                             "not new assignment",
+                             "relative this Friday"
+                         ],
+    "mustNotDo":  [
+                      "create duplicate deadline",
+                      "overwrite existing task"
+                  ]
+}

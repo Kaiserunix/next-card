@@ -1,0 +1,22 @@
+﻿{
+    "id":  "img-blocked-hard-002",
+    "sourceType":  "image",
+    "category":  "blocked",
+    "difficulty":  "hard",
+    "imageFile":  "img-blocked-hard-002.png",
+    "expectedReview":  "blocked",
+    "expectedCandidates":  [
+                               "unreadable image",
+                               "no candidates",
+                               "request re-upload"
+                           ],
+    "expectedWarnings":  [
+                             "unreadable image",
+                             "no task candidates"
+                         ],
+    "mustNotDo":  [
+                      "generate deck",
+                      "guess deadline",
+                      "use default template"
+                  ]
+}

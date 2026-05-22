@@ -1,0 +1,37 @@
+{
+  "id": "img-blocked-hard-001",
+  "sourceType": "image",
+  "category": "blocked",
+  "difficulty": "hard",
+  "documentType": "blocked unusable mixed student screenshot",
+  "language": "Simplified Chinese",
+  "imageStyle": "portrait 9:16 phone photo of another phone screen, overexposed glare, severe crop, motion blur, low contrast, intentionally unreliable",
+  "expectedReview": "blocked",
+  "visibleText": [
+    "作业...",
+    "明天...",
+    "...10:00",
+    "教室 B...",
+    "截图不完整"
+  ],
+  "expectedCandidates": {
+    "weakFragments": [
+      "明天",
+      "10:00",
+      "教室 B"
+    ],
+    "blockedReason": "missing source title, missing course name, cropped deadline context, unreadable sender/time, no reliable location"
+  },
+  "expectedWarnings": [
+    "low_ocr_confidence",
+    "blocked_unusable_image",
+    "missing_core_facts"
+  ],
+  "mustNotDo": [
+    "create authoritative candidates",
+    "commit hard lock",
+    "create deck directly",
+    "invent course name or location",
+    "write proof"
+  ]
+}

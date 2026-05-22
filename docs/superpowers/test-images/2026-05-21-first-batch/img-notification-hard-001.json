@@ -1,0 +1,57 @@
+{
+  "id": "img-notification-hard-001",
+  "sourceType": "image",
+  "category": "notification",
+  "difficulty": "hard",
+  "documentType": "notification shade",
+  "language": "Simplified Chinese",
+  "imageStyle": "vertical smartphone notification center screenshot, 9:16, stacked notification cards, compression artifacts, uneven brightness, mild blur",
+  "expectedReview": "strict",
+  "visibleText": [
+    "2026/05/21 18:40",
+    "通知中心",
+    "课程提醒 17:55",
+    "《数据分析》小测改到明天 10:00，地点改为 B203。",
+    "班级通知 18:02",
+    "今晚答疑取消，原定 19:30 不再进行，不需要补交材料。",
+    "作业提醒 18:11",
+    "整理课堂问题，下节课前发给助教。",
+    "生活提醒 18:20",
+    "取快递柜里的笔记本。"
+  ],
+  "expectedCandidates": {
+    "scheduleChanges": [
+      {
+        "event": "《数据分析》小测",
+        "changeType": "rescheduled",
+        "newTime": "2026-05-22 10:00",
+        "location": "B203"
+      },
+      {
+        "event": "今晚答疑",
+        "changeType": "cancelled",
+        "originalTime": "2026-05-21 19:30"
+      }
+    ],
+    "tasksNeedingReview": [
+      {
+        "title": "整理课堂问题，发给助教",
+        "deadlineText": "下节课前",
+        "reason": "requires class schedule context before resolving a hard deadline"
+      }
+    ],
+    "ignoredText": [
+      "取快递柜里的笔记本。"
+    ]
+  },
+  "expectedWarnings": [
+    "hard_schedule_change_requires_review",
+    "ambiguous_relative_deadline",
+    "cancellation_must_not_create_task"
+  ],
+  "mustNotDo": [
+    "resolve 下节课前 without schedule context",
+    "create a task for canceled Q&A",
+    "fake external notification delivery"
+  ]
+}

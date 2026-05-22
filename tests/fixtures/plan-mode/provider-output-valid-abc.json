@@ -1,0 +1,155 @@
+{
+  "draft": {
+    "id": "draft_valid_abc",
+    "requestId": "pm_req_voice_calculus_001",
+    "operation": "generate",
+    "source": "voice-confirmed",
+    "planCompilerHandoffId": "handoff_calculus_001",
+    "verifiedInputBundleId": "bundle_calculus_001",
+    "confirmedTranscriptId": "voice_tx_calculus_confirmed_001",
+    "status": "options-ready",
+    "goalUnderstanding": "用户要在明天早八前顺利去高数课，并降低早晨临时准备压力。",
+    "keyConstraints": ["明天 08:00 高数课", "7:40 前出门"],
+    "decomposition": [
+      {
+        "id": "stage-1",
+        "title": "今晚准备",
+        "purpose": "把明早要找的物品提前放好。",
+        "sourceConstraintRefs": ["明天 08:00 高数课"]
+      }
+    ],
+    "timeStrategy": ["先做 10 分钟整理", "明早只保留出门动作"],
+    "options": [
+      {
+        "id": "plan-a",
+        "mode": "A",
+        "style": "urgent",
+        "title": "快速出门保障",
+        "objective": "先保证明早能准时出门。",
+        "summary": "只处理最关键物品和提醒。",
+        "estimatedTotalMinutes": 18,
+        "riskLevel": "medium",
+        "tradeoffs": ["细节少，但能快速降低迟到风险"],
+        "cardDrafts": [
+          {
+            "id": "card-a-1",
+            "title": "圈出明早必带物品",
+            "action": "打开课程提醒，圈出高数课本、笔和上次作业这 3 个必带物品。",
+            "estimatedMinutes": 5,
+            "objectiveLevel": "baseline",
+            "timingIntent": "start-now",
+            "sourceStageId": "stage-1"
+          },
+          {
+            "id": "card-a-2",
+            "title": "把物品放到包旁边",
+            "action": "把高数课本、笔和上次作业放到书包旁边。",
+            "estimatedMinutes": 7,
+            "objectiveLevel": "baseline",
+            "timingIntent": "start-now",
+            "sourceStageId": "stage-1"
+          },
+          {
+            "id": "card-a-3",
+            "title": "确认明早出门时间",
+            "action": "设置 7:40 前出门提醒，并把手机放到能听见的位置。",
+            "estimatedMinutes": 6,
+            "objectiveLevel": "progress",
+            "timingIntent": "before-deadline",
+            "sourceStageId": "stage-1"
+          }
+        ]
+      },
+      {
+        "id": "plan-b",
+        "mode": "B",
+        "style": "balanced",
+        "title": "标准课前准备",
+        "objective": "今晚完成准备，明早留出缓冲。",
+        "summary": "兼顾物品、路线和课前状态。",
+        "estimatedTotalMinutes": 28,
+        "riskLevel": "low",
+        "tradeoffs": ["用时稍长，但早晨更稳"],
+        "cardDrafts": [
+          {
+            "id": "card-b-1",
+            "title": "确认课程和地点",
+            "action": "打开课程表，确认高数课时间和教室信息。",
+            "estimatedMinutes": 5,
+            "objectiveLevel": "baseline",
+            "timingIntent": "start-now",
+            "sourceStageId": "stage-1"
+          },
+          {
+            "id": "card-b-2",
+            "title": "整理课本和作业",
+            "action": "把高数课本、笔记和上次作业页整理进书包。",
+            "estimatedMinutes": 10,
+            "objectiveLevel": "standard",
+            "timingIntent": "start-now",
+            "sourceStageId": "stage-1"
+          },
+          {
+            "id": "card-b-3",
+            "title": "预留早晨路线缓冲",
+            "action": "按 7:40 出门倒推洗漱和早餐时间，写下一个明早顺序。",
+            "estimatedMinutes": 13,
+            "objectiveLevel": "standard",
+            "timingIntent": "scheduled-window",
+            "sourceStageId": "stage-1"
+          }
+        ]
+      },
+      {
+        "id": "plan-c",
+        "mode": "C",
+        "style": "gentle",
+        "title": "低压课前准备",
+        "objective": "用更小的第一步避免拖延。",
+        "summary": "先做最轻动作，再补可选整理。",
+        "estimatedTotalMinutes": 22,
+        "riskLevel": "low",
+        "tradeoffs": ["压力低，但需要明早再确认一次"],
+        "cardDrafts": [
+          {
+            "id": "card-c-1",
+            "title": "只拿出高数课本",
+            "action": "先把高数课本从桌上拿出来，放到书包旁边。",
+            "estimatedMinutes": 3,
+            "objectiveLevel": "progress",
+            "timingIntent": "start-now",
+            "sourceStageId": "stage-1"
+          },
+          {
+            "id": "card-c-2",
+            "title": "补齐作业和文具",
+            "action": "把上次作业页和一支能写的笔放进书包。",
+            "estimatedMinutes": 7,
+            "objectiveLevel": "baseline",
+            "timingIntent": "start-now",
+            "sourceStageId": "stage-1"
+          },
+          {
+            "id": "card-c-3",
+            "title": "明早再确认教室",
+            "action": "把明早确认教室的提醒放到起床后第一条。",
+            "estimatedMinutes": 4,
+            "objectiveLevel": "progress",
+            "timingIntent": "soft-optional",
+            "sourceStageId": "stage-1"
+          }
+        ]
+      }
+    ],
+    "assumptions": ["用户希望今天先准备，明早减少压力"],
+    "missingButNonBlocking": ["具体教室可稍后确认"],
+    "provider": "deterministic-local",
+    "createdAt": "2026-05-21T12:00:00.000Z",
+    "writes": {
+      "deckCommitted": false,
+      "proofWritten": false,
+      "remindersCreated": false,
+      "scheduleQueued": false
+    }
+  }
+}

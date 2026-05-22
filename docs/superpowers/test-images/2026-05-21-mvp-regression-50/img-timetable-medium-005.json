@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-timetable-medium-005",
+    "sourceType":  "image",
+    "category":  "timetable",
+    "difficulty":  "medium",
+    "imageFile":  "img-timetable-medium-005.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "today schedule screenshot",
+                               "pending class meeting location",
+                               "tomorrow class candidate"
+                           ],
+    "expectedWarnings":  [
+                             "overlay covers row",
+                             "location pending"
+                         ],
+    "mustNotDo":  [
+                      "invent meeting location",
+                      "commit covered row"
+                  ]
+}

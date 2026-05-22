@@ -1,0 +1,44 @@
+{
+  "caseId": "notification-permission-denied",
+  "notificationCapability": "external_denied",
+  "scheduleSnapshot": {
+    "id": "snapshot_notification_denied",
+    "version": 1,
+    "now": "2026-05-21T07:00:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "committedDecks": [],
+    "activeCards": [],
+    "scheduledEvents": [],
+    "timeLocks": [],
+    "availableWindows": [],
+    "frozenQueue": [],
+    "policySnapshotId": "policy_default"
+  },
+  "reminderPlans": [
+    {
+      "id": "baseline_prepare",
+      "cardId": "card_prepare",
+      "deckId": "deck_calculus",
+      "chosenPlanId": "plan-b",
+      "fireAt": "2026-05-21T07:30:00+08:00",
+      "kind": "baseline",
+      "source": "system-fallback",
+      "capabilityRequired": "browser-notification",
+      "deliveryStatus": "planned",
+      "privacyLevel": "low-sensitive"
+    },
+    {
+      "id": "in_app_prepare",
+      "cardId": "card_prepare",
+      "deckId": "deck_calculus",
+      "chosenPlanId": "plan-b",
+      "fireAt": "2026-05-21T07:30:00+08:00",
+      "kind": "in-app-only",
+      "source": "system-fallback",
+      "capabilityRequired": "none",
+      "deliveryStatus": "planned",
+      "privacyLevel": "low-sensitive"
+    }
+  ],
+  "queueActions": []
+}

@@ -1,0 +1,22 @@
+﻿{
+    "id":  "img-assignment-medium-001",
+    "sourceType":  "image",
+    "category":  "assignment",
+    "difficulty":  "medium",
+    "imageFile":  "img-assignment-medium-001.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "Research Reflection 1",
+                               "draft deadline",
+                               "final deadline",
+                               "rubric non-task"
+                           ],
+    "expectedWarnings":  [
+                             "multiple deadlines",
+                             "rubric not task"
+                         ],
+    "mustNotDo":  [
+                      "convert rubric into cards",
+                      "choose deadline without review"
+                  ]
+}

@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-relative-hard-006",
+    "sourceType":  "image",
+    "category":  "relative-date",
+    "difficulty":  "hard",
+    "imageFile":  "img-relative-hard-006.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "resolve before next class using timetable",
+                               "candidate before Friday class",
+                               "fallback minimum"
+                           ],
+    "expectedWarnings":  [
+                             "requires timetable context",
+                             "minimum not goal reduction"
+                         ],
+    "mustNotDo":  [
+                      "resolve without timetable",
+                      "silently reduce baseline goal"
+                  ]
+}

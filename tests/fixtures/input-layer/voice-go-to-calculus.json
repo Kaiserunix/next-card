@@ -1,0 +1,46 @@
+{
+  "caseId": "voice-go-to-calculus",
+  "path": "light",
+  "rawInput": {
+    "id": "raw_voice_calculus",
+    "sourceType": "voice",
+    "text": "明天早八去高数课",
+    "sourceHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "locale": "zh-CN",
+    "timezone": "Asia/Shanghai",
+    "createdAt": "2026-05-21T08:00:00.000Z",
+    "receivedAt": "2026-05-21T08:00:00.000Z",
+    "privacyFlags": ["contains_location"],
+    "retentionPolicy": {
+      "rawRetentionDays": 7,
+      "derivedRetentionDays": 30,
+      "userDeletable": true
+    }
+  },
+  "extraction": {
+    "id": "extract_voice_calculus",
+    "rawInputId": "raw_voice_calculus",
+    "candidates": {
+      "tasks": [{ "id": "task_calculus", "title": "去高数课", "taskType": "course-arrival", "confidence": 0.9, "lifecycle": "unknown" }],
+      "timeConstraints": [{ "id": "time_calculus", "kind": "hard-lock", "label": "明天早八", "isHard": true, "confidence": 0.86 }],
+      "locations": [],
+      "courses": [{ "id": "course_calculus", "courseName": "高数", "confidence": 0.9 }],
+      "reminders": []
+    },
+    "confidence": 0.88,
+    "ambiguities": ["缺少地点"],
+    "warnings": ["course_time"],
+    "evidence": [{ "rawInputId": "raw_voice_calculus", "quote": "明天早八去高数课", "confidence": 0.88 }],
+    "reviewRequirement": "light"
+  },
+  "confirmationRequest": {
+    "id": "confirm_voice_calculus",
+    "rawInputId": "raw_voice_calculus",
+    "mode": "light-card",
+    "summary": "我理解为：明天早八去高数课，地点待确认。",
+    "facts": [{ "id": "fact_calculus", "field": "event", "label": "事件", "value": "去高数课", "confidence": 0.9, "evidenceRefs": [] }],
+    "missingFields": ["location"],
+    "riskReasons": ["course_time"],
+    "canProceedToPlanMode": false
+  }
+}

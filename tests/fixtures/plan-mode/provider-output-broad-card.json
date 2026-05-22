@@ -1,0 +1,154 @@
+{
+  "draft": {
+    "id": "draft_broad_card",
+    "requestId": "pm_req_voice_calculus_001",
+    "operation": "generate",
+    "source": "voice-confirmed",
+    "planCompilerHandoffId": "handoff_calculus_001",
+    "verifiedInputBundleId": "bundle_calculus_001",
+    "status": "options-ready",
+    "goalUnderstanding": "用户要完成作业。",
+    "keyConstraints": ["今晚截止"],
+    "decomposition": [
+      {
+        "id": "stage-1",
+        "title": "作业",
+        "purpose": "完成作业",
+        "sourceConstraintRefs": []
+      }
+    ],
+    "timeStrategy": ["尽快开始"],
+    "options": [
+      {
+        "id": "plan-a",
+        "mode": "A",
+        "style": "urgent",
+        "title": "快速",
+        "objective": "快速完成",
+        "summary": "先完成",
+        "estimatedTotalMinutes": 15,
+        "riskLevel": "medium",
+        "tradeoffs": [],
+        "cardDrafts": [
+          {
+            "id": "card-a-1",
+            "title": "完成作业",
+            "action": "完成作业",
+            "estimatedMinutes": 15,
+            "objectiveLevel": "baseline",
+            "timingIntent": "start-now",
+            "sourceStageId": "stage-1"
+          },
+          {
+            "id": "card-a-2",
+            "title": "打开要求",
+            "action": "打开作业要求，圈出必须提交的 3 个点。",
+            "estimatedMinutes": 5,
+            "objectiveLevel": "baseline",
+            "timingIntent": "start-now",
+            "sourceStageId": "stage-1"
+          },
+          {
+            "id": "card-a-3",
+            "title": "写出第一段",
+            "action": "用 10 分钟写出第一段的最低可提交版本。",
+            "estimatedMinutes": 10,
+            "objectiveLevel": "progress",
+            "timingIntent": "start-now",
+            "sourceStageId": "stage-1"
+          }
+        ]
+      },
+      {
+        "id": "plan-b",
+        "mode": "B",
+        "style": "balanced",
+        "title": "平衡",
+        "objective": "平衡推进",
+        "summary": "平衡推进",
+        "estimatedTotalMinutes": 25,
+        "riskLevel": "low",
+        "tradeoffs": [],
+        "cardDrafts": [
+          {
+            "id": "card-b-1",
+            "title": "打开要求",
+            "action": "打开作业要求，圈出必须提交的 3 个点。",
+            "estimatedMinutes": 5,
+            "objectiveLevel": "baseline",
+            "timingIntent": "start-now",
+            "sourceStageId": "stage-1"
+          },
+          {
+            "id": "card-b-2",
+            "title": "写出提纲",
+            "action": "写出三条提纲，每条只写一个关键词。",
+            "estimatedMinutes": 8,
+            "objectiveLevel": "progress",
+            "timingIntent": "start-now",
+            "sourceStageId": "stage-1"
+          },
+          {
+            "id": "card-b-3",
+            "title": "补第一段",
+            "action": "按提纲补出第一段的 4 句话。",
+            "estimatedMinutes": 12,
+            "objectiveLevel": "standard",
+            "timingIntent": "start-now",
+            "sourceStageId": "stage-1"
+          }
+        ]
+      },
+      {
+        "id": "plan-c",
+        "mode": "C",
+        "style": "gentle",
+        "title": "低压",
+        "objective": "低压推进",
+        "summary": "低压推进",
+        "estimatedTotalMinutes": 20,
+        "riskLevel": "low",
+        "tradeoffs": [],
+        "cardDrafts": [
+          {
+            "id": "card-c-1",
+            "title": "只打开要求",
+            "action": "只打开作业要求，找到提交格式这一行。",
+            "estimatedMinutes": 4,
+            "objectiveLevel": "progress",
+            "timingIntent": "start-now",
+            "sourceStageId": "stage-1"
+          },
+          {
+            "id": "card-c-2",
+            "title": "写一个句子",
+            "action": "先写一个能放进正文的句子。",
+            "estimatedMinutes": 6,
+            "objectiveLevel": "progress",
+            "timingIntent": "start-now",
+            "sourceStageId": "stage-1"
+          },
+          {
+            "id": "card-c-3",
+            "title": "标出下一步",
+            "action": "在文档末尾写下下一步要补的两点。",
+            "estimatedMinutes": 5,
+            "objectiveLevel": "progress",
+            "timingIntent": "soft-optional",
+            "sourceStageId": "stage-1"
+          }
+        ]
+      }
+    ],
+    "assumptions": [],
+    "missingButNonBlocking": [],
+    "provider": "unknown",
+    "createdAt": "2026-05-21T12:00:00.000Z",
+    "writes": {
+      "deckCommitted": false,
+      "proofWritten": false,
+      "remindersCreated": false,
+      "scheduleQueued": false
+    }
+  }
+}

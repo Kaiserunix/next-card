@@ -27,12 +27,46 @@ mock planner and record a soft notice in proof instead of crashing the app.
 The planning flow must stay Codex Plan Mode-like:
 
 1. Understand the user's goal and source type.
-2. Extract constraints, especially time, deadline, dependencies, and energy pressure.
-3. Decompose the goal into action stages.
-4. Explain the time strategy, including what can be frozen or rescheduled.
-5. Offer exactly three execution plans.
+2. Analyze the behavior vector: `expectancy`, `taskValue`, `procrastination`, and `timePressure`.
+3. Select one local agent profile from the six-agent policy set.
+4. Extract constraints, especially time, deadline, dependencies, and energy pressure.
+5. Decompose the goal into action stages.
+6. Explain the time strategy, including what can be frozen or rescheduled.
+7. Offer exactly three execution plans.
 
 Do not skip straight from input to a pile of task cards.
+
+## Behavior Vector And Agent Policy
+
+The MVP uses a simple Temporal Motivation Theory-inspired vector. These are
+not user-facing personality scores; they describe the current task state:
+
+| Field | Meaning | Downstream impact |
+|---|---|---|
+| `expectancy` | How doable the next action feels | Lower values increase decomposition and gentler copy |
+| `taskValue` | How clearly valuable or consequential the task is | Lower values can trigger meaning-focused guidance |
+| `procrastination` | How much the task has been avoided or resisted | Higher values increase micro-actions or recovery mode |
+| `timePressure` | How close the useful action window is | Higher values increase burn sensitivity and reminders |
+
+The vector selects one of six local agent profiles:
+
+| Agent id | Name | Primary use |
+|---|---|---|
+| `balanced-coach` | 平衡教练 | Default steady progress |
+| `deadline-guardian` | 截止线守卫 | High time pressure without strong avoidance |
+| `micro-splitter` | 微动作拆解师 | Low expectancy or severe stuck state |
+| `sprint-driver` | 冲刺推进器 | High deadline pressure plus high procrastination |
+| `gentle-recovery` | 温和恢复师 | Avoidance with low current deadline pressure |
+| `meaning-coach` | 意义唤醒师 | Low task value or weak reason to start |
+
+Agent policies control strictness, decomposition, in-app push frequency, burn
+sensitivity, freeze tolerance, reward emphasis, and card minute range. Runtime
+skills and trigger relationships are defined in:
+
+```text
+docs/agent-runtime-architecture.md
+lib/server/agent-runtime.ts
+```
 
 ## Task Classification
 

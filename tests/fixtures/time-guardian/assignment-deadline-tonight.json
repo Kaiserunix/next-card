@@ -1,0 +1,63 @@
+{
+  "caseId": "assignment-deadline-tonight",
+  "notificationCapability": "in_app_only",
+  "scheduleSnapshot": {
+    "id": "snapshot_assignment_due",
+    "version": 1,
+    "now": "2026-05-21T18:00:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "committedDecks": [
+      {
+        "deckId": "deck_assignment",
+        "chosenPlanId": "plan-a",
+        "title": "Submit assignment"
+      }
+    ],
+    "activeCards": [
+      {
+        "cardId": "card_minimum_submit",
+        "deckId": "deck_assignment",
+        "chosenPlanId": "plan-a",
+        "tension": "deadline-sensitive",
+        "estimatedMinutes": 30,
+        "deadlineAt": "2026-05-21T20:00:00+08:00",
+        "hardLockRefs": ["lock_assignment_due"],
+        "nudgeReminderIds": [],
+        "scheduleStatus": "unscheduled"
+      }
+    ],
+    "scheduledEvents": [],
+    "timeLocks": [
+      {
+        "id": "lock_assignment_due",
+        "userId": "anon",
+        "kind": "submission_deadline",
+        "dueAt": "2026-05-21T20:00:00+08:00",
+        "timezone": "Asia/Shanghai",
+        "movable": false,
+        "sourceRefs": [
+          {
+            "rawInputId": "raw_assignment",
+            "quote": "Submit before 20:00",
+            "confidence": 0.97
+          }
+        ],
+        "reviewStatus": "user-confirmed",
+        "conflictStatus": "none"
+      }
+    ],
+    "availableWindows": [
+      {
+        "id": "window_evening",
+        "startAt": "2026-05-21T18:10:00+08:00",
+        "endAt": "2026-05-21T20:00:00+08:00",
+        "timezone": "Asia/Shanghai",
+        "source": "derived",
+        "confidence": 0.9
+      }
+    ],
+    "frozenQueue": [],
+    "policySnapshotId": "policy_default"
+  },
+  "queueActions": []
+}

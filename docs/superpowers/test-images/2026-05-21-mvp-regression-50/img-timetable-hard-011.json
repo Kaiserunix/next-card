@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-timetable-hard-011",
+    "sourceType":  "image",
+    "category":  "timetable",
+    "difficulty":  "hard",
+    "imageFile":  "img-timetable-hard-011.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "whiteboard lab schedule",
+                               "experiment record deadline",
+                               "assignment inside timetable"
+                           ],
+    "expectedWarnings":  [
+                             "whiteboard source review",
+                             "deadline inside schedule"
+                         ],
+    "mustNotDo":  [
+                      "move lab without confirmation",
+                      "treat deadline as class only"
+                  ]
+}

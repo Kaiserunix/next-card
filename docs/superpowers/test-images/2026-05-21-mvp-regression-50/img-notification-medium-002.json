@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-notification-medium-002",
+    "sourceType":  "image",
+    "category":  "notification",
+    "difficulty":  "medium",
+    "imageFile":  "img-notification-medium-002.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "review session reschedule",
+                               "response deadline today 17:00",
+                               "schedule mutation"
+                           ],
+    "expectedWarnings":  [
+                             "relative today tonight tomorrow",
+                             "hard-lock review"
+                         ],
+    "mustNotDo":  [
+                      "silently move hard lock",
+                      "schedule old and new event"
+                  ]
+}

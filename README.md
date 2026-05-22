@@ -121,6 +121,37 @@ Limits:
 
 The backend stores voice usage records and confirmed transcript metadata in local JSON. Deck and proof state remain frontend `localStorage` state in this slice.
 
+## Post-Voice Plan Mode Backend
+
+Confirmed voice/manual/text/multimodal input now enters a draft-only backend boundary:
+
+```text
+voice confirm -> input-layer handoff -> plan-mode draft -> future deck commit
+```
+
+Route:
+
+```text
+POST /api/backend/plan-mode
+```
+
+The route accepts a verified `PlanCompilerHandoff` and returns a `PlanModeDraft`
+with explicit A/B/C options. It stores drafts in:
+
+```text
+.nextcard-data/plan-mode-drafts.json
+```
+
+Config:
+
+```text
+NEXTCARD_PLAN_MODE_DRAFT_FILE=.nextcard-data/plan-mode-drafts.json
+```
+
+This route intentionally does not commit a deck, write proof, create reminders,
+schedule cards, or default to option A. Deck commit remains a future backend
+service that should reference `planModeDraftId` plus the user's selected option.
+
 ## Real Mimo AI Provider
 
 Plan Mode uses `MIMO_PLANNER_MODEL` and multimodal import review uses

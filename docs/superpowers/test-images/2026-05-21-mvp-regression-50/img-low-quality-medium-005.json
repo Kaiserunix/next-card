@@ -1,0 +1,22 @@
+﻿{
+    "id":  "img-low-quality-medium-005",
+    "sourceType":  "image",
+    "category":  "low-quality",
+    "difficulty":  "medium",
+    "imageFile":  "img-low-quality-medium-005.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "handwritten homework list",
+                               "multi-goal",
+                               "deadline scope unclear"
+                           ],
+    "expectedWarnings":  [
+                             "smudged handwriting",
+                             "multi-goal",
+                             "scope unclear"
+                         ],
+    "mustNotDo":  [
+                      "bind all tasks to Sunday",
+                      "create broad study task"
+                  ]
+}

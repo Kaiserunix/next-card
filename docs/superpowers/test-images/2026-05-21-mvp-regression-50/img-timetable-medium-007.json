@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-timetable-medium-007",
+    "sourceType":  "image",
+    "category":  "timetable",
+    "difficulty":  "medium",
+    "imageFile":  "img-timetable-medium-007.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "notebook pasted timetable",
+                               "handwritten Saturday lab supplement",
+                               "lab coat reminder"
+                           ],
+    "expectedWarnings":  [
+                             "handwriting low confidence",
+                             "missing location"
+                         ],
+    "mustNotDo":  [
+                      "treat handwritten note as hard lock",
+                      "ignore missing location"
+                  ]
+}

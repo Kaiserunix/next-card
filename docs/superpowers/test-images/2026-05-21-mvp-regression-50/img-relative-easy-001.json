@@ -1,0 +1,20 @@
+﻿{
+    "id":  "img-relative-easy-001",
+    "sourceType":  "image",
+    "category":  "relative-date",
+    "difficulty":  "easy",
+    "imageFile":  "img-relative-easy-001.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "resolve today from visible capture date",
+                               "linear algebra task",
+                               "25 minute estimate"
+                           ],
+    "expectedWarnings":  [
+                             "visible capture date required"
+                         ],
+    "mustNotDo":  [
+                      "use system date",
+                      "create broad study task"
+                  ]
+}

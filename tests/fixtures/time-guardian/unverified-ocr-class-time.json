@@ -1,0 +1,25 @@
+{
+  "caseId": "unverified-ocr-class-time",
+  "notificationCapability": "in_app_only",
+  "unverifiedTimeCandidate": {
+    "id": "candidate_ocr_class",
+    "sourceType": "ocr",
+    "label": "Maybe class at 08:00",
+    "confidence": 0.62,
+    "reviewStatus": "unverified"
+  },
+  "scheduleSnapshot": {
+    "id": "snapshot_unverified_ocr",
+    "version": 1,
+    "now": "2026-05-21T07:00:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "committedDecks": [],
+    "activeCards": [],
+    "scheduledEvents": [],
+    "timeLocks": [],
+    "availableWindows": [],
+    "frozenQueue": [],
+    "policySnapshotId": "policy_default"
+  },
+  "queueActions": []
+}

@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-timetable-easy-009",
+    "sourceType":  "image",
+    "category":  "timetable",
+    "difficulty":  "easy",
+    "imageFile":  "img-timetable-easy-009.png",
+    "expectedReview":  "light",
+    "expectedCandidates":  [
+                               "exam-week review sessions",
+                               "empty slot ignored",
+                               "online discussion candidate"
+                           ],
+    "expectedWarnings":  [
+                             "empty slot not task",
+                             "plastic glare"
+                         ],
+    "mustNotDo":  [
+                      "create task from empty slot",
+                      "ignore review-session nature"
+                  ]
+}

@@ -1,0 +1,58 @@
+{
+  "draft": {
+    "id": "draft_missing_c",
+    "requestId": "pm_req_voice_calculus_001",
+    "operation": "generate",
+    "source": "voice-confirmed",
+    "planCompilerHandoffId": "handoff_calculus_001",
+    "verifiedInputBundleId": "bundle_calculus_001",
+    "status": "options-ready",
+    "goalUnderstanding": "用户要去高数课。",
+    "keyConstraints": ["明天 08:00 高数课"],
+    "decomposition": [
+      {
+        "id": "stage-1",
+        "title": "准备",
+        "purpose": "准备课程",
+        "sourceConstraintRefs": []
+      }
+    ],
+    "timeStrategy": ["先做准备"],
+    "options": [
+      {
+        "id": "plan-a",
+        "mode": "A",
+        "style": "urgent",
+        "title": "快速",
+        "objective": "快速准备",
+        "summary": "快速准备",
+        "estimatedTotalMinutes": 15,
+        "riskLevel": "medium",
+        "tradeoffs": [],
+        "cardDrafts": []
+      },
+      {
+        "id": "plan-b",
+        "mode": "B",
+        "style": "balanced",
+        "title": "平衡",
+        "objective": "平衡准备",
+        "summary": "平衡准备",
+        "estimatedTotalMinutes": 25,
+        "riskLevel": "low",
+        "tradeoffs": [],
+        "cardDrafts": []
+      }
+    ],
+    "assumptions": [],
+    "missingButNonBlocking": [],
+    "provider": "unknown",
+    "createdAt": "2026-05-21T12:00:00.000Z",
+    "writes": {
+      "deckCommitted": false,
+      "proofWritten": false,
+      "remindersCreated": false,
+      "scheduleQueued": false
+    }
+  }
+}

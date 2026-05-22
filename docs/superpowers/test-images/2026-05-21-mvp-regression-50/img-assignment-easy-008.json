@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-assignment-easy-008",
+    "sourceType":  "image",
+    "category":  "assignment",
+    "difficulty":  "easy",
+    "imageFile":  "img-assignment-easy-008.png",
+    "expectedReview":  "light",
+    "expectedCandidates":  [
+                               "lab reflection note",
+                               "tonight 20:00 deadline",
+                               "no print step"
+                           ],
+    "expectedWarnings":  [
+                             "platform missing",
+                             "tonight resolution"
+                         ],
+    "mustNotDo":  [
+                      "add print step",
+                      "treat placeholder as real name"
+                  ]
+}

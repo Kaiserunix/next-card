@@ -1,0 +1,21 @@
+﻿{
+    "id":  "img-timetable-hard-010",
+    "sourceType":  "image",
+    "category":  "timetable",
+    "difficulty":  "hard",
+    "imageFile":  "img-timetable-hard-010.png",
+    "expectedReview":  "strict",
+    "expectedCandidates":  [
+                               "week 15 app timetable",
+                               "training location pending",
+                               "Sunday sync classification"
+                           ],
+    "expectedWarnings":  [
+                             "pending location",
+                             "soft vs hard classification"
+                         ],
+    "mustNotDo":  [
+                      "commit pending location",
+                      "force Sunday sync as hard course"
+                  ]
+}

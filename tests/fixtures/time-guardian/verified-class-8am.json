@@ -1,0 +1,91 @@
+{
+  "caseId": "verified-class-8am",
+  "notificationCapability": "in_app_only",
+  "scheduleSnapshot": {
+    "id": "snapshot_verified_class_8am",
+    "version": 1,
+    "now": "2026-05-21T07:00:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "committedDecks": [
+      {
+        "deckId": "deck_calculus",
+        "chosenPlanId": "plan-b",
+        "title": "Go to calculus class"
+      }
+    ],
+    "activeCards": [
+      {
+        "cardId": "card_prepare",
+        "deckId": "deck_calculus",
+        "chosenPlanId": "plan-b",
+        "tension": "hard",
+        "estimatedMinutes": 15,
+        "hardLockRefs": ["lock_class_8am"],
+        "nudgeReminderIds": [],
+        "scheduleStatus": "unscheduled"
+      }
+    ],
+    "scheduledEvents": [
+      {
+        "id": "event_prepare_window",
+        "userId": "anon",
+        "kind": "card-window",
+        "deckId": "deck_calculus",
+        "cardId": "card_prepare",
+        "chosenPlanId": "plan-b",
+        "startsAt": "2026-05-21T07:25:00+08:00",
+        "endsAt": "2026-05-21T07:40:00+08:00",
+        "timezone": "Asia/Shanghai",
+        "source": "time-guardian",
+        "status": "planned",
+        "basedOnSnapshotId": "snapshot_verified_class_8am",
+        "sourceRefs": ["raw_class"],
+        "reason": "Prepare before verified 08:00 class."
+      }
+    ],
+    "timeLocks": [
+      {
+        "id": "lock_class_8am",
+        "userId": "anon",
+        "kind": "class_time",
+        "startAt": "2026-05-21T08:00:00+08:00",
+        "endAt": "2026-05-21T09:30:00+08:00",
+        "timezone": "Asia/Shanghai",
+        "movable": false,
+        "sourceRefs": [
+          {
+            "rawInputId": "raw_class",
+            "quote": "Calculus starts at 08:00",
+            "confidence": 0.98
+          }
+        ],
+        "reviewStatus": "verified",
+        "conflictStatus": "none"
+      }
+    ],
+    "availableWindows": [
+      {
+        "id": "window_before_class",
+        "startAt": "2026-05-21T07:00:00+08:00",
+        "endAt": "2026-05-21T08:00:00+08:00",
+        "timezone": "Asia/Shanghai",
+        "source": "derived",
+        "confidence": 0.95
+      }
+    ],
+    "frozenQueue": [],
+    "policySnapshotId": "policy_default"
+  },
+  "queueActions": [
+    {
+      "type": "insert-schedule-event",
+      "id": "action_insert_prepare",
+      "snapshotId": "snapshot_verified_class_8am",
+      "actor": "system-service",
+      "reason": "Insert a safe preparation card before verified class time.",
+      "createdAt": "2026-05-21T07:00:00+08:00",
+      "chosenPlanId": "plan-b",
+      "idempotencyKey": "deck_calculus:card_prepare:window"
+    }
+  ]
+}
