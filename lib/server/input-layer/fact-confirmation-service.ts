@@ -18,6 +18,7 @@ export type ConfirmFactsCommand = {
   action: "confirm" | "correct" | "reject";
   corrections?: Partial<Record<"event" | "time" | "deadline" | "location" | "taskType" | "lifecycle", string>>;
   sourceType?: VerifiedInputBundle["sourceType"];
+  allowStrictReviewConfirmation?: boolean;
 };
 
 export type ConfirmFactsResult = {
@@ -31,7 +32,7 @@ export function confirmFacts(command: ConfirmFactsCommand): ConfirmFactsResult {
     return { nextAction: "retry-input" };
   }
 
-  if (command.request.mode === "rough-scope" || command.request.mode === "strict-review") {
+  if (command.request.mode === "rough-scope" || (command.request.mode === "strict-review" && !command.allowStrictReviewConfirmation)) {
     return { nextAction: "show-strict-review" };
   }
 

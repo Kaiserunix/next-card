@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "node --max-old-space-size=8192 ./node_modules/next/dist/bin/next build --turbopack",
+    "backend:chain": "node scripts/backend-chain-smoke.mjs",
     "lint": "eslint . --ext .ts,.tsx",
     "real:mimo": "node scripts/real-mimo-test-service.mjs",
     "test": "vitest run",

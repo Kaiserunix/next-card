@@ -48,6 +48,17 @@ export function validateProofEventRequest(input: ProofEventRequest): ProofEventR
     throw new ProofLedgerError("INVALID_PROOF_EVENT", "card_completed proof can only come from Card Runtime.");
   }
 
+  if (
+    (input.type === "card_started" ||
+      input.type === "card_frozen" ||
+      input.type === "burn_started" ||
+      input.type === "burn_completed" ||
+      input.type === "card_deferred") &&
+    (!input.deckId || !input.cardId)
+  ) {
+    throw new ProofLedgerError("INVALID_PROOF_EVENT", `${input.type} proof requires deckId and cardId.`);
+  }
+
   if (input.sourceService === "deck-commit" && input.type !== "deck_committed") {
     throw new ProofLedgerError("INVALID_PROOF_EVENT", "Deck Commit can only request deck_committed proof.");
   }

@@ -38,6 +38,25 @@ pnpm real:mimo -- --mode text --limit 1
 pnpm real:mimo -- --mode image --image "C:\Users\qwerf\Downloads\66aa4560bbb1fd0251f0ac99bd42c845.jpg" --limit 1
 ```
 
+跑 P0 后端闭环 sandbox，不需要网页平台或 dev server：
+
+```powershell
+pnpm backend:chain -- --case text-assignment --selected-option plan-b
+pnpm backend:chain -- --case strict-image-confirmed --image "C:\Users\qwerf\Downloads\66aa4560bbb1fd0251f0ac99bd42c845.jpg" --selected-option plan-b
+pnpm backend:chain -- --case crowded-timeline --selected-option plan-b
+pnpm backend:chain -- --case notification-relative --selected-option plan-b
+```
+
+`pnpm backend:chain` direct mode 证明的是 deterministic backend orchestration；它会注入 mock multimodal extractor，并在输出中打印 `multimodal provider: mock`。这不是真实 MiMo 图片识别证明。
+
+`pnpm real:mimo` 证明真实 MiMo text/image extraction。若要把正在运行的 Next route 与真实 provider config 串起来，可先开 dev server，再用 `pnpm backend:chain -- --route-url http://127.0.0.1:3022/api/backend/sandbox/run ...`；此时输出会标记 `multimodal provider: route`。
+
+输出会包含 multimodal provider、import review 状态、是否需要事实确认、已选方案、commit 的 deck/cards、Time Guardian queue actions、Card Runtime actions、Proof Timeline entries，并把 `report.json` 写到：
+
+```text
+.nextcard-data/backend-chain-runs/<timestamp>/
+```
+
 慢跑生成图目录，先跑 5 张：
 
 ```powershell

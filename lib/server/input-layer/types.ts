@@ -102,6 +102,7 @@ export type InputWarning =
   | "course_time"
   | "exam_time"
   | "submission_deadline"
+  | "document_text_unavailable"
   | "prompt_injection_like_text"
   | "high_risk_multimodal"
   | "hard_time_without_evidence"

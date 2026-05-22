@@ -1,7 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import { extname, join, resolve } from "node:path";
+import {
+  JsonFileImportConfirmationSessionRepository,
+  type ImportConfirmationSessionRepository,
+} from "@/lib/server/import-review/confirmation-session-repository";
 import { confirmFacts } from "@/lib/server/input-layer/fact-confirmation-service";
+import { extractDocumentText, type DocumentTextExtractionResult } from "@/lib/server/input-layer/document-text-extractor";
 import { MockMultimodalExtractor } from "@/lib/server/input-layer/mock-multimodal-extractor";
 import type { MultimodalExtractionPort } from "@/lib/server/input-layer/multimodal-port";
 import { InMemoryRawInputRepository, type RawInputRepository } from "@/lib/server/input-layer/raw-input-repository";
@@ -14,11 +19,14 @@ import type { ImportReviewCommand, ImportReviewProviderUsage, ImportReviewReport
 export type ImportReviewServiceOptions = {
   rawInputRepository?: RawInputRepository;
   multimodalExtractor?: MultimodalExtractionPort;
+  confirmationSessionRepository?: ImportConfirmationSessionRepository;
   uploadDir?: string;
   preparedImageDir?: string;
+  now?: () => string;
 };
 
 const TEXT_LIKE_SOURCES = new Set<RawInputSourceType>(["text", "manual-dictation", "voice"]);
+const DOCUMENT_TEXT_SOURCES = new Set<RawInputSourceType>(["pdf", "docx"]);
 const DEFAULT_UPLOAD_DIR = join(process.cwd(), ".nextcard-data", "import-uploads");
 const DEFAULT_PREPARED_IMAGE_DIR = join(process.cwd(), ".nextcard-data", "import-prepared-images");
 const DEFAULT_MIMO_MULTIMODAL_MODEL = "mimo-v2.5";
@@ -26,11 +34,15 @@ const DEFAULT_MIMO_MULTIMODAL_MODEL = "mimo-v2.5";
 export class ImportReviewService {
   private readonly rawInputRepository: RawInputRepository;
   private readonly multimodalExtractor: MultimodalExtractionPort;
+  private readonly confirmationSessionRepository: ImportConfirmationSessionRepository;
   private readonly uploadDir: string;
+  private readonly now: () => string;
 
   constructor(options: ImportReviewServiceOptions = {}) {
     this.rawInputRepository = options.rawInputRepository ?? new InMemoryRawInputRepository();
+    this.confirmationSessionRepository = options.confirmationSessionRepository ?? new JsonFileImportConfirmationSessionRepository();
     this.uploadDir = resolve(options.uploadDir ?? process.env.NEXTCARD_IMPORT_UPLOAD_DIR ?? DEFAULT_UPLOAD_DIR);
+    this.now = options.now ?? (() => new Date().toISOString());
     this.multimodalExtractor =
       options.multimodalExtractor ??
       new LazyMimoMultimodalExtractor(resolve(options.preparedImageDir ?? join(this.uploadDir, "prepared")));
@@ -38,10 +50,12 @@ export class ImportReviewService {
 
   async review(command: ImportReviewCommand): Promise<ImportReviewReport> {
     const contentRef = await this.resolveContentRef(command);
+    const documentText = await this.extractDocumentText(command, contentRef);
+    const text = documentText?.ok ? documentText.text : command.text;
     const rawInputResult = await createRawInput(
       {
         sourceType: command.sourceType,
-        text: command.text,
+        text,
         contentRef,
         anonymousDeviceId: command.clientContext?.anonymousDeviceId ?? "anonymous-import-device",
         userId: command.clientContext?.userId,
@@ -51,7 +65,9 @@ export class ImportReviewService {
       },
       this.rawInputRepository,
     );
-    const extraction = await this.extract(command.sourceType, rawInputResult.rawInput);
+    const extraction = documentText && !documentText.ok
+      ? blockedDocumentExtraction(rawInputResult.rawInput.id, documentText.message)
+      : await this.extract(command.sourceType, rawInputResult.rawInput);
     const reviewGate = runReviewGate({
       rawInput: rawInputResult.rawInput,
       extraction,
@@ -64,24 +80,71 @@ export class ImportReviewService {
           sourceType: command.sourceType,
         })
       : undefined;
+    const createdAt = command.clientContext?.now ?? this.now();
+    const reviewSessionId = reviewGate.requirement !== "blocked"
+      ? await this.saveReviewSession({
+          rawInputId: rawInputResult.rawInput.id,
+          sourceType: command.sourceType,
+          extraction,
+          confirmationRequest: reviewGate.confirmationRequest,
+          reviewRequirement: reviewGate.requirement,
+          createdAt,
+        })
+      : undefined;
 
     return {
       reportId: `import_report_${randomUUID()}`,
       rawInputId: rawInputResult.rawInput.id,
+      reviewSessionId,
       sourceType: command.sourceType,
       extraction,
       reviewGate,
       canProceedToPlanMode: Boolean(confirmation?.planCompilerHandoff),
       planCompilerHandoff: confirmation?.planCompilerHandoff,
       boundaryWarnings: boundaryWarnings(reviewGate.requirement),
-      providerUsage: this.providerUsage(command.sourceType),
+      providerUsage: this.providerUsage(command.sourceType, documentText),
     };
   }
 
   private async extract(sourceType: RawInputSourceType, rawInput: Parameters<typeof extractTextInput>[0]): Promise<InputExtractionResult> {
     if (TEXT_LIKE_SOURCES.has(sourceType)) return extractTextInput(rawInput);
     if (sourceType === "notification" && rawInput.text && !rawInput.contentRef) return extractTextInput(rawInput);
+    if (DOCUMENT_TEXT_SOURCES.has(sourceType) && rawInput.text) return truncateDocumentEvidence(extractTextInput(rawInput));
     return this.multimodalExtractor.extract(rawInput);
+  }
+
+  private async extractDocumentText(
+    command: ImportReviewCommand,
+    contentRef: string | undefined,
+  ): Promise<DocumentTextExtractionResult | undefined> {
+    if (!contentRef) return undefined;
+    if (command.sourceType !== "docx" && command.sourceType !== "pdf" && command.sourceType !== "text") return undefined;
+    const ext = extname(contentRef).toLowerCase();
+    if (command.sourceType === "text" && ext !== ".txt") return undefined;
+    return extractDocumentText({ filePath: contentRef, sourceType: command.sourceType === "text" ? "text" : command.sourceType });
+  }
+
+  private async saveReviewSession(input: {
+    rawInputId: string;
+    sourceType: RawInputSourceType;
+    extraction: InputExtractionResult;
+    confirmationRequest: ImportReviewReport["reviewGate"]["confirmationRequest"];
+    reviewRequirement: ImportReviewReport["reviewGate"]["requirement"];
+    createdAt: string;
+  }): Promise<string> {
+    const id = `review_session_${randomUUID()}`;
+    await this.confirmationSessionRepository.save({
+      id,
+      rawInputId: input.rawInputId,
+      sourceType: input.sourceType,
+      extraction: input.extraction,
+      confirmationRequest: input.confirmationRequest,
+      reviewRequirement: input.reviewRequirement,
+      createdAt: input.createdAt,
+      expiresAt: new Date(Date.parse(input.createdAt) + 24 * 60 * 60 * 1000).toISOString(),
+      status: "pending",
+    });
+    return id;
   }
 
   private async resolveContentRef(command: ImportReviewCommand): Promise<string | undefined> {
@@ -95,7 +158,23 @@ export class ImportReviewService {
     return outputPath;
   }
 
-  private providerUsage(sourceType: RawInputSourceType): ImportReviewProviderUsage {
+  private providerUsage(
+    sourceType: RawInputSourceType,
+    documentText: DocumentTextExtractionResult | undefined,
+  ): ImportReviewProviderUsage {
+    if (documentText?.ok) {
+      return { provider: "document-text", used: true };
+    }
+
+    if (documentText && !documentText.ok) {
+      return {
+        provider: "document-text",
+        used: false,
+        recoverable: documentText.recoverable,
+        reason: documentText.reason,
+      };
+    }
+
     if (TEXT_LIKE_SOURCES.has(sourceType) || sourceType === "notification") {
       return { provider: "manual", used: true };
     }
@@ -110,6 +189,35 @@ export class ImportReviewService {
       used: true,
     };
   }
+}
+
+function blockedDocumentExtraction(rawInputId: string, message: string): InputExtractionResult {
+  return {
+    id: `extract_${rawInputId}`,
+    rawInputId,
+    candidates: {
+      tasks: [],
+      timeConstraints: [],
+      locations: [],
+      courses: [],
+      reminders: [],
+    },
+    confidence: 0,
+    ambiguities: [message],
+    warnings: ["document_text_unavailable", "insufficient_input"],
+    evidence: [],
+    reviewRequirement: "blocked",
+  };
+}
+
+function truncateDocumentEvidence(extraction: InputExtractionResult): InputExtractionResult {
+  return {
+    ...extraction,
+    evidence: extraction.evidence.map((item) => ({
+      ...item,
+      quote: item.quote && item.quote.length > 180 ? `${item.quote.slice(0, 180)}...` : item.quote,
+    })),
+  };
 }
 
 class LazyMimoMultimodalExtractor implements MultimodalExtractionPort {

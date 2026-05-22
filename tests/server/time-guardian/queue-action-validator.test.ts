@@ -139,6 +139,47 @@ describe("queue action validator", () => {
     }
   });
 
+  it("allows freeze-card actions for the selected committed card", () => {
+    const current = snapshot();
+    const result = validateQueueAction(
+      {
+        type: "freeze-card",
+        id: "action_freeze_card_prepare",
+        snapshotId: current.id,
+        actor: "user",
+        reason: "User froze this card and saved context for later.",
+        createdAt: current.now,
+        cardId: "card_prepare",
+        deckId: "deck_calculus",
+        chosenPlanId: "plan-b",
+      },
+      { snapshot: current, expectedChosenPlanId: "plan-b", notificationCapability: "in_app_only" },
+    );
+
+    expect(result.allowed).toBe(true);
+  });
+
+  it("rejects freeze-card actions for cards outside the schedule snapshot", () => {
+    const current = snapshot();
+    const result = validateQueueAction(
+      {
+        type: "freeze-card",
+        id: "action_freeze_missing_card",
+        snapshotId: current.id,
+        actor: "user",
+        reason: "This card is not in the validated runtime snapshot.",
+        createdAt: current.now,
+        cardId: "card_missing",
+        deckId: "deck_calculus",
+        chosenPlanId: "plan-b",
+      },
+      { snapshot: current, expectedChosenPlanId: "plan-b", notificationCapability: "in_app_only" },
+    );
+
+    expect(result.allowed).toBe(false);
+    if (!result.allowed) expect(result.reason).toContain("card");
+  });
+
   it("rejects external reminder jobs without notification permission", () => {
     const current = snapshot();
     const result = validateQueueAction(

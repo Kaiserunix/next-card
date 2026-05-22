@@ -95,6 +95,44 @@ export function validateQueueAction(
     if (!timelineOverlap.allowed) return timelineOverlap;
   }
 
+  if (action.type === "freeze-card") {
+    const deck = options.snapshot.committedDecks.find((item) => item.deckId === action.deckId);
+    if (!deck) {
+      return {
+        allowed: false,
+        reason: `Freeze action references unknown deck ${action.deckId}.`,
+        requiresUserReview: true,
+      };
+    }
+
+    if (deck.chosenPlanId !== action.chosenPlanId) {
+      return {
+        allowed: false,
+        reason: `Freeze action chosen plan ${action.chosenPlanId} does not match committed deck ${deck.chosenPlanId}.`,
+        requiresUserReview: true,
+      };
+    }
+
+    const card = options.snapshot.activeCards.find(
+      (item) => item.cardId === action.cardId && item.deckId === action.deckId,
+    );
+    if (!card) {
+      return {
+        allowed: false,
+        reason: `Freeze action references unknown active card ${action.cardId}.`,
+        requiresUserReview: true,
+      };
+    }
+
+    if (card.chosenPlanId !== action.chosenPlanId) {
+      return {
+        allowed: false,
+        reason: `Freeze action chosen plan ${action.chosenPlanId} does not match active card ${card.chosenPlanId}.`,
+        requiresUserReview: true,
+      };
+    }
+  }
+
   if (action.type === "create-baseline-reminder" || action.type === "create-nudge-reminder") {
     if (action.reminder.kind === "baseline" && !["system-fallback", "user-fixed"].includes(action.reminder.source)) {
       return {

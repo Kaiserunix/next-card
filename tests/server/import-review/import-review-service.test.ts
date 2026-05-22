@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { ImportReviewService } from "@/lib/server/import-review/import-review-service";
 import { MockMultimodalExtractor } from "@/lib/server/input-layer/mock-multimodal-extractor";
+import { createStoredDocx } from "@/tests/fixtures/document-docx";
 
 const tempDirs: string[] = [];
 
@@ -65,6 +66,48 @@ describe("ImportReviewService", () => {
     expect(report.reviewGate.requirement).toBe("strict");
     expect(report.extraction.warnings).toEqual(expect.arrayContaining(["high_risk_multimodal", "course_time"]));
     expect(report.canProceedToPlanMode).toBe(false);
+  });
+
+  it("reports document-text provider usage for successful DOCX extraction", async () => {
+    const dir = await tempDir();
+    const docxPath = join(dir, "assignment.docx");
+    await writeFile(docxPath, createStoredDocx("课程作业通知：5 月 25 日 20:00 前提交实验报告。"));
+    const service = new ImportReviewService();
+
+    const report = await service.review({
+      sourceType: "docx",
+      filePath: docxPath,
+      clientContext: { now: "2026-05-22T08:00:00.000Z", timezone: "Asia/Shanghai", locale: "zh-CN" },
+      sandboxMode: true,
+    });
+
+    expect(report.providerUsage).toMatchObject({
+      provider: "document-text",
+      used: true,
+    });
+    expect(report.reviewGate.requirement).toBe("strict");
+  });
+
+  it("reports recoverable document-text non-usage for PDF fallback", async () => {
+    const dir = await tempDir();
+    const pdfPath = join(dir, "assignment.pdf");
+    await writeFile(pdfPath, Buffer.from("%PDF-1.4 fake"));
+    const service = new ImportReviewService();
+
+    const report = await service.review({
+      sourceType: "pdf",
+      filePath: pdfPath,
+      clientContext: { now: "2026-05-22T08:00:00.000Z", timezone: "Asia/Shanghai", locale: "zh-CN" },
+      sandboxMode: true,
+    });
+
+    expect(report.providerUsage).toMatchObject({
+      provider: "document-text",
+      used: false,
+      recoverable: true,
+      reason: "document_text_unavailable",
+    });
+    expect(report.reviewGate.requirement).toBe("blocked");
   });
 });
 

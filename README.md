@@ -30,6 +30,13 @@ pnpm test
 pnpm build
 ```
 
+Backend-only chain smoke without a dev server:
+
+```bash
+pnpm backend:chain -- --case text-assignment --selected-option plan-b
+pnpm backend:chain -- --case crowded-timeline --selected-option plan-b
+```
+
 This repo now uses a Next.js server runtime because `app/api/backend/*` routes
 are part of the product surface. Static `out/` exports are historical artifacts,
 not the current backend-capable run target.
@@ -65,35 +72,31 @@ and cloud storage are outside the current slice.
 Current route handlers:
 
 ```text
-GET  /api/backend/health
+POST /api/backend/voice/transcribe
+POST /api/backend/voice/normalize
+POST /api/backend/voice/readiness
+POST /api/backend/voice/confirm
+POST /api/backend/import
+POST /api/backend/import/confirm
 POST /api/backend/plan-mode
-POST /api/backend/import/review
-POST /api/backend/schedule/plan
-POST /api/backend/freeze/return
-POST /api/backend/worker/tick
-GET  /api/backend/push/public-key
-POST /api/backend/push/subscriptions
-POST /api/backend/push/send
-POST /api/backend/calendar/events
+POST /api/backend/deck/commit
+POST /api/backend/card/action
+GET  /api/backend/proof/timeline
+POST /api/backend/sandbox/run
 ```
 
 Core backend modules:
 
 ```text
 lib/server/backend-ports.ts
-lib/server/backend-services.ts
-lib/server/schedule-planner.ts
-lib/server/freeze-return-agent.ts
-lib/server/import-coverage.ts
-lib/server/plan-mode-service.ts
-lib/server/backend-worker.ts
-lib/server/queue-repository.ts
-lib/server/provider-dispatch.ts
-lib/server/agent-runtime.ts
-lib/server/providers/mimo-ai-provider.ts
-lib/server/providers/web-push-notification-provider.ts
-lib/server/providers/push-subscription-repository.ts
-lib/server/providers/ics-calendar-provider.ts
+lib/server/import-review/*
+lib/server/input-layer/*
+lib/server/plan-mode/*
+lib/server/deck-commit/*
+lib/server/card-runtime/*
+lib/server/proof-ledger/*
+lib/server/time-guardian/*
+lib/server/backend-orchestrator/*
 ```
 
 Agent runtime relationships are documented in:
@@ -126,7 +129,7 @@ The backend stores voice usage records and confirmed transcript metadata in loca
 Confirmed voice/manual/text/multimodal input now enters a draft-only backend boundary:
 
 ```text
-voice confirm -> input-layer handoff -> plan-mode draft -> future deck commit
+voice confirm -> input-layer handoff -> plan-mode draft -> selected deck commit -> card runtime -> proof timeline
 ```
 
 Route:
@@ -149,8 +152,8 @@ NEXTCARD_PLAN_MODE_DRAFT_FILE=.nextcard-data/plan-mode-drafts.json
 ```
 
 This route intentionally does not commit a deck, write proof, create reminders,
-schedule cards, or default to option A. Deck commit remains a future backend
-service that should reference `planModeDraftId` plus the user's selected option.
+schedule cards, or default to option A. Deck Commit references `planModeDraftId`
+plus the user's selected option, while Card Runtime owns card completion proof.
 
 ## Real Mimo AI Provider
 
